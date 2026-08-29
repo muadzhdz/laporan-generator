@@ -287,9 +287,9 @@ function Pandoc(doc)
     blocks[#blocks + 1] = spacer(640)
   end
 
+  local author_list = {}
   local authors = meta["author"]
   if authors ~= nil then
-    local author_list = {}
     if authors[1] ~= nil then
       for _, a in ipairs(authors) do
         author_list[#author_list + 1] = a
@@ -323,12 +323,207 @@ function Pandoc(doc)
     end
   end
 
+  local function build_approval_blocks()
+    local app = meta["approval"]
+    if app == nil then
+      return pandoc.List{}
+    end
+    local enable = app["enable"]
+    if enable ~= nil and pandoc.utils.stringify(enable) == "false" then
+      return pandoc.List{}
+    end
+
+    local app_title = meta_str(app, "title")
+    if app_title == "" then
+      app_title = "LEMBAR PENGESAHAN"
+    end
+
+    local blks = pandoc.List{}
+    blks[#blks + 1] = pagebreak()
+
+    local app_id = "lembar-pengesahan"
+    table.insert(toc_entries, 1, {
+      level = 1,
+      id = app_id,
+      text = string.upper(app_title),
+    })
+
+    blks[#blks + 1] = pandoc.Header(1, pandoc.Str(string.upper(app_title)), pandoc.Attr(app_id, { "unnumbered" }, {}))
+    blks[#blks + 1] = spacer(200)
+
+    if title ~= "" then
+      blks[#blks + 1] = para({ pandoc.Strong(pandoc.Str(string.upper(title))) }, "CoverTitle")
+      blks[#blks + 1] = spacer(200)
+    end
+
+    if #author_list > 0 then
+      blks[#blks + 1] = para({ pandoc.Str("Disusun oleh:") }, "CoverLine")
+      for _, a in ipairs(author_list) do
+        local name = pandoc.utils.stringify(a["name"] or a)
+        local nim = pandoc.utils.stringify(a["nim"] or "")
+        local line = name
+        if nim ~= "" then
+          line = line .. " (NIM. " .. nim .. ")"
+        end
+        blks[#blks + 1] = para({ pandoc.Strong(pandoc.Str(line)) }, "CoverName")
+      end
+      blks[#blks + 1] = spacer(200)
+    end
+
+    local degree = meta_str(app, "degree")
+    local city = meta_str(app, "city")
+    local date = meta_str(app, "date")
+    local stmt = "Disetujui dan disahkan sebagai salah satu syarat kelulusan"
+    if degree ~= "" then
+      stmt = stmt .. " " .. degree
+    else
+      stmt = stmt .. " laporan tugas akhir/skripsi"
+    end
+    if city ~= "" then
+      stmt = stmt .. " di " .. city
+      if date ~= "" then
+        stmt = stmt .. ", pada tanggal " .. date .. "."
+      else
+        stmt = stmt .. "."
+      end
+    end
+    blks[#blks + 1] = para({ pandoc.Str(stmt) }, "Normal")
+    blks[#blks + 1] = spacer(400)
+
+    local advisors = app["advisors"]
+    if advisors ~= nil then
+      local adv_list = {}
+      if advisors[1] ~= nil then
+        for _, v in ipairs(advisors) do
+          adv_list[#adv_list + 1] = v
+        end
+      else
+        adv_list[#adv_list + 1] = advisors
+      end
+      for _, adv in ipairs(adv_list) do
+        local r = meta_str(adv, "role")
+        local n = meta_str(adv, "name")
+        local nip = meta_str(adv, "nip")
+        if r == "" then r = "Dosen Pembimbing" end
+        blks[#blks + 1] = para({ pandoc.Str(r .. ":") }, "Normal")
+        blks[#blks + 1] = spacer(600)
+        local n_inlines = { pandoc.Strong(pandoc.Underline(pandoc.Str(n))) }
+        if nip ~= "" then
+          n_inlines[#n_inlines + 1] = pandoc.LineBreak()
+          n_inlines[#n_inlines + 1] = pandoc.Str("NIP. " .. nip)
+        end
+        blks[#blks + 1] = para(n_inlines, "Normal")
+        blks[#blks + 1] = spacer(200)
+      end
+    end
+
+    local hod = app["head_of_department"]
+    if hod ~= nil then
+      local r = meta_str(hod, "role")
+      local n = meta_str(hod, "name")
+      local nip = meta_str(hod, "nip")
+      if r == "" then r = "Ketua Program Studi" end
+      blks[#blks + 1] = para({ pandoc.Str("Mengetahui,"), pandoc.LineBreak(), pandoc.Str(r) }, "Normal")
+      blks[#blks + 1] = spacer(600)
+      local n_inlines = { pandoc.Strong(pandoc.Underline(pandoc.Str(n))) }
+      if nip ~= "" then
+        n_inlines[#n_inlines + 1] = pandoc.LineBreak()
+        n_inlines[#n_inlines + 1] = pandoc.Str("NIP. " .. nip)
+      end
+      blks[#blks + 1] = para(n_inlines, "Normal")
+    end
+
+    return blks
+  end
+
+  local function build_abstract_blocks()
+    local blks = pandoc.List{}
+
+    local abs_id = meta["abstrak"] or meta["abstract"]
+    if abs_id ~= nil then
+      local abs_text = pandoc.utils.stringify(abs_id)
+      if abs_text ~= "" then
+        blks[#blks + 1] = pagebreak()
+        local idx = #toc_entries >= 1 and 2 or 1
+        table.insert(toc_entries, idx, {
+          level = 1,
+          id = "abstrak",
+          text = "ABSTRAK",
+        })
+        blks[#blks + 1] = pandoc.Header(1, pandoc.Str("ABSTRAK"), pandoc.Attr("abstrak", { "unnumbered" }, {}))
+        blks[#blks + 1] = spacer(200)
+        blks[#blks + 1] = para({ pandoc.Str(abs_text) }, "Normal")
+
+        local kw = meta["kata_kunci"]
+        if kw ~= nil then
+          local kw_str = ""
+          if type(kw) == "table" and kw[1] ~= nil then
+            local items = {}
+            for _, k in ipairs(kw) do
+              items[#items + 1] = pandoc.utils.stringify(k)
+            end
+            kw_str = table.concat(items, ", ")
+          else
+            kw_str = pandoc.utils.stringify(kw)
+          end
+          if kw_str ~= "" then
+            blks[#blks + 1] = spacer(200)
+            blks[#blks + 1] = para({ pandoc.Strong(pandoc.Str("Kata Kunci: ")), pandoc.Str(kw_str) }, "Normal")
+          end
+        end
+      end
+    end
+
+    local abs_en = meta["abstract_en"]
+    if abs_en ~= nil then
+      local abs_en_text = pandoc.utils.stringify(abs_en)
+      if abs_en_text ~= "" then
+        blks[#blks + 1] = pagebreak()
+        local idx = #toc_entries >= 2 and 3 or (#toc_entries >= 1 and 2 or 1)
+        table.insert(toc_entries, idx, {
+          level = 1,
+          id = "abstract-en",
+          text = "ABSTRACT",
+        })
+        blks[#blks + 1] = pandoc.Header(1, pandoc.Str("ABSTRACT"), pandoc.Attr("abstract-en", { "unnumbered" }, {}))
+        blks[#blks + 1] = spacer(200)
+        blks[#blks + 1] = para({ pandoc.Emph(pandoc.Str(abs_en_text)) }, "Normal")
+
+        local kw_en = meta["keywords_en"]
+        if kw_en ~= nil then
+          local kw_en_str = ""
+          if type(kw_en) == "table" and kw_en[1] ~= nil then
+            local items = {}
+            for _, k in ipairs(kw_en) do
+              items[#items + 1] = pandoc.utils.stringify(k)
+            end
+            kw_en_str = table.concat(items, ", ")
+          else
+            kw_en_str = pandoc.utils.stringify(kw_en)
+          end
+          if kw_en_str ~= "" then
+            blks[#blks + 1] = spacer(200)
+            blks[#blks + 1] = para({ pandoc.Strong(pandoc.Emph(pandoc.Str("Keywords: "))), pandoc.Emph(pandoc.Str(kw_en_str)) }, "Normal")
+          end
+        end
+      end
+    end
+
+    return blks
+  end
+
+  local app_blocks = build_approval_blocks()
+  local abs_blocks = build_abstract_blocks()
+
   meta.title = nil
   meta.subtitle = nil
   meta.date = nil
   meta.author = nil
   meta.abstract = nil
   meta["abstract-title"] = nil
+  meta.abstrak = nil
+  meta.abstract_en = nil
+  meta.approval = nil
 
   local body = pandoc.List{}
   local inserted = false
@@ -347,6 +542,6 @@ function Pandoc(doc)
     body[#body + 1] = blk
   end
 
-  doc.blocks = blocks .. body
+  doc.blocks = blocks .. app_blocks .. abs_blocks .. body
   return doc
 end

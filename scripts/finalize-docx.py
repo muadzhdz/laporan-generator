@@ -33,10 +33,10 @@ def next_heading_text(doc, start):
     return t.group(1) if t else ""
 
 
-def classify(text):
-    t = text.strip()
-    if t == "KATA PENGANTAR":
+def classify(text, idx=0):
+    if idx == 0:
         return "cover"
+    t = text.strip()
     words = t.split()
     if len(words) >= 2 and words[0] == "BAB":
         if words[1] == "I":
@@ -60,10 +60,10 @@ def process(doc):
     out = []
     last = 0
     changed = 0
-    for m in matches:
+    for i, m in enumerate(matches):
         out.append(doc[last:m.start()])
         sect = m.group(1)
-        kind = classify(next_heading_text(doc, m.end()))
+        kind = classify(next_heading_text(doc, m.end()), i)
         if kind == "cover":
             sect = FOOTER_REF.sub("", sect)
             changed += 1
@@ -77,6 +77,7 @@ def process(doc):
         last = m.end()
     out.append(doc[last:])
     return "".join(out), changed
+
 
 
 def main():

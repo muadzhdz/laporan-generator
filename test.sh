@@ -417,8 +417,146 @@ else
 fi
 echo ""
 
+echo "[T21] Lembar Pengesahan (Approval Sheet) check"
+if grep -q 'approval' template.typ; then
+  pass "template.typ mendukung konfigurasi approval"
+else
+  fail "template.typ belum mendukung konfigurasi approval"
+fi
+if grep -q 'approval' docx.lua; then
+  pass "docx.lua mendukung konfigurasi approval"
+else
+  fail "docx.lua belum mendukung konfigurasi approval"
+fi
+if grep -q 'approval' docs/metadata-schema.md; then
+  pass "docs/metadata-schema.md mendokumentasikan skema approval"
+else
+  fail "docs/metadata-schema.md belum mendokumentasikan approval"
+fi
+
+# End-to-end build test with approval enabled
+cat << 'EOF' > /tmp/meta-approval-test.yml
+title: "Laporan Uji Pengesahan dan Abstrak"
+subtitle: "Subjudul Laporan Pengujian"
+author:
+  - name: "Tester Mahasiswa"
+    nim: "12345678"
+institution: "Institut Pengujian Teknologi"
+faculty: "Fakultas Rekayasa"
+year: "2026"
+approval:
+  enable: true
+  title: "LEMBAR PENGESAHAN"
+  city: "Bandung"
+  date: "28 Agustus 2026"
+  degree: "Sarjana Komputer"
+  advisors:
+    - name: "Prof. Dr. Dosen Penguji Utama, M.Sc."
+      nip: "197001011995031001"
+      role: "Pembimbing Utama"
+  head_of_department:
+    name: "Dr. Ketua Jurusan, M.T."
+    nip: "197502022000031002"
+    role: "Ketua Program Studi"
+abstrak: "Ini adalah teks abstrak Bahasa Indonesia pengujian otomatis."
+kata_kunci: ["Pengujian", "Automasi"]
+abstract_en: "This is the automated test English abstract text."
+keywords_en: ["Testing", "Automation"]
+EOF
+
+if command -v pandoc &>/dev/null && command -v typst &>/dev/null; then
+  pandoc cover.md chapters/bab1*.md --template=template.typ --metadata-file=/tmp/meta-approval-test.yml --citeproc --bibliography=references.bib --csl=apa.csl --pdf-engine=typst -o /tmp/test-app.pdf 2>/dev/null
+  if [ -f /tmp/test-app.pdf ]; then
+    pass "PDF berhasil dikompilasi dengan lembar pengesahan & abstrak aktif"
+    if command -v pdftotext &>/dev/null; then
+      APP_TEXT=$(pdftotext /tmp/test-app.pdf - 2>/dev/null)
+      if echo "$APP_TEXT" | grep -q "LEMBAR PENGESAHAN"; then
+        pass "PDF memuat teks LEMBAR PENGESAHAN"
+      else
+        fail "PDF tidak memuat teks LEMBAR PENGESAHAN"
+      fi
+      if echo "$APP_TEXT" | grep -q "Dosen Penguji Utama"; then
+        pass "PDF memuat nama dosen pembimbing"
+      else
+        fail "PDF tidak memuat nama dosen pembimbing"
+      fi
+    else
+      pass "pdftotext dilewati (skipped)"
+    fi
+  else
+    fail "Gagal membuat PDF pengujian approval"
+  fi
+fi
+
+if command -v pandoc &>/dev/null && [ -f reference.docx ]; then
+  pandoc cover.md chapters/bab1*.md --metadata-file=/tmp/meta-approval-test.yml --citeproc --bibliography=references.bib --csl=apa.csl --reference-doc=reference.docx --lua-filter=docx.lua -o /tmp/test-app.docx 2>/dev/null
+  if [ -f /tmp/test-app.docx ]; then
+    python3 scripts/finalize-docx.py /tmp/test-app.docx /tmp/test-app-final.docx >/dev/null 2>&1
+    DOCXML_APP=$(unzip -p /tmp/test-app-final.docx word/document.xml 2>/dev/null || true)
+    if echo "$DOCXML_APP" | grep -q "LEMBAR PENGESAHAN"; then
+      pass "DOCX memuat teks LEMBAR PENGESAHAN"
+    else
+      fail "DOCX tidak memuat teks LEMBAR PENGESAHAN"
+    fi
+    if echo "$DOCXML_APP" | grep -q "Dosen Penguji Utama"; then
+      pass "DOCX memuat nama pembimbing"
+    else
+      fail "DOCX tidak memuat nama pembimbing"
+    fi
+  else
+    fail "Gagal membuat DOCX pengujian approval"
+  fi
+fi
+echo ""
+
+echo "[T22] Bilingual Abstract (Abstrak & Abstract) check"
+if grep -q 'abstract_en' template.typ || grep -q 'abstrak' template.typ; then
+  pass "template.typ mendukung abstrak dwibahasa"
+else
+  fail "template.typ belum mendukung abstrak dwibahasa"
+fi
+if grep -q 'abstract_en' docx.lua || grep -q 'abstrak' docx.lua; then
+  pass "docx.lua mendukung abstrak dwibahasa"
+else
+  fail "docx.lua belum mendukung abstrak dwibahasa"
+fi
+if grep -q 'abstract_en' docs/metadata-schema.md || grep -q 'keywords_en' docs/metadata-schema.md; then
+  pass "docs/metadata-schema.md mendokumentasikan abstrak dwibahasa"
+else
+  fail "docs/metadata-schema.md belum mendokumentasikan abstrak dwibahasa"
+fi
+
+if [ -n "$APP_TEXT" ]; then
+  if echo "$APP_TEXT" | grep -q "ABSTRAK" && echo "$APP_TEXT" | grep -q "Kata Kunci:"; then
+    pass "PDF memuat ABSTRAK dan Kata Kunci"
+  else
+    fail "PDF tidak memuat ABSTRAK atau Kata Kunci"
+  fi
+  if echo "$APP_TEXT" | grep -q "ABSTRACT" && echo "$APP_TEXT" | grep -q "Keywords:"; then
+    pass "PDF memuat ABSTRACT dan Keywords (EN)"
+  else
+    fail "PDF tidak memuat ABSTRACT atau Keywords (EN)"
+  fi
+fi
+
+if [ -n "$DOCXML_APP" ]; then
+  if echo "$DOCXML_APP" | grep -q "ABSTRAK" && echo "$DOCXML_APP" | grep -q "Kata Kunci"; then
+    pass "DOCX memuat ABSTRAK dan Kata Kunci"
+  else
+    fail "DOCX tidak memuat ABSTRAK atau Kata Kunci"
+  fi
+  if echo "$DOCXML_APP" | grep -q "ABSTRACT" && echo "$DOCXML_APP" | grep -q "Keywords"; then
+    pass "DOCX memuat ABSTRACT dan Keywords"
+  else
+    fail "DOCX tidak memuat ABSTRACT atau Keywords"
+  fi
+fi
+echo ""
+
+
 echo "========================"
 echo "Hasil: $PASS passed, $FAIL failed"
 echo "========================"
 
 [ "$FAIL" -eq 0 ] || exit 1
+

@@ -218,4 +218,121 @@ $endfor$
 #set page(numbering: "i")
 #counter(page).update(1)
 
+$if(approval)$
+$if(approval.enable)$
+#align(center)[
+  #text(size: 14pt, weight: "bold")[#upper("$if(approval.title)$$approval.title$$else$LEMBAR PENGESAHAN$endif$")]
+]
+#v(0.6cm)
+
+#align(center)[
+  #text(size: 12pt, weight: "bold")[#title-lines]
+]
+#v(0.4cm)
+
+#align(center)[
+  #text(size: 11pt)[Disusun oleh:] \
+  $for(author)$
+  #text(size: 11pt, weight: "bold")[$author.name$] (NIM. $author.nim$)$sep$, $endfor$
+]
+#v(0.3cm)
+
+#align(center)[
+  #text(size: 11pt)[
+    $if(approval.degree)$
+    Disetujui dan disahkan sebagai salah satu syarat kelulusan $approval.degree$
+    $else$
+    Disetujui dan disahkan sebagai laporan tugas akhir/skripsi
+    $endif$
+    $if(approval.city)$
+    di $approval.city$$if(approval.date)$, pada tanggal $approval.date$$endif$.
+    $endif$
+  ]
+]
+#v(0.6cm)
+
+$if(approval.advisors)$
+#grid(
+  columns: ($for(approval.advisors)$1fr$sep$, $endfor$),
+  column-gutter: 1.5cm,
+  row-gutter: 1cm,
+  $for(approval.advisors)$
+  align(center)[
+    #text(size: 10pt)[$it.role$:]
+    #v(2cm)
+    #text(size: 10pt, weight: "bold")[#underline[$it.name$]] \
+    #text(size: 9pt)[NIP. $it.nip$]
+  ]$sep$,$endfor$
+)
+#v(0.6cm)
+$endif$
+
+$if(approval.head_of_department)$
+#align(center)[
+  #text(size: 10pt)[Mengetahui,] \
+  #text(size: 10pt)[$approval.head_of_department.role$]
+  #v(2cm)
+  #text(size: 10pt, weight: "bold")[#underline[$approval.head_of_department.name$]] \
+  #text(size: 9pt)[NIP. $approval.head_of_department.nip$]
+]
+$endif$
+
+#pagebreak()
+$endif$
+$endif$
+
+$if(abstrak)$
+#align(center)[
+  #text(size: 14pt, weight: "bold")[ABSTRAK]
+]
+#v(0.6cm)
+
+#set par(justify: true, leading: 0.55em, first-line-indent: 1.25cm)
+$abstrak$
+
+$if(kata_kunci)$
+#v(0.4cm)
+#set par(first-line-indent: 0cm)
+#text(weight: "bold")[Kata Kunci: ] $for(kata_kunci)$$kata_kunci$$sep$, $endfor$
+$endif$
+
+#pagebreak()
+$else$
+$if(abstract)$
+#align(center)[
+  #text(size: 14pt, weight: "bold")[ABSTRAK]
+]
+#v(0.6cm)
+
+#set par(justify: true, leading: 0.55em, first-line-indent: 1.25cm)
+$abstract$
+
+$if(kata_kunci)$
+#v(0.4cm)
+#set par(first-line-indent: 0cm)
+#text(weight: "bold")[Kata Kunci: ] $for(kata_kunci)$$kata_kunci$$sep$, $endfor$
+$endif$
+
+#pagebreak()
+$endif$
+$endif$
+
+$if(abstract_en)$
+#align(center)[
+  #text(size: 14pt, weight: "bold")[ABSTRACT]
+]
+#v(0.6cm)
+
+#set par(justify: true, leading: 0.55em, first-line-indent: 1.25cm)
+#emph[$abstract_en$]
+
+$if(keywords_en)$
+#v(0.4cm)
+#set par(first-line-indent: 0cm)
+#text(weight: "bold")[#emph[Keywords: ]] #emph[$for(keywords_en)$$keywords_en$$sep$, $endfor$]
+$endif$
+
+#pagebreak()
+$endif$
+
 $body$

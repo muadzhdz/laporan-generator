@@ -14,7 +14,44 @@ institution: "Universitas Example"
 faculty: "Program Studi Informatika"
 year: "2026/2027"
 date: "Agustus 2026"
-abstract: |
-  Laporan ini membahas perancangan dan implementasi pipeline otomatisasi pembuatan dokumen akademik modern menggunakan Markdown, Pandoc, Typst, Lua Filter, dan multi-pass DOCX engine. Pipeline ini memungkinkan penulisan konten laporan dalam format Markdown yang secara otomatis dikonversi menjadi dokumen PDF berkualitas percetakan berbasis Typst serta dokumen Microsoft Word (.docx) berstruktur formal lengkap dengan penomoran bab dan halaman otomatis.
 preset: "standard"
+
+# --- Lembar Pengesahan ---
+approval:
+  enable: true
+  title: "LEMBAR PENGESAHAN"
+  city: "Bandung"
+  date: "28 Agustus 2026"
+  degree: "Sarjana Komputer (S.Kom.)"
+  advisors:
+    - name: "Dr. Nama Dosen Pembimbing, M.Kom."
+      nip: "197508152000031002"
+      role: "Pembimbing Utama"
+  head_of_department:
+    name: "Prof. Dr. Nama Kaprodi, M.T."
+    nip: "196503121990031003"
+    role: "Ketua Program Studi Informatika"
+
+
+
+
+# --- Abstrak Dwibahasa ---
+abstrak: |
+  Laporan ini membahas perancangan dan implementasi pipeline otomatisasi pembuatan dokumen akademik modern menggunakan Markdown, Pandoc, Typst, Lua Filter, dan multi-pass DOCX engine. Pipeline ini memungkinkan penulisan konten laporan dalam format Markdown yang secara otomatis dikonversi menjadi dokumen PDF berkualitas percetakan berbasis Typst serta dokumen Microsoft Word (.docx) berstruktur formal lengkap dengan penomoran bab dan halaman otomatis.
+kata_kunci:
+  - "Otomatisasi Dokumen"
+  - "Pandoc"
+  - "Typst"
+  - "DOCX"
+  - "Laporan Akademik"
+
+abstract_en: |
+  This report discusses the design and implementation of a modern academic document automation pipeline using Markdown, Pandoc, Typst, Lua Filters, and a multi-pass DOCX engine. This pipeline enables authoring academic report content in standard Markdown, which is then compiled into print-quality PDF documents powered by Typst and formal Microsoft Word (.docx) documents with automated chapter and page numbering.
+keywords_en:
+  - "Document Automation"
+  - "Pandoc"
+  - "Typst"
+  - "DOCX"
+  - "Academic Report"
 ...
+

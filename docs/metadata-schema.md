@@ -1,6 +1,6 @@
 # Spesifikasi Skema Metadata (metadata.yml)
 
-File `metadata.yml` digunakan oleh Pandoc dan template LaTeX untuk mengisikan informasi sampul (cover page), judul laporan, identitas penyusun, dosen pengampu, serta abstrak laporan.
+File `metadata.yml` digunakan oleh Pandoc, Typst, dan engine DOCX untuk mengisikan informasi sampul (cover page), lembar pengesahan, abstrak dwibahasa, identitas penyusun, dosen pengampu, serta konfigurasi preset format.
 
 ---
 
@@ -8,8 +8,8 @@ File `metadata.yml` digunakan oleh Pandoc dan template LaTeX untuk mengisikan in
 
 ```yaml
 ---
-title: "Otomatisasi Pembuatan Dokumen Laporan Akademik Menggunakan Pandoc, LaTeX, dan Markdown"
-subtitle: "Laporan Projek Akhir Pipeline Dokumentasi"
+title: "Otomatisasi Pembuatan Dokumen Laporan Akademik Menggunakan Pandoc, Typst, dan Markdown"
+subtitle: "Laporan Dokumentasi Pipeline dan Arsitektur Multi-Engine"
 author:
   - name: "Ahmad Dahlan"
     nim: "101234567"
@@ -21,12 +21,47 @@ institution: "Universitas Gadjah Mada"
 faculty: "Departemen Teknik Elektro dan Teknologi Informasi"
 year: "2025/2026"
 date: "Juli 2026"
-abstract: |
-  Laporan ini membahas pipeline otomatisasi dokumen akademik
-  menggunakan Markdown, Pandoc, LaTeX, dan Bash. Pipeline ini
-  memungkinkan penulisan konten laporan dalam format Markdown
-  yang kemudian dikonversi menjadi PDF profesional melalui
-  Pandoc dan pdfLaTeX.
+preset: "standard"
+
+# --- Lembar Pengesahan (Opsional) ---
+approval:
+  enable: true
+  title: "LEMBAR PENGESAHAN"
+  city: "Yogyakarta"
+  date: "28 Agustus 2026"
+  degree: "Sarjana Komputer (S.Kom.)"
+  advisors:
+    - name: "Dr. Ir. Hendra Wijaya, M.T."
+      nip: "197508152000031002"
+      role: "Pembimbing Utama"
+    - name: "Dr. Techn. Saiful Akbar, S.T., M.T."
+      nip: "197203101997021001"
+      role: "Pembimbing Pendamping"
+  head_of_department:
+    name: "Prof. Dr. Eng. Budi Rahardjo, M.T."
+    nip: "196503121990031003"
+    role: "Ketua Departemen Teknik Elektro dan Teknologi Informasi"
+
+# --- Abstrak Dwibahasa (Opsional) ---
+abstrak: |
+  Laporan ini membahas perancangan dan implementasi pipeline otomatisasi pembuatan
+  dokumen akademik modern menggunakan Markdown, Pandoc, Typst, Lua Filter, dan
+  multi-pass DOCX engine.
+kata_kunci:
+  - "Otomatisasi Dokumen"
+  - "Pandoc"
+  - "Typst"
+  - "Skripsi"
+
+abstract_en: |
+  This report discusses the design and implementation of a modern academic
+  document automation pipeline using Markdown, Pandoc, Typst, Lua Filter, and
+  multi-pass DOCX engine.
+keywords_en:
+  - "Document Automation"
+  - "Pandoc"
+  - "Typst"
+  - "Thesis"
 ...
 ```
 
@@ -47,7 +82,26 @@ abstract: |
 | `faculty` | String | **Ya** | Nama Fakultas, Departemen, atau Program Studi. |
 | `year` | String | **Ya** | Tahun Ajaran (contoh: `2025/2026`). |
 | `date` | String | Opsional | Bulan dan Tahun pembuatan (contoh: `Juli 2026`). |
-| `abstract` | Multiline String | Opsional | Ringkasan/Abstrak laporan dalam Bahasa Indonesia. |
+| `preset` | String | Opsional | ID Preset kampus (contoh: `standard`, `skripsi-4433`, `itb-ta`, `ui-skripsi`). |
+| `approval` | Object | Opsional | Konfigurasi Lembar Pengesahan (lihat rincian di bawah). |
+| `abstrak` (atau `abstract`) | Multiline String | Opsional | Teks Abstrak Bahasa Indonesia. |
+| `kata_kunci` | List / String | Opsional | Daftar kata kunci Bahasa Indonesia. |
+| `abstract_en` | Multiline String | Opsional | Teks Abstract Bahasa Inggris (diformat cetak miring / *italic*). |
+| `keywords_en` | List / String | Opsional | Daftar keywords Bahasa Inggris (cetak miring / *italic*). |
+
+---
+
+## Rincian Konfigurasi Lembar Pengesahan (`approval`)
+
+| Field | Tipe Data | Keterangan |
+|---|---|---|
+| `approval.enable` | Boolean | `true` untuk mengaktifkan rendering lembar pengesahan. |
+| `approval.title` | String | Judul halaman (default: `LEMBAR PENGESAHAN`). |
+| `approval.city` | String | Nama kota pengesahan (contoh: `Bandung`, `Jakarta`, `Yogyakarta`). |
+| `approval.date` | String | Tanggal pengesahan dokumen. |
+| `approval.degree` | String | Program studi / gelar akademik yang dituju. |
+| `approval.advisors` | List of Objects | Daftar dosen pembimbing (`name`, `nip`, `role`). |
+| `approval.head_of_department` | Object | Data pimpinan jurusan / ketua program studi (`name`, `nip`, `role`). |
 
 ---
 
@@ -72,3 +126,4 @@ Skema ini mendukung jumlah penulis dinamis (1 orang hingga banyak orang):
     - name: "Mahasiswa C"
       nim: "101234563"
   ```
+
