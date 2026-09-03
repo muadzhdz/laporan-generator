@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y imagemagick xz-utils unzip
+          sudo apt-get install -y imagemagick xz-utils unzip python3 poppler-utils
           wget -q "https://github.com/jgm/pandoc/releases/download/3.7.0.2/pandoc-3.7.0.2-1-amd64.deb" -O /tmp/pandoc.deb
           sudo dpkg -i /tmp/pandoc.deb
           wget -q "https://github.com/typst/typst/releases/download/v0.15.1/typst-x86_64-unknown-linux-musl.tar.xz" -O /tmp/typst.tar.xz
@@ -27,11 +27,15 @@ jobs:
       - name: Run Test Suite
         run: ./test.sh
 
-      - name: Build PDF
-        run: ./build.sh
+      - name: Build PDF and DOCX
+        run: |
+          ./build.sh
+          make docx
 
-      - name: Upload PDF artifact
+      - name: Upload PDF and DOCX artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Laporan
-          path: Laporan.pdf
+          path: |
+            Laporan.pdf
+            Laporan.docx

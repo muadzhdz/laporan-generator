@@ -5,10 +5,10 @@ echo "=== Pre-commit: Validasi Laporan Generator ==="
 
 # Cek dependensi
 command -v pandoc >/dev/null 2>&1 || { echo "FAIL: pandoc tidak ditemukan"; exit 1; }
-command -v pdflatex >/dev/null 2>&1 || { echo "FAIL: pdflatex tidak ditemukan"; exit 1; }
+command -v typst >/dev/null 2>&1 || { echo "FAIL: typst tidak ditemukan"; exit 1; }
 
 # Cek file wajib ada
-for f in cover.md template.latex metadata.yml references.bib; do
+for f in cover.md template.typ metadata.yml references.bib reference.docx docx.lua; do
   [ -f "$f" ] || { echo "FAIL: $f tidak ditemukan"; exit 1; }
 done
 
@@ -18,7 +18,7 @@ echo "Build PDF..."
 
 # Validasi output
 [ -f Laporan.pdf ] || { echo "FAIL: Laporan.pdf tidak dihasilkan"; exit 1; }
-SIZE=$(stat -c%s Laporan.pdf)
+SIZE=$(stat -c%s Laporan.pdf 2>/dev/null || stat -f%z Laporan.pdf 2>/dev/null)
 [ "$SIZE" -gt 50000 ] || { echo "FAIL: Laporan.pdf terlalu kecil ($SIZE bytes)"; exit 1; }
 
 echo "=== Pre-commit: OK ==="

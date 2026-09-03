@@ -21,3 +21,4 @@ __pycache__/
 .~lock.*
 history-*.md
 *.tmp
+dist/

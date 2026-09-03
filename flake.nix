@@ -25,6 +25,7 @@
             pkgs.shellcheck
             pkgs.typst
             pkgs.unzip
+            pkgs.python3
           ];
         };
       });

@@ -9,12 +9,27 @@ author:
   - name: "Nama Mahasiswa 3"
     nim: "101234569"
 lecturer: "Dr. Nama Dosen Pengampu, M.Kom."
+lecturer_label: "Dosen Pengampu:"
 course: "Proyek Perangkat Lunak"
 institution: "Universitas Example"
 faculty: "Program Studi Informatika"
 year: "2026/2027"
 date: "Agustus 2026"
-abstract: |
-  Laporan ini membahas perancangan dan implementasi pipeline otomatisasi pembuatan dokumen akademik modern menggunakan Markdown, Pandoc, Typst, Lua Filter, dan multi-pass DOCX engine. Pipeline ini memungkinkan penulisan konten laporan dalam format Markdown yang secara otomatis dikonversi menjadi dokumen PDF berkualitas percetakan berbasis Typst serta dokumen Microsoft Word (.docx) berstruktur formal lengkap dengan penomoran bab dan halaman otomatis.
+abstract_id: |
+  Laporan ini membahas perancangan dan implementasi pipeline otomatisasi pembuatan dokumen akademik modern menggunakan Markdown, Pandoc, Typst, Lua Filter, dan multi-pass DOCX engine. Pipeline ini memungkinkan penulisan konten laporan dalam format Markdown yang secara otomatis dikonversi menjadi dokumen PDF berkualitas percetakan berbasis Typst serta dokumen Microsoft Word (.docx) berstruktur formal lengkap dengan penomoran bab, tabel, gambar, dan halaman otomatis yang mematuhi standar karya ilmiah perguruan tinggi di Indonesia.
+keywords_id:
+  - Otomatisasi Dokumen
+  - Pandoc
+  - Typst
+  - OpenXML
+  - Rekayasa Perangkat Lunak
+abstract_en: |
+  This report presents the design and implementation of a modern academic document automation pipeline utilizing Markdown, Pandoc, Typst, Lua Filters, and a multi-pass DOCX engine. This pipeline facilitates authoring scholarly reports in plain Markdown, seamlessly generating both print-quality Typst-based PDF documents and formally structured Microsoft Word (.docx) files. The generated outputs feature automated chapter, table, figure, and dual-pagination numbering compliant with standardized higher education guidelines.
+keywords_en:
+  - Document Automation
+  - Pandoc
+  - Typst
+  - OpenXML
+  - Software Engineering
 preset: "standard"
 ...

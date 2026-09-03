@@ -17,17 +17,24 @@ cp "$OUTDIR/apa.csl" "$TMPDIR/" 2>/dev/null || true
 cp -r "$OUTDIR/presets" "$TMPDIR/" 2>/dev/null || true
 
 if [ -d "$OUTDIR/chapters" ]; then
-  cp "$OUTDIR/chapters"/*.md "$TMPDIR/"
-  INPUT_FILES="$TMPDIR/cover.md $TMPDIR/bab1-*.md $TMPDIR/bab2-*.md $TMPDIR/bab3-*.md $TMPDIR/bab4-*.md $TMPDIR/bab5-*.md"
+  cp "$OUTDIR/chapters"/*.md "$TMPDIR/" 2>/dev/null || true
+  CHAPTER_FILES=$(find "$TMPDIR" -maxdepth 1 -name "bab*.md" | sort -V)
+  if [ -z "$CHAPTER_FILES" ]; then
+    echo "ERROR: Tidak ada berkas bab*.md di direktori chapters/."
+    exit 1
+  fi
+  INPUT_FILES="$TMPDIR/cover.md $CHAPTER_FILES"
 else
   echo "ERROR: Direktori chapters/ tidak ditemukan."
-  echo "Buat folder chapters/ dengan file bab1-pendahuluan.md sampai bab5-penutup.md"
+  echo "Buat folder chapters/ dengan file bab laporan (contoh: bab1-pendahuluan.md dst)."
   exit 1
 fi
 
 if [ -d "$OUTDIR/gambar" ]; then
   cp -r "$OUTDIR/gambar" "$TMPDIR/"
-  find "$TMPDIR/gambar" -type f \( -name "*.png" -o -name "*.PNG" \) -exec convert {} -alpha off {} \; 2>/dev/null || true
+  IM_CONV="convert"
+  command -v magick >/dev/null 2>&1 && IM_CONV="magick"
+  find "$TMPDIR/gambar" -type f \( -name "*.png" -o -name "*.PNG" \) -exec $IM_CONV {} -alpha off {} \; 2>/dev/null || true
 fi
 
 cd "$TMPDIR"

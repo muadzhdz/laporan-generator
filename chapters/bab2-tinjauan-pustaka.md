@@ -76,7 +76,7 @@ Nix adalah manajer paket murni fungsional yang menjamin *reproducible builds* de
 
 ### Kontainerisasi Menggunakan Docker
 
-Docker menyediakan isolasi tingkat sistem operasi menggunakan teknologi Linux *cgroups* dan *namespaces* [@merkel2014docker]. Melalui `Dockerfile` multi-arsitektur (amd64 dan arm64), lingkungan kompilasi dokumen dapat dijalankan langsung pada platform apapun yang mendukung runtime container tanpa perlu instalasi perangkat lunak lokal.
+Docker menyediakan isolasi tingkat sistem operasi menggunakan teknologi Linux *cgroups* dan *namespaces* [@merkel2014docker; @love2010kernel]. Melalui `Dockerfile` multi-arsitektur (amd64 dan arm64), lingkungan kompilasi dokumen dapat dijalankan langsung pada platform apapun yang mendukung runtime container tanpa perlu instalasi perangkat lunak lokal.
 
 ## Standar Sitasi Akademik APA Edisi ke-7
 

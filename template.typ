@@ -37,9 +37,30 @@ $else$
 $endif$
 #show bibliography: set par(hanging-indent: $if(first_line_indent)$$first_line_indent$$else$1.25cm$endif$, first-line-indent: 0cm)
 
+#let raw-prefix = "$if(heading_chapter_prefix)$$heading_chapter_prefix$$else$BAB $endif$"
+#let chapter-prefix = if raw-prefix == "" {
+  ""
+} else if raw-prefix.ends-with(" ") {
+  raw-prefix
+} else {
+  raw-prefix + " "
+}
+#let chapter-fmt = "$if(heading_chapter_num_format)$$heading_chapter_num_format$$else$roman$endif$"
+#let format-chapter-num(n) = {
+  if chapter-fmt == "arabic" {
+    numbering("1", n)
+  } else {
+    numbering("I", n)
+  }
+}
+
 #set heading(numbering: (..ns) => {
   if ns.len() == 1 {
-    "$if(heading_chapter_prefix)$$heading_chapter_prefix$$else$BAB $endif$" + numbering("I", ns.at(0))
+    if chapter-prefix != "" {
+      chapter-prefix + format-chapter-num(ns.at(0))
+    } else {
+      format-chapter-num(ns.at(0))
+    }
   } else if ns.len() == 2 {
     numbering("$if(heading_sub_dot)$1.1.$else$1.1$endif$", ..ns)
   } else {
@@ -47,15 +68,53 @@ $endif$
   }
 })
 
+#show figure.where(kind: image): set figure(
+  supplement: [Gambar],
+  numbering: it => {
+    let ch = counter(heading).get().at(0, default: 1)
+    str(ch) + "." + str(it)
+  }
+)
+
+#show figure.where(kind: table): set figure(
+  supplement: [Tabel],
+  numbering: it => {
+    let ch = counter(heading).get().at(0, default: 1)
+    str(ch) + "." + str(it)
+  }
+)
+
+#show figure.where(kind: raw): set figure(
+  supplement: [Listing],
+  numbering: it => {
+    let ch = counter(heading).get().at(0, default: 1)
+    str(ch) + "." + str(it)
+  }
+)
+
+#set math.equation(numbering: it => "(" + str(counter(heading).get().at(0, default: 1)) + "." + str(it) + ")")
+
 #show heading.where(level: 1): it => {
+  counter(figure.where(kind: image)).update(0)
+  counter(figure.where(kind: table)).update(0)
+  counter(figure.where(kind: raw)).update(0)
+  counter(math.equation).update(0)
   pagebreak(weak: true)
   align(center)[
     #block(inset: (top: 0.5em, bottom: 1.8em))[
       #text(size: 14pt, weight: "bold")[
         #if it.numbering != none [
-          #("BAB " + numbering("I", counter(heading).get().at(0)))
-          #linebreak()
-          #upper(it.body.text)
+          #if chapter-prefix != "" [
+            #(chapter-prefix + format-chapter-num(counter(heading).get().at(0)))
+            #linebreak()
+          ] else [
+            #(format-chapter-num(counter(heading).get().at(0)) + ". ")
+          ]
+          #if it.body.has("text") [
+            #upper(it.body.text)
+          ] else [
+            #upper(it.body)
+          ]
         ] else [
           #it.body
         ]
@@ -81,9 +140,33 @@ $endif$
 #show figure: it => it + par[]
 #show list: it => it + par[]
 #show enum: it => it + par[]
-#show quote: it => it + par[]
+#show quote: it => {
+  block(
+    fill: rgb("#f3f4f6"),
+    stroke: (left: 3.5pt + rgb("#2563eb")),
+    inset: (x: 12pt, y: 8pt),
+    radius: (right: 4pt),
+    width: 100%,
+  )[
+    #set text(size: 10.5pt, style: "italic")
+    #set par(justify: true, leading: 0.65em)
+    #it.body
+  ]
+}
 #show table: it => it + par[]
-#show raw.where(block: true): it => it + par[]
+#show raw.where(block: true): it => {
+  block(
+    fill: rgb("#f8f9fa"),
+    stroke: 0.5pt + rgb("#d1d5db"),
+    inset: (x: 10pt, y: 8pt),
+    radius: 4pt,
+    width: 100%,
+  )[
+    #set text(font: "DejaVu Sans Mono", size: 8.5pt)
+    #set par(justify: false, leading: 0.55em)
+    #it
+  ]
+}
 
 #show outline.entry.where(level: 1): set text(weight: "bold")
 #set par(leading: 0.75em)
@@ -177,14 +260,14 @@ $if(course)$
 ]
 $endif$
 $if(lecturer)$
-$if(cover_hide_lecturer)$
-$else$
-#v(0.4cm)
-#align(center)[
-  #text(size: 11pt)[Dosen Pengampu:]
-  #text(size: 12pt, weight: "bold")[$lecturer$]
+#let hide-lecturer = ("$cover_hide_lecturer$" == "true" or "$cover_show_lecturer$" == "false")
+#if not hide-lecturer [
+  #v(0.4cm)
+  #align(center)[
+    #text(size: 11pt)[$if(lecturer_label)$$lecturer_label$$else$Dosen Pengampu:$endif$]
+    #text(size: 12pt, weight: "bold")[$lecturer$]
+  ]
 ]
-$endif$
 $endif$
 
 #v(1fr)
@@ -217,5 +300,95 @@ $endfor$
 #pagebreak()
 #set page(numbering: "i")
 #counter(page).update(1)
+
+$if(approval)$
+#align(center)[
+  #text(size: 14pt, weight: "bold")[LEMBAR PENGESAHAN]
+  #v(0.8cm)
+  #text(size: 12pt, weight: "bold")[#title-lines]
+]
+#v(0.5cm)
+#align(center)[
+  #text(size: 11pt)[Disusun oleh:] \
+  $for(author)$
+  #text(size: 11pt, weight: "bold")[$author.name$] #text(size: 11pt)[($author.nim$)] \
+  $endfor$
+]
+#v(0.5cm)
+#align(center)[
+  #text(size: 11pt)[Telah diperiksa dan disetujui untuk diujikan pada:] \
+  #text(size: 11pt)[$if(approval.city)$$approval.city$, $endif$$if(approval.date)$$approval.date$$else$$date$$endif$]
+]
+#v(1cm)
+#grid(
+  columns: (1fr, 1fr),
+  gutter: 20pt,
+  $for(approval.supervisors)$
+  align(center)[
+    #text(size: 10.5pt)[$it.role$] \
+    #v(2cm)
+    #text(size: 10.5pt, weight: "bold")[$it.name$] \
+    $if(it.nip)$#text(size: 9pt)[NIP. $it.nip$]$endif$
+  ],
+  $endfor$
+)
+$if(approval.dean)$
+#v(1cm)
+#align(center)[
+  #text(size: 10.5pt)[Mengetahui,] \
+  #text(size: 10.5pt)[$approval.dean.role$] \
+  #v(2cm)
+  #text(size: 10.5pt, weight: "bold")[$approval.dean.name$] \
+  $if(approval.dean.nip)$#text(size: 9pt)[NIP. $approval.dean.nip$]$endif$
+]
+$endif$
+#pagebreak()
+$endif$
+
+$if(abstract_id)$
+#align(center)[
+  #text(size: 14pt, weight: "bold")[ABSTRAK]
+]
+#v(0.5cm)
+#align(center)[
+  #text(size: 11pt, weight: "bold")[#title-lines]
+]
+#v(0.5cm)
+#set par(justify: true, leading: 0.65em, first-line-indent: 1cm)
+#text(size: 11pt)[
+  $abstract_id$
+]
+$if(keywords_id)$
+#v(0.5cm)
+#text(size: 10.5pt)[
+  #set par(first-line-indent: 0cm)
+  #strong[Kata Kunci:] #emph[$for(keywords_id)$$keywords_id$$sep$, $endfor$]
+]
+$endif$
+#pagebreak()
+$endif$
+
+$if(abstract_en)$
+#align(center)[
+  #text(size: 14pt, weight: "bold")[ABSTRACT]
+]
+#v(0.5cm)
+#align(center)[
+  #text(size: 11pt, weight: "bold", style: "italic")[#title-lines]
+]
+#v(0.5cm)
+#set par(justify: true, leading: 0.65em, first-line-indent: 1cm)
+#text(size: 11pt, style: "italic")[
+  $abstract_en$
+]
+$if(keywords_en)$
+#v(0.5cm)
+#text(size: 10.5pt)[
+  #set par(first-line-indent: 0cm)
+  #strong[Keywords:] #emph[$for(keywords_en)$$keywords_en$$sep$, $endfor$]
+]
+$endif$
+#pagebreak()
+$endif$
 
 $body$

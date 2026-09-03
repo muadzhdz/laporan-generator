@@ -5,8 +5,8 @@
 <h1 align="center">Laporan Generator</h1>
 
 <p align="center">
-   Pipeline otomatisasi laporan akademik dari Markdown ke PDF dalam satu perintah.
-   Format APA, cover profesional, support Docker & Nix. Bisa pake AI Agent untuk generate konten otomatis.
+   Pipeline otomatisasi dokumen akademik dan teknis (Makalah, Laporan Proyek, Magang, Skripsi, Artikel Ilmiah) dari Markdown ke PDF dan Word (DOCX) dalam satu perintah.
+   Format APA, Typst engine, cover profesional, support Docker dan Nix. Didukung AI Agent prompt interaktif untuk pembuatan konten otomatis.
 </p>
 
 <p align="center">
@@ -114,18 +114,24 @@ Jika Anda ingin menulis konten laporan secara manual tanpa AI:
 
 **Linux / macOS (Bash):**
 ```bash
-./laporan init                   # Wizard interaktif setup metadata (judul, penulis, preset)
+./laporan init                   # Wizard interaktif setup metadata dan jenis dokumen
 ./laporan preset list            # Tampilkan daftar preset format kampus yang tersedia
 ./laporan preset scan <file.pdf> # Pindai otomatis pedoman penulisan PDF kampus baru
 ./laporan preset apply <id>      # Terapkan preset kampus ke metadata.yml
 ./laporan build                  # Build PDF dan DOCX sekaligus
+./laporan stats                  # Analisis statistik kata, halaman, gambar, durasi baca
+./laporan doctor                 # Audit integritas proyek (sitasi rusak, broken images)
+./laporan bundle                 # Kemas seluruh laporan ke dalam arsip zip rilis
 ./laporan check                  # Cek kelengkapan dependensi dan berkas proyek
 ```
 
 **Windows (PowerShell):**
 ```powershell
 .\laporan.ps1 check              # Cek kelengkapan dependensi sistem & berkas
-.\laporan.ps1 build              # Build PDF laporan
+.\laporan.ps1 build              # Build PDF dan DOCX laporan sekaligus
+.\laporan.ps1 stats              # Analisis statistik kata, halaman, durasi baca
+.\laporan.ps1 doctor             # Audit kesehatan proyek
+.\laporan.ps1 bundle             # Kemas seluruh dokumen ke arsip zip
 .\laporan.ps1 preset list        # Tampilkan daftar preset kampus yang tersedia
 .\laporan.ps1 preset apply itb-ta # Terapkan preset kampus ke metadata.yml
 .\laporan.ps1 view               # Buka dokumen Laporan.pdf di viewer
@@ -157,7 +163,7 @@ make watch        # Auto-build saat file berubah (butuh inotify-tools)
 make docx         # Export ke Microsoft Word (.docx)
 make reference-docx # Regenerasi reference.docx dari reference bawaan pandoc
 make html         # Export ke HTML
-make test         # Jalankan test suite (20 kategori tes / 80+ assertions)
+make test         # Jalankan test suite (22 kategori tes / 91 assertions)
 make clean        # Hapus Laporan.pdf dan folder tmp/
 ```
 
@@ -171,7 +177,7 @@ nix develop
 
 # Build PDF / test di dalam shell:
 ./laporan build       # Build PDF + DOCX
-make test             # 80+ assertions
+make test             # 91 assertions passed
 ```
 
 Dengan `flake.lock` yang di-commit, environment akan selalu identik di semua perangkat (Linux/macOS) -- tidak perlu install Pandoc, Typst, atau ImageMagick secara manual.
@@ -220,16 +226,16 @@ laporan-generator/
 ├── cover.md                 # Kata pengantar
 ├── gambar/                  # Direktori gambar/screenshot laporan
 ├── logo.jpg                 # Logo kampus/sekolah (WAJIB ganti)
-├── Makefile                 # Target build, watch, test, docker, init, view
-├── test.sh                  # Test suite (20 kategori tes / 80 assertions)
+├── Makefile                 # Target build, watch, test, docker, init, view, docx
+├── test.sh                  # Test suite (22 kategori tes / 91 assertions)
 ├── reference.docx           # Template gaya Word (A4, TNR 12pt, Heading 14pt)
 ├── docx.lua                 # Filter penomoran BAB/1.1./1.1.1 + cover DOCX
-├── scripts/                 # Skrip bantu (scan-preset.py, validate-preset.py, docx-pagenum.py)
-├── flake.nix                # Nix devShell (pandoc, typst, ImageMagick, tooling)
+├── scripts/                 # Skrip bantu (report-stats.py, report-doctor.py, bundle.py, scan-preset.py, validate-preset.py, docx-pagenum.py)
+├── flake.nix                # Nix devShell (pandoc, typst, ImageMagick, python3, tooling)
 ├── flake.lock               # Lockfile untuk environment reproducible
-├── Dockerfile               # Container build (Ubuntu 22.04 + Pandoc + Typst)
+├── Dockerfile               # Container build (Ubuntu 22.04 + Pandoc + Typst + Python 3)
 ├── docker-compose.yml       # Docker orchestration (UID/GID user mapping)
-└── prompt.md                # Instruksi AI Agent untuk pembuatan laporan
+└── prompt.md                # Protokol AI Agent interaktif untuk pembuatan berbagai karya ilmiah
 ```
 
 ---

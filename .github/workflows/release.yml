@@ -29,8 +29,10 @@ jobs:
       - name: Run Test Suite
         run: ./test.sh
 
-      - name: Build Report PDF
-        run: ./build.sh
+      - name: Build Report Documents
+        run: |
+          ./build.sh
+          make docx
 
       - name: Extract Release Notes from CHANGELOG
         id: changelog
@@ -54,6 +56,7 @@ jobs:
           body: ${{ steps.changelog.outputs.RELEASE_NOTES }}
           files: |
             Laporan.pdf
+            Laporan.docx
             examples/Laporan-Akademik-Example.pdf
           draft: false
           prerelease: false

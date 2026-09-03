@@ -12,6 +12,8 @@ local bab = 0
 local sub = 0
 local subsub = 0
 local toc_entries = {}
+local chapter_prefix = "BAB "
+local chapter_num_fmt = "roman"
 
 local function is_unnumbered(el)
   for _, cls in ipairs(el.attr.classes or {}) do
@@ -139,6 +141,32 @@ local function meta_str(meta, key)
   return pandoc.utils.stringify(v)
 end
 
+local function format_chapter_number(n)
+  if chapter_num_fmt == "arabic" then
+    return tostring(n)
+  else
+    return roman(n)
+  end
+end
+
+local function Meta(meta)
+  if meta["heading_chapter_prefix"] ~= nil then
+    local pfx = meta_str(meta, "heading_chapter_prefix")
+    if pfx == "" then
+      chapter_prefix = ""
+    else
+      if not pfx:match("%s$") then
+        pfx = pfx .. " "
+      end
+      chapter_prefix = pfx
+    end
+  end
+  local fmt = meta_str(meta, "heading_chapter_num_format")
+  if fmt ~= "" then
+    chapter_num_fmt = fmt
+  end
+end
+
 function Header(el)
   if FORMAT ~= "docx" then
     return nil
@@ -158,16 +186,30 @@ function Header(el)
     bab = bab + 1
     sub = 0
     subsub = 0
-    toc_entries[#toc_entries + 1] = {
-      level = 1,
-      id = el.identifier,
-      text = "BAB " .. roman(bab) .. " " .. string.upper(title),
-    }
-    el.content = pandoc.List{
-      pandoc.Str("BAB " .. roman(bab)),
-      pandoc.LineBreak(),
-      pandoc.Str(string.upper(title)),
-    }
+    local bnum = format_chapter_number(bab)
+    local full_bab = chapter_prefix .. bnum
+    if chapter_prefix == "" then
+      full_bab = bnum .. "."
+      toc_entries[#toc_entries + 1] = {
+        level = 1,
+        id = el.identifier,
+        text = full_bab .. " " .. string.upper(title),
+      }
+      el.content = pandoc.List{
+        pandoc.Str(full_bab .. " " .. string.upper(title)),
+      }
+    else
+      toc_entries[#toc_entries + 1] = {
+        level = 1,
+        id = el.identifier,
+        text = full_bab .. " " .. string.upper(title),
+      }
+      el.content = pandoc.List{
+        pandoc.Str(full_bab),
+        pandoc.LineBreak(),
+        pandoc.Str(string.upper(title)),
+      }
+    end
   elseif el.level == 2 then
     sub = sub + 1
     subsub = 0
@@ -270,8 +312,18 @@ function Pandoc(doc)
     end
     local hide_lecturer = meta_str(meta, "cover_hide_lecturer") == "true" or meta_str(meta, "cover_show_lecturer") == "false"
     if lecturer ~= "" and not hide_lecturer then
+      local lecturer_lbl = meta_str(meta, "lecturer_label")
+      if lecturer_lbl == "" then
+        lecturer_lbl = "Dosen Pengampu: "
+      else
+        if not lecturer_lbl:match(":%s*$") then
+          lecturer_lbl = lecturer_lbl .. ": "
+        elseif not lecturer_lbl:match("%s$") then
+          lecturer_lbl = lecturer_lbl .. " "
+        end
+      end
       blocks[#blocks + 1] = para(
-        { pandoc.Str("Dosen Pengampu: "), pandoc.Strong(pandoc.Str(lecturer)) },
+        { pandoc.Str(lecturer_lbl), pandoc.Strong(pandoc.Str(lecturer)) },
         "CoverLecturer"
       )
     end
@@ -350,3 +402,8 @@ function Pandoc(doc)
   doc.blocks = blocks .. body
   return doc
 end
+
+return {
+  { Meta = Meta },
+  { Header = Header, Pandoc = Pandoc }
+}

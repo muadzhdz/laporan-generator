@@ -23,7 +23,7 @@ lint-deps:
 	@echo "Checking dependencies..."
 	@command -v pandoc >/dev/null 2>&1 || { echo "ERROR: pandoc not found"; exit 1; }
 	@command -v typst >/dev/null 2>&1 || { echo "ERROR: typst not found"; exit 1; }
-	@command -v convert >/dev/null 2>&1 || { echo "ERROR: ImageMagick (convert) not found"; exit 1; }
+	@command -v magick >/dev/null 2>&1 || command -v convert >/dev/null 2>&1 || { echo "ERROR: ImageMagick (magick/convert) not found"; exit 1; }
 	@echo "All dependencies OK."
 
 watch:
@@ -40,6 +40,7 @@ docx:
 		echo "ERROR: Direktori chapters/ tidak ditemukan."; \
 		exit 1; \
 	fi; \
+	mkdir -p tmp; \
 	PRESET=$$(grep -E '^[[:space:]]*(preset|margin_preset):' metadata.yml 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '\"'\''\r\n '); \
 	PRESET_FILE=""; \
 	if [ -n "$$PRESET" ] && [ -f "presets/$${PRESET}.yml" ]; then \
@@ -56,15 +57,18 @@ docx:
 		--top-level-division=chapter \
 		--reference-doc=reference.docx \
 		--lua-filter=docx.lua \
-		-o /tmp/Laporan-tmp.docx 2>&1
-	python3 scripts/finalize-docx.py /tmp/Laporan-tmp.docx /tmp/Laporan-sect.docx
-	python3 scripts/docx-pagenum.py /tmp/Laporan-sect.docx Laporan.docx
+		-o tmp/Laporan-tmp.docx 2>&1; \
+	python3 scripts/finalize-docx.py tmp/Laporan-tmp.docx tmp/Laporan-sect.docx; \
+	python3 scripts/docx-pagenum.py tmp/Laporan-sect.docx Laporan.docx; \
+	rm -f tmp/Laporan-tmp.docx tmp/Laporan-sect.docx
 
 reference-docx:
 	@command -v pandoc >/dev/null 2>&1 || { echo "ERROR: pandoc not found"; exit 1; }
 	@command -v python3 >/dev/null 2>&1 || { echo "ERROR: python3 not found"; exit 1; }
-	pandoc --print-default-data-file reference.docx > /tmp/ref-default.docx
-	python3 scripts/make-reference-docx.py /tmp/ref-default.docx reference.docx
+	@mkdir -p tmp
+	pandoc --print-default-data-file reference.docx > tmp/ref-default.docx
+	python3 scripts/make-reference-docx.py tmp/ref-default.docx reference.docx
+	@rm -f tmp/ref-default.docx
 
 html:
 	@if [ ! -d chapters ]; then \

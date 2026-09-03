@@ -1,6 +1,6 @@
 # Spesifikasi Skema Metadata (metadata.yml)
 
-File `metadata.yml` digunakan oleh Pandoc dan template LaTeX untuk mengisikan informasi sampul (cover page), judul laporan, identitas penyusun, dosen pengampu, serta abstrak laporan.
+File `metadata.yml` digunakan oleh Pandoc, template Typst (`template.typ`), dan filter DOCX (`docx.lua`) untuk mengisikan informasi sampul (cover page), judul laporan, identitas penyusun, dosen pengampu/pembimbing, serta abstrak laporan.
 
 ---
 
@@ -8,7 +8,7 @@ File `metadata.yml` digunakan oleh Pandoc dan template LaTeX untuk mengisikan in
 
 ```yaml
 ---
-title: "Otomatisasi Pembuatan Dokumen Laporan Akademik Menggunakan Pandoc, LaTeX, dan Markdown"
+title: "Otomatisasi Pembuatan Dokumen Laporan Akademik Menggunakan Pandoc, Typst, dan Markdown"
 subtitle: "Laporan Projek Akhir Pipeline Dokumentasi"
 author:
   - name: "Ahmad Dahlan"
@@ -16,6 +16,7 @@ author:
   - name: "Budi Santoso"
     nim: "101234568"
 lecturer: "Dr. Ir. Hendra Wijaya, M.T."
+lecturer_label: "Dosen Pengampu:"   # Opsional: "Dosen Pembimbing:", "Pembimbing 1:", dll.
 course: "Pengolahan Citra Digital dan Pembelajaran Mesin"
 institution: "Universitas Gadjah Mada"
 faculty: "Departemen Teknik Elektro dan Teknologi Informasi"
@@ -23,10 +24,10 @@ year: "2025/2026"
 date: "Juli 2026"
 abstract: |
   Laporan ini membahas pipeline otomatisasi dokumen akademik
-  menggunakan Markdown, Pandoc, LaTeX, dan Bash. Pipeline ini
+  menggunakan Markdown, Pandoc, Typst, dan Bash. Pipeline ini
   memungkinkan penulisan konten laporan dalam format Markdown
-  yang kemudian dikonversi menjadi PDF profesional melalui
-  Pandoc dan pdfLaTeX.
+  yang kemudian dikonversi menjadi PDF berkualitas percetakan
+  melalui Pandoc dan Typst serta berkas Microsoft Word (.docx).
 ...
 ```
 
@@ -41,7 +42,8 @@ abstract: |
 | `author` | List of Objects | **Ya** | Daftar penulis. Setiap entri memiliki `name` dan `nim`. |
 | `author[].name` | String | **Ya** | Nama lengkap mahasiswa / penyusun. |
 | `author[].nim` | String | **Ya** | Nomor Induk Mahasiswa (NIM / NPM / NISN). |
-| `lecturer` | String | **Ya** | Nama lengkap dan gelar Dosen / Guru Pengampu. |
+| `lecturer` | String | **Ya** | Nama lengkap dan gelar Dosen / Guru Pengampu / Pembimbing. |
+| `lecturer_label` | String | Opsional | Label peran dosen (default: `"Dosen Pengampu:"`, bisa `"Dosen Pembimbing:"`). |
 | `course` | String | **Ya** | Nama Mata Kuliah atau Mata Pelajaran. |
 | `institution` | String | **Ya** | Nama Universitas, Institut, Politeknik, atau Sekolah. |
 | `faculty` | String | **Ya** | Nama Fakultas, Departemen, atau Program Studi. |

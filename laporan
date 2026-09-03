@@ -33,7 +33,10 @@ show_help() {
     echo -e "  ${GREEN}pdf${NC}          Kompilasi dokumen PDF (via Typst)"
     echo -e "  ${GREEN}docx${NC}         Kompilasi dokumen Microsoft Word (.docx)"
     echo -e "  ${GREEN}init${NC}         Wizard interaktif untuk konfigurasi awal metadata"
-    echo -e "  ${GREEN}preset${NC}       Kelola preset format kampus (list/show/apply)"
+    echo -e "  ${GREEN}preset${NC}       Kelola preset format kampus (list/show/apply/diff/validate)"
+    echo -e "  ${GREEN}stats${NC}        Analisis statistik kata, halaman, gambar, dan durasi baca"
+    echo -e "  ${GREEN}doctor${NC}       Audit kesehatan proyek (broken images, sitasi hilang, dll.)"
+    echo -e "  ${GREEN}bundle${NC}       Kemas seluruh laporan (PDF, DOCX, MD) menjadi arsip zip"
     echo -e "  ${GREEN}check${NC}        Audit dependensi sistem dan struktur proyek"
     echo -e "  ${GREEN}test${NC}         Jalankan suite pengujian otomatis (test.sh)"
     echo -e "  ${GREEN}view${NC}         Buka dokumen Laporan.pdf di viewer"
@@ -358,6 +361,18 @@ cmd_watch() {
     make watch
 }
 
+cmd_stats() {
+    python3 scripts/report-stats.py
+}
+
+cmd_doctor() {
+    python3 scripts/report-doctor.py
+}
+
+cmd_bundle() {
+    python3 scripts/bundle.py
+}
+
 # Main routing
 case "${1:-help}" in
     build)
@@ -375,6 +390,15 @@ case "${1:-help}" in
     preset)
         shift
         cmd_preset "$@"
+        ;;
+    stats)
+        cmd_stats
+        ;;
+    doctor)
+        cmd_doctor
+        ;;
+    bundle)
+        cmd_bundle
         ;;
     check)
         cmd_check

@@ -35,8 +35,8 @@ Terima kasih telah tertarik untuk berkontribusi pada **Laporan Generator**! Proj
 
 ## Jenis Kontribusi yang Kami Terima
 
-### 1. Template Kampus / Institusi Baru
-Kami menyambut baik penambahan variasi template LaTeX resmi universitas/sekolah di Indonesia. Anda dapat menambahkan folder template baru di direktori `templates/`.
+### 1. Preset Kampus / Institusi Baru
+Kami menyambut baik penambahan variasi preset format kampus resmi universitas/sekolah di Indonesia. Anda dapat menambahkan berkas preset baru di direktori `presets/<preset-id>.yml` (lihat spesifikasi di `docs/preset-schema.md`).
 
 ### 2. Perbaikan Skrip & Automation
 Memperbaiki efisiensi `build.sh`, meningkatkan penanganan kesalahan, atau menambah pengujian baru pada `test.sh`.
@@ -54,17 +54,18 @@ Sebelum membuat Pull Request, Anda **wajib** memastikan pengujian lokal lulus 10
 make test
 ```
 
-`test.sh` akan memverifikasi 15 kategori tes (30 pengecekan), termasuk:
+`test.sh` akan memverifikasi 20 kategori tes (80+ assertions), termasuk:
 - Ketersediaan sintaks dan file wajib
 - Validasi metadata dan BibTeX
-- Penanganan makro Pandoc `\pandocbounded`
+- Penomoran heading dan multi-engine Typst/DOCX
 - Pengujian kompilasi PDF dan ekstraksi teks (`pdftotext`)
 - Pengecekan kebersihan dari karakter ilegal (box-drawing)
+- Validasi skema preset kampus dan scanner PDF
 
 ---
 
 ## Pedoman Kode (Coding Standards)
 
 - **Bash Script**: Ikuti praktik terbaik ShellCheck. Gunakan pengurutan variabel bertanda kutip dan penanganan error `set -e`.
-- **LaTeX Template**: Gunakan makro yang kompatibel dengan pdflatex. Hindari paket yang membutuhkan xelatex/lualatex jika tidak benar-benar diperlukan.
+- **Typst Template & Lua Filter**: Ikuti kaidah sintaks Typst modern (kompatibel Typst 0.15+) dan pandoc Lua filter standards.
 - **Markdown Document**: Gunakan heading standar (`#`, `##`, `###`) dan sintaks sitasi Pandoc `[@citekey]`.

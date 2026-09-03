@@ -417,6 +417,86 @@ else
 fi
 echo ""
 
+echo "[T21] Architecture Integrity, Git Hooks & Tooling Parity check"
+if [ -f ".githooks/pre-commit" ]; then
+  if grep -q "template.typ" .githooks/pre-commit && ! grep -q "pdflatex" .githooks/pre-commit && ! grep -q "template.latex" .githooks/pre-commit; then
+    pass "pre-commit hook sinkron dengan Typst (tanpa dependensi pdflatex/latex)"
+  else
+    fail "pre-commit hook masih memiliki referensi lama LaTeX"
+  fi
+else
+  fail ".githooks/pre-commit tidak ditemukan"
+fi
+
+if grep -q "Cmd-Build-DOCX" laporan.ps1 && grep -q "Cmd-Init" laporan.ps1 && grep -q "Cmd-Test" laporan.ps1; then
+  pass "laporan.ps1 memiliki paritas fitur lengkap (DOCX, Init, Test, Preset Diff/Scan)"
+else
+  fail "laporan.ps1 belum memiliki paritas fitur lengkap dengan Bash CLI"
+fi
+
+if grep -q "sort -V" build.sh; then
+  pass "build.sh mendukung deteksi bab dinamis tak terbatas (natural sort -V)"
+else
+  fail "build.sh belum mendukung deteksi bab dinamis"
+fi
+
+if grep -q "heading_chapter_num_format" docx.lua && grep -q "heading_chapter_num_format" template.typ; then
+  pass "Typst dan DOCX keduanya mendukung heading_chapter_num_format dinamis"
+else
+  fail "Dukungan heading_chapter_num_format belum lengkap di kedua engine"
+fi
+
+if grep -q "python3" flake.nix; then
+  pass "flake.nix menyertakan python3 untuk ekosistem scripts/ yang mandiri"
+else
+  fail "flake.nix belum menyertakan python3"
+fi
+echo ""
+
+echo "[T22] BAB I Spacing Fix, CLI Supercharged & Multi-Genre Protocol check"
+if pdftotext Laporan.pdf - 2>/dev/null | grep -q "BAB I PENDAHULUAN"; then
+  pass "Judul Bab I berjarak spasi sempurna ('BAB I PENDAHULUAN') di PDF"
+else
+  fail "Judul Bab I tidak memiliki spasi yang tepat di PDF"
+fi
+
+if ! pdftotext Laporan.pdf - 2>/dev/null | grep -q "BABI PENDAHULUAN"; then
+  pass "Bebas dari bug teks rapat 'BABI PENDAHULUAN'"
+else
+  fail "Terdeteksi bug teks rapat 'BABI PENDAHULUAN'"
+fi
+
+if ./laporan stats 2>&1 | grep -q "STATISTIK DOKUMEN"; then
+  pass "./laporan stats berfungsi dan menampilkan analisis dokumen"
+else
+  fail "./laporan stats gagal dijalankan"
+fi
+
+if python3 scripts/report-doctor.py 2>&1 | grep -q "SEHAT"; then
+  pass "report-doctor.py memvalidasi integritas sitasi & gambar (Status: SEHAT)"
+else
+  fail "report-doctor.py mendeteksi anomali pada proyek"
+fi
+
+if ./laporan bundle >/dev/null 2>&1 && [ -f "dist/Laporan-Akademik-Lengkap.zip" ]; then
+  pass "./laporan bundle berhasil membuat arsip zip rilis"
+else
+  fail "./laporan bundle gagal membuat arsip zip"
+fi
+
+if grep -q "Cmd-Stats" laporan.ps1 && grep -q "Cmd-Doctor" laporan.ps1 && grep -q "Cmd-Bundle" laporan.ps1; then
+  pass "laporan.ps1 mendukung perintah stats, doctor, dan bundle di PowerShell"
+else
+  fail "laporan.ps1 belum mendukung perintah supercharged"
+fi
+
+if grep -q "PROTOKOL WAWANCARA INTERAKTIF" prompt.md && grep -q "Makalah / Paper Akademik" prompt.md; then
+  pass "prompt.md memuat protokol wawancara 3 tahap dan dukungan multi-karya ilmiah"
+else
+  fail "prompt.md belum memuat protokol wawancara interaktif multi-genre"
+fi
+echo ""
+
 echo "========================"
 echo "Hasil: $PASS passed, $FAIL failed"
 echo "========================"
