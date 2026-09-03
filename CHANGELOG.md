@@ -6,6 +6,28 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ---
 
+## [2.4.0] - 2026-09-03
+
+### Added
+- **Generalisasi Universal Karya Ilmiah (`prompt.md` & `template.typ`)**: Dukungan resmi untuk Makalah Akademik, Laporan Proyek, Laporan Magang / PKL, Tugas Akhir / Skripsi, dan Artikel Jurnal IMRAD.
+- **Protokol Wawancara Interaktif 3 Tahap (`prompt.md`)**: Panduan dialog wajib AI Agent untuk menanyakan jenis karya tulis dan mengonfirmasi susunan halaman (Cover, Pengesahan, Abstrak, Kata Pengantar, Daftar Isi, Gambar/Tabel, Lampiran) sebelum berkas dibuat.
+- **CLI Analytics & Health Audit Tooling (`./laporan` & `laporan.ps1`)**:
+  - `stats`: Analisis komprehensif jumlah kata, halaman, bab, tabel, gambar, persamaan matematika, sitasi, durasi membaca, dan grafik distribusi kata.
+  - `doctor`: Audit otomatis broken image links, sitasi rusak di `.bib`, heading numbering anti-patterns, dan box-drawing characters (Skor Kesehatan 100/100).
+  - `bundle`: Pengemasan laporan PDF, DOCX, dan sumber Markdown ke dalam berkas zip rilis (`dist/Laporan-Akademik-Lengkap.zip`).
+- **Dukungan Halaman Abstrak Dwibahasa & Lembar Pengesahan**: Halaman khusus terpisah unnumbered untuk Abstrak (Bahasa Indonesia) + Kata Kunci dan Abstract (Bahasa Inggris) + Keywords, serta rendering otomatis lembar tanda tangan pengesahan.
+- **Daftar Gambar & Daftar Tabel Otomatis**: Query dinamis berbasis `#context` Typst yang otomatis menyisipkan DAFTAR GAMBAR dan DAFTAR TABEL jika dokumen memuat media/tabel.
+- **Kategori Uji [T21] & [T22] pada Test Suite**: Ekspansi suite pengujian otomatis menjadi 22 kategori dan 91 assertions lulus 100%.
+
+### Fixed
+- **Perbaikan Kritis Spasi Awalan Bab (`template.typ` & `docx.lua`)**: Menambahkan smart guard string prefix pada template Typst dan filter Lua DOCX sehingga teks tidak lagi rapat (`BABI PENDAHULUAN` diperbaiki menjadi `BAB I PENDAHULUAN`).
+- **Dukungan Awalan Bab Kosong**: Menjamin format artikel ilmiah/makalah tanpa awalan "BAB" (`heading_chapter_prefix: ""`) tidak menghasilkan spasi kosong di awal nomor bab.
+- **Perbaikan Git Hook Pre-Commit**: Menghapus dependensi usang pdflatex dan template.latex lama, menyelaraskannya dengan Typst, reference.docx, dan docx.lua.
+- **Deteksi Bab Dinamis `sort -V` (`build.sh`)**: Mengganti globbing statis dengan natural sort dinamis tanpa batas bab.
+- **Pembersihan Residu Era LaTeX**: Menghapus sisa komentar dan dead code LaTeX pada `cover.md`, `CONTRIBUTING.md`, dan `docs/metadata-schema.md`.
+
+---
+
 ## [2.3.0] - 2026-08-27
 
 ### Added
