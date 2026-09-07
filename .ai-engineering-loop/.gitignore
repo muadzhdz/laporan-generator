@@ -1,0 +1,7 @@
+# Runtime artifacts may contain source excerpts and verification logs.
+runs/
+usage/
+worktrees/
+locks/
+tasks/current.diff
+tasks/*.log

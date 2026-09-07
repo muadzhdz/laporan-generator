@@ -19,7 +19,16 @@ PT_REGEX = re.compile(r"^[0-9]+(\.[0-9]+)?pt$", re.I)
 
 
 def parse_simple_yaml(filepath):
-    """Parser YAML ringan tanpa dependensi eksternal."""
+    """Parser YAML yang tangguh dengan PyYAML dan fallback aman tanpa dependensi."""
+    try:
+        import yaml
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = yaml.safe_load(f)
+            if isinstance(content, dict):
+                return {str(k): ("" if v is None else str(v)) for k, v in content.items()}
+    except (ImportError, ModuleNotFoundError):
+        pass
+
     data = {}
     with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
@@ -29,10 +38,15 @@ def parse_simple_yaml(filepath):
             if ":" in line:
                 key, val = line.split(":", 1)
                 key = key.strip()
-                val = val.split("#")[0].strip()  # buang inline comment
-                # Bersihkan kutip
-                if (val.startswith('"') and val.endswith('"')) or (val.startswith("'") and val.endswith("'")):
-                    val = val[1:-1]
+                val = val.strip()
+                if val.startswith('"'):
+                    end_quote = val.find('"', 1)
+                    val = val[1:end_quote] if end_quote != -1 else val.strip('"')
+                elif val.startswith("'"):
+                    end_quote = val.find("'", 1)
+                    val = val[1:end_quote] if end_quote != -1 else val.strip("'")
+                else:
+                    val = val.split("#")[0].strip()
                 data[key] = val
     return data
 

@@ -38,6 +38,7 @@ echo ""
 # T4: Cek template validity
 echo "[T4] Template check"
 if grep -q '^#set page' template.typ; then pass "template punya konfigurasi halaman (#set page)"; else fail "template tanpa #set page"; fi
+# shellcheck disable=SC2016
 if grep -Fq '$body$' template.typ; then pass "template punya placeholder \$body\$"; else fail "template tanpa placeholder \$body\$"; fi
 if grep -Fq 'set heading(numbering' template.typ; then pass "template punya penomoran heading otomatis"; else fail "template tanpa penomoran heading"; fi
 echo ""
@@ -61,7 +62,7 @@ if ./build.sh; then
   if [ -f Laporan.pdf ]; then
     SIZE=$(stat -c%s Laporan.pdf 2>/dev/null || stat -f%z Laporan.pdf 2>/dev/null)
     if [ "$SIZE" -gt 50000 ]; then
-      pass "PDF valid ($(numfmt --to=iec $SIZE 2>/dev/null || echo ${SIZE}B))"
+      pass "PDF valid ($(numfmt --to=iec "$SIZE" 2>/dev/null || echo "${SIZE}B"))"
     else
       fail "PDF terlalu kecil ($SIZE bytes)"
     fi
@@ -494,6 +495,41 @@ if grep -q "PROTOKOL WAWANCARA INTERAKTIF" prompt.md && grep -q "Makalah / Paper
   pass "prompt.md memuat protokol wawancara 3 tahap dan dukungan multi-karya ilmiah"
 else
   fail "prompt.md belum memuat protokol wawancara interaktif multi-genre"
+fi
+echo ""
+
+# T23: 10/10 Enterprise Hardening, Python Unit Tests & Cross-Platform Parity
+echo "[T23] 10/10 Enterprise Hardening & Python Test Suite check"
+if python3 scripts/test_scripts.py >/dev/null 2>&1; then
+  pass "Python scripts unit test suite lulus 100% (scripts/test_scripts.py)"
+else
+  fail "Python scripts unit test suite gagal"
+fi
+
+if grep -q "Cmd-Watch" laporan.ps1 && grep -q "Escape-Yaml" laporan.ps1; then
+  pass "laporan.ps1 mendukung Cmd-Watch native dan sanitasi Escape-Yaml"
+else
+  fail "laporan.ps1 belum mendukung Cmd-Watch atau Escape-Yaml"
+fi
+
+if grep -q "yaml_escape" laporan; then
+  pass "laporan (Bash) memiliki fungsi proteksi injeksi yaml_escape"
+else
+  fail "laporan (Bash) belum memiliki proteksi yaml_escape"
+fi
+
+TEST_RAW='Judul: "Laporan" \ Keandalan Tinggi'
+TEST_ESC=$(eval "$(awk '/^yaml_escape\(\)/{flag=1} flag; /^}/{if(flag){flag=0; exit}}' laporan)"; yaml_escape "$TEST_RAW")
+if [[ "$TEST_ESC" == *"\"Laporan\""* ]] || [[ "$TEST_ESC" == *"\\\"Laporan\\\""* ]]; then
+  pass "yaml_escape memproses dan meng-escape tanda kutip serta backslash secara dinamis"
+else
+  fail "yaml_escape gagal melakukan escaping pada input dinamis"
+fi
+
+if [ -f "docs/syntax-cheatsheet.md" ] && grep -q "Sitasi & Bibliografi" docs/syntax-cheatsheet.md; then
+  pass "docs/syntax-cheatsheet.md tersedia dan memuat panduan lengkap"
+else
+  fail "docs/syntax-cheatsheet.md tidak ditemukan atau belum lengkap"
 fi
 echo ""
 

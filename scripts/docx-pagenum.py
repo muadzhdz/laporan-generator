@@ -30,7 +30,7 @@ DECIMAL = re.compile(r"^\d+$")
 
 
 def page_count(pdf):
-    out = subprocess.check_output(["pdfinfo", pdf], text=True)
+    out = subprocess.check_output(["pdfinfo", pdf], text=True, timeout=15)
     m = re.search(r"^Pages:\s+(\d+)", out, re.M)
     return int(m.group(1)) if m else 0
 
@@ -42,6 +42,7 @@ def page_texts(pdf):
         out = subprocess.check_output(
             ["pdftotext", "-f", str(p), "-l", str(p), "-layout", pdf, "-"],
             text=True,
+            timeout=15,
         )
         lines = [l.strip() for l in out.splitlines() if l.strip()]
         pages[p] = lines
@@ -113,6 +114,7 @@ def render_pdf(docx):
         ],
         check=True,
         capture_output=True,
+        timeout=45,
     )
     base = os.path.basename(docx).rsplit(".", 1)[0] + ".pdf"
     return os.path.join(tmp, base)
@@ -132,9 +134,17 @@ def main():
         items = {n: zin.read(n) for n in names}
     doc = items["word/document.xml"].decode("utf-8")
 
-    pdf = render_pdf(src)
+    try:
+        pdf = render_pdf(src)
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError) as err:
+        print(f"[warn] docx-pagenum: render LibreOffice gagal/timeout ({err}), nomor halaman memakai nilai cache default.")
+        return
+
     try:
         pages = page_texts(pdf)
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError) as err:
+        print(f"[warn] docx-pagenum: ekstraksi teks PDF gagal/timeout ({err}), nomor halaman memakai nilai cache default.")
+        return
     finally:
         shutil.rmtree(os.path.dirname(pdf), ignore_errors=True)
 

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "defaultMode": "ASSISTED",
+  "allowUnattended": false,
+  "requireSandboxForUnattended": true,
+  "perRunTokenLimit": 50000,
+  "dailyTokenLimit": 200000,
+  "killSwitch": false
+}

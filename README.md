@@ -180,6 +180,7 @@ Dengan `flake.lock` yang di-commit, environment akan selalu identik di semua per
 Untuk informasi teknis lebih mendalam, silakan baca dokumentasi terpisah kami:
 
 - **[GETTING-STARTED.md](GETTING-STARTED.md)**: Panduan langkah-demi-langkah dari nol hingga jadi PDF, glosarium istilah, dan FAQ.
+- **[docs/syntax-cheatsheet.md](docs/syntax-cheatsheet.md)**: Cheatsheet sintaks Markdown akademik lengkap (sitasi, rumus matematika, gambar, tabel).
 - **[docs/campus-guide.md](docs/campus-guide.md)**: Panduan preset kampus (UI, ITB, UGM, ITS, UNPAD), margin, dan pemindaian PDF pedoman.
 - **[docs/preset-schema.md](docs/preset-schema.md)**: Spesifikasi skema konfigurasi preset format kampus (`presets/*.yml`).
 - **[docs/metadata-schema.md](docs/metadata-schema.md)**: Panduan lengkap skema konfigurasi `metadata.yml` (Single & Multi-Author).

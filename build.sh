@@ -6,7 +6,7 @@ OUTDIR="$DIR"
 REPORT="$OUTDIR/Laporan.pdf"
 
 TMPDIR=$(mktemp -d)
-trap "rm -rf $TMPDIR" EXIT
+trap 'rm -rf "$TMPDIR"' EXIT
 
 cp "$OUTDIR/cover.md" "$TMPDIR/"
 cp "$OUTDIR/template.typ" "$TMPDIR/"
@@ -23,7 +23,10 @@ if [ -d "$OUTDIR/chapters" ]; then
     echo "ERROR: Tidak ada berkas bab*.md di direktori chapters/."
     exit 1
   fi
-  INPUT_FILES="$TMPDIR/cover.md $CHAPTER_FILES"
+  INPUT_FILES=("$TMPDIR/cover.md")
+  while IFS= read -r f; do
+    [ -n "$f" ] && INPUT_FILES+=("$f")
+  done < <(find "$TMPDIR" -maxdepth 1 -name "bab*.md" | sort -V)
 else
   echo "ERROR: Direktori chapters/ tidak ditemukan."
   echo "Buat folder chapters/ dengan file bab laporan (contoh: bab1-pendahuluan.md dst)."
@@ -40,17 +43,17 @@ fi
 cd "$TMPDIR"
 
 PRESET_NAME=$(grep -E '^[[:space:]]*(preset|margin_preset):' "$TMPDIR/metadata.yml" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"'\''\r\n ')
-PRESET_OPTS=""
+PRESET_OPTS=()
 if [ -n "$PRESET_NAME" ] && [ -f "$TMPDIR/presets/${PRESET_NAME}.yml" ]; then
-  PRESET_OPTS="--metadata-file=$TMPDIR/presets/${PRESET_NAME}.yml"
+  PRESET_OPTS=("--metadata-file=$TMPDIR/presets/${PRESET_NAME}.yml")
 elif [ -f "$TMPDIR/presets/standard.yml" ]; then
-  PRESET_OPTS="--metadata-file=$TMPDIR/presets/standard.yml"
+  PRESET_OPTS=("--metadata-file=$TMPDIR/presets/standard.yml")
 fi
 
 if ! pandoc \
-  $INPUT_FILES \
+  "${INPUT_FILES[@]}" \
   --template="template.typ" \
-  $PRESET_OPTS \
+  "${PRESET_OPTS[@]}" \
   --metadata-file="metadata.yml" \
   --citeproc \
   --bibliography="references.bib" \

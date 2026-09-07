@@ -258,6 +258,15 @@ cmd_preset() {
     esac
 }
 
+yaml_escape() {
+    local val="$1"
+    val="${val//\\/\\\\}"
+    val="${val//\"/\\\"}"
+    val="${val//$'\r'/}"
+    val="${val//$'\n'/ }"
+    echo -n "$val"
+}
+
 cmd_init() {
     show_banner
     echo -e "${CYAN}${BOLD}Wizard Konfigurasi Laporan Akademik${NC}"
@@ -298,18 +307,18 @@ cmd_init() {
     in_preset=${in_preset:-"standard"}
 
     cat << YAML_EOF > metadata.yml
-title: "$in_title"
-subtitle: "$in_subtitle"
-course: "$in_course"
-lecturer: "$in_lecturer"
+title: "$(yaml_escape "$in_title")"
+subtitle: "$(yaml_escape "$in_subtitle")"
+course: "$(yaml_escape "$in_course")"
+lecturer: "$(yaml_escape "$in_lecturer")"
 author:
-  - name: "$in_author"
-    nim: "$in_nim"
-institution: "$in_institution"
-faculty: "$in_faculty"
-year: "$in_year"
+  - name: "$(yaml_escape "$in_author")"
+    nim: "$(yaml_escape "$in_nim")"
+institution: "$(yaml_escape "$in_institution")"
+faculty: "$(yaml_escape "$in_faculty")"
+year: "$(yaml_escape "$in_year")"
 date: "$(date +'%B %Y')"
-preset: "$in_preset"
+preset: "$(yaml_escape "$in_preset")"
 YAML_EOF
 
     echo ""

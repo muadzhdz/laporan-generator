@@ -38,6 +38,7 @@ function Show-Help {
     Write-Host "  check        Audit dependensi sistem dan struktur proyek" -ForegroundColor Green
     Write-Host "  test         Jalankan suite pengujian otomatis" -ForegroundColor Green
     Write-Host "  view         Buka dokumen Laporan.pdf di PDF viewer" -ForegroundColor Green
+    Write-Host "  watch        Pantau perubahan berkas dan auto-rebuild" -ForegroundColor Green
     Write-Host "  clean        Bersihkan berkas output dan direktori sementara" -ForegroundColor Green
     Write-Host "  help         Tampilkan panduan bantuan ini" -ForegroundColor Green
     Write-Host ""
@@ -226,9 +227,19 @@ function Cmd-Build {
     Write-Host "Dokumen PDF dan DOCX berhasil diproses!" -ForegroundColor Green
 }
 
+function Escape-Yaml {
+    param ([string]$Val)
+    if (-not $Val) { return "" }
+    $Val = $Val -replace "\\", "\\\\"
+    $Val = $Val -replace '"', '\"'
+    $Val = $Val -replace "`r", ""
+    $Val = $Val -replace "`n", " "
+    return $Val
+}
+
 function Cmd-Init {
     Show-Banner
-    Write-Host "Wizard Konfigurasi Laporan Akademik (PowerShell)" -ForegroundColor Cyan
+    Write-Host "Wizard Konfigurasi Laporan Akademik (Windows PowerShell)" -ForegroundColor Cyan
     Write-Host "Isi data di bawah ini (tekan Enter untuk memakai nilai default):"
     Write-Host ""
 
@@ -267,19 +278,30 @@ function Cmd-Init {
 
     $curDate = (Get-Date -Format "MMMM yyyy")
 
+    $escTitle = Escape-Yaml $in_title
+    $escSubtitle = Escape-Yaml $in_subtitle
+    $escCourse = Escape-Yaml $in_course
+    $escLecturer = Escape-Yaml $in_lecturer
+    $escAuthor = Escape-Yaml $in_author
+    $escNim = Escape-Yaml $in_nim
+    $escInstitution = Escape-Yaml $in_institution
+    $escFaculty = Escape-Yaml $in_faculty
+    $escYear = Escape-Yaml $in_year
+    $escPreset = Escape-Yaml $in_preset
+
     $yamlContent = @"
-title: "$in_title"
-subtitle: "$in_subtitle"
-course: "$in_course"
-lecturer: "$in_lecturer"
+title: "$escTitle"
+subtitle: "$escSubtitle"
+course: "$escCourse"
+lecturer: "$escLecturer"
 author:
-  - name: "$in_author"
-    nim: "$in_nim"
-institution: "$in_institution"
-faculty: "$in_faculty"
-year: "$in_year"
+  - name: "$escAuthor"
+    nim: "$escNim"
+institution: "$escInstitution"
+faculty: "$escFaculty"
+year: "$escYear"
 date: "$curDate"
-preset: "$in_preset"
+preset: "$escPreset"
 "@
 
     Set-Content -Path "metadata.yml" -Value $yamlContent
@@ -433,6 +455,44 @@ function Cmd-View {
     }
 }
 
+function Cmd-Watch {
+    Show-Banner
+    Write-Host "Memantau perubahan berkas dan auto-rebuild... (Tekan Ctrl+C untuk berhenti)" -ForegroundColor Cyan
+    $scriptPath = $MyInvocation.MyCommand.Definition
+    if (-not $scriptPath) { $scriptPath = $PSCommandPath }
+    if (-not $scriptPath) { $scriptPath = ".\laporan.ps1" }
+
+    $watcher = New-Object System.IO.FileSystemWatcher
+    $watcher.Path = (Get-Location).Path
+    $watcher.IncludeSubdirectories = $true
+    $watcher.EnableRaisingEvents = $true
+    $watcher.Filter = "*.*"
+
+    $action = {
+        $path = $Event.SourceEventArgs.FullPath
+        if ($path -notmatch '(\.pdf|\.docx|tmp|dist|\.git)' -and ($path -match '(\.md|\.typ|\.yml|\.bib)')) {
+            Write-Host "[Perubahan Terdeteksi] $path -> Membangun ulang..." -ForegroundColor Yellow
+            if (Get-Command Cmd-Build -ErrorAction SilentlyContinue) {
+                Cmd-Build
+            } elseif ($using:scriptPath -and (Test-Path $using:scriptPath)) {
+                & powershell -ExecutionPolicy Bypass -File $using:scriptPath build
+            } else {
+                powershell -ExecutionPolicy Bypass -File ".\laporan.ps1" build
+            }
+        }
+    }
+
+    Register-ObjectEvent $watcher "Changed" -Action $action | Out-Null
+    Register-ObjectEvent $watcher "Created" -Action $action | Out-Null
+
+    try {
+        while ($true) { Start-Sleep -Seconds 1 }
+    } finally {
+        Get-EventSubscriber | Unregister-Event
+        $watcher.Dispose()
+    }
+}
+
 switch ($Command.ToLower()) {
     "build"  { Cmd-Build }
     "pdf"    { Cmd-Build-PDF }
@@ -444,6 +504,7 @@ switch ($Command.ToLower()) {
     "check"  { Cmd-Check }
     "clean"  { Cmd-Clean }
     "view"   { Cmd-View }
+    "watch"  { Cmd-Watch }
     "test"   { Cmd-Test }
     "preset" { Cmd-Preset $SubCommand $Arg1 $Arg2 }
     "help"   { Show-Help }
