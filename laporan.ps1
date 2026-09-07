@@ -16,7 +16,7 @@ $ErrorActionPreference = "Stop"
 
 function Show-Banner {
     Write-Host "  ========================================================" -ForegroundColor Cyan
-    Write-Host "                 LAPORAN GENERATOR CLI v2.4.0             " -ForegroundColor Cyan
+    Write-Host "                 LAPORAN GENERATOR CLI v2.5.0             " -ForegroundColor Cyan
     Write-Host "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   " -ForegroundColor Cyan
     Write-Host "  ========================================================" -ForegroundColor Cyan
     Write-Host ""

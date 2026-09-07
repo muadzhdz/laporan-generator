@@ -6,6 +6,22 @@ Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id
 
 ---
 
+## [2.5.0] - 2026-09-07
+
+### Added
+- **Native PowerShell Auto-Rebuild Watcher (`laporan.ps1 watch`)**: Kapabilitas live watching untuk pengguna Windows via .NET `System.IO.FileSystemWatcher` yang mendeteksi perubahan bab dan kompilasi otomatis tanpa dependensi eksternal.
+- **Panduan Sintaks Akademik Lengkap (`docs/syntax-cheatsheet.md`)**: Cheatsheet komprehensif penulisan sitasi APA, formula matematika Typst/Pandoc, pembuatan tabel multi-kolom, penyisipan gambar ber-caption, dan format catatan kaki.
+- **Unit Test Suite Python (`scripts/test_scripts.py`)**: 8 pengujian otomatis terisolasi untuk memvalidasi parser YAML preset dan ekstraksi nomor halaman TOC DOCX.
+- **Suite Pengujian [T23] pada `test.sh`**: Peningkatan cakupan uji regresi menjadi 23 test suites dan 96 assertions validasi otomatis lulus 100%.
+
+### Fixed
+- **Sanitasi String YAML (`laporan` & `laporan.ps1`)**: Implementasi `yaml_escape` dan `Escape-Yaml` pada wizard interaktif `init` untuk mencegah malformasi struktur file `metadata.yml`.
+- **Ekspansi Array Bash (`build.sh`)**: Perbaikan peringatan ShellCheck SC2064 dan SC2086 menggunakan array `INPUT_FILES[@]` dan `PRESET_OPTS[@]` untuk memastikan jalur direktori berspasi ditangani secara aman.
+- **Defensive Timeout Subproses DOCX (`scripts/docx-pagenum.py`)**: Penambahan batas waktu eksekusi (15 detik untuk `pdfinfo`/`pdftotext`, 45 detik untuk `soffice`) guna mencegah proses kompilasi macet (*hang*).
+- **Hardening Parser Preset YAML (`scripts/validate-preset.py`)**: Integrasi pustaka PyYAML dengan fallback string parser dan penanganan exception yang terisolasi.
+
+---
+
 ## [2.4.0] - 2026-09-03
 
 ### Added

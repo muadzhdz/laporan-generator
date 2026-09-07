@@ -18,7 +18,7 @@ cd "$SCRIPT_DIR"
 show_banner() {
     echo -e "${CYAN}${BOLD}"
     echo "  ========================================================"
-    echo "                 LAPORAN GENERATOR CLI v2.4.0             "
+    echo "                 LAPORAN GENERATOR CLI v2.5.0             "
     echo "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   "
     echo "  ========================================================"
     echo -e "${NC}"
