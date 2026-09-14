@@ -6,6 +6,13 @@ import os
 import re
 import sys
 
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 GREEN = "\033[0;32m"
 BLUE = "\033[0;34m"
 CYAN = "\033[0;36m"
