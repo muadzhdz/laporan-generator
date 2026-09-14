@@ -339,13 +339,20 @@ function Cmd-Test {
     Write-Host "Menjalankan Test Suite..." -ForegroundColor Blue
     $gitBash = "C:\Program Files\Git\bin\bash.exe"
     $bashCmd = if (Test-Path $gitBash) { $gitBash } elseif ((Get-Command "bash" -ErrorAction SilentlyContinue) -and (Get-Command "bash").Source -notmatch "system32\\bash\.exe") { "bash" } else { "" }
-    if ($bashCmd) {
+    if ($bashCmd -and (Test-Path "test.sh")) {
         & $bashCmd test.sh
     } else {
         $pyCmd = Get-PythonCommand
         if ($pyCmd) {
             Write-Host "Menjalankan validasi skema preset..." -ForegroundColor Blue
-            & $pyCmd scripts/validate-preset.py --all
+            if (Test-Path "scripts/validate-preset.py") {
+                & $pyCmd scripts/validate-preset.py --all
+            }
+            if (Test-Path "scripts/test_scripts.py") {
+                Write-Host ""
+                Write-Host "Menjalankan unit test skrip Python..." -ForegroundColor Blue
+                & $pyCmd scripts/test_scripts.py
+            }
         } else {
             Write-Host "Test suite membutuhkan bash atau python3." -ForegroundColor Yellow
         }
