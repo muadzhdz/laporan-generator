@@ -85,7 +85,7 @@ if ! pandoc \
   --metadata=reference-section-title="DAFTAR PUSTAKA" \
   --top-level-division=chapter \
   --pdf-engine=typst \
-  --syntax-highlighting=none \
+  --no-highlight \
   -o "$REPORT" 2>&1; then
   echo ""
   echo "[ERROR] BUILD GAGAL: Terjadi kesalahan saat kompilasi Pandoc/Typst."
