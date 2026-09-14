@@ -123,7 +123,6 @@ class TestFinalizeDocx(unittest.TestCase):
         self.assertIn('w:left="720"', res)
 
 
-
 report_stats = __import__("report-stats")
 
 
@@ -132,10 +131,10 @@ class TestReportStats(unittest.TestCase):
         sample_md = os.path.join(ROOT_DIR, "cover.md")
         if os.path.exists(sample_md):
             stats = report_stats.count_file_stats(sample_md)
-            words, chars, h1, h2, h3, imgs, tbls, eq, cites = stats
-            self.assertIsInstance(words, int)
-            self.assertIsInstance(chars, int)
-            self.assertGreaterEqual(words, 0)
+            self.assertIsInstance(stats, dict)
+            self.assertIsInstance(stats["words"], int)
+            self.assertIsInstance(stats["chars"], int)
+            self.assertGreaterEqual(stats["words"], 0)
 
 
 if __name__ == "__main__":
