@@ -7,6 +7,19 @@ const { spawnSync } = require('child_process');
 const args = process.argv.slice(2);
 const command = args[0] || 'help';
 
+function getPythonCommand() {
+  if (process.platform === 'win32') {
+    const testPy = spawnSync('python', ['--version'], { stdio: 'ignore' });
+    if (testPy.status === 0) return 'python';
+    const testPy3 = spawnSync('python3', ['--version'], { stdio: 'ignore' });
+    if (testPy3.status === 0) return 'python3';
+    return 'python';
+  }
+  const testPy3 = spawnSync('python3', ['--version'], { stdio: 'ignore' });
+  if (testPy3.status === 0) return 'python3';
+  return 'python';
+}
+
 function showHelp() {
   console.log(`
   ========================================================
@@ -47,7 +60,8 @@ switch (command) {
   case 'doctor':
   case 'check':
     const doctorScript = path.join(__dirname, '../scripts/report-doctor.py');
-    const proc = spawnSync('python3', [doctorScript], { stdio: 'inherit' });
+    const pyCmd = getPythonCommand();
+    const proc = spawnSync(pyCmd, [doctorScript], { stdio: 'inherit' });
     process.exit(proc.status || 0);
     break;
   case 'build':
