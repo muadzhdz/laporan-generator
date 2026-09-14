@@ -164,7 +164,7 @@ function Cmd-Build-PDF {
     $pandocArgs += "--metadata=reference-section-title=DAFTAR PUSTAKA"
     $pandocArgs += "--top-level-division=chapter"
     $pandocArgs += "--pdf-engine=typst"
-    $pandocArgs += "--syntax-highlighting=none"
+    $pandocArgs += "--no-highlight"
     $pandocArgs += @("-o", "Laporan.pdf")
 
     & pandoc $pandocArgs
