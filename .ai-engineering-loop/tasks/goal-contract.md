@@ -1,49 +1,48 @@
-# Goal Contract: Upgrade laporan-generator to 10/10 Enterprise Quality
+# Goal Contract: Windows Parity, Encoding Hardening, and CLI Robustness
 
 ## 1. Objective
-Meningkatkan seluruh 7 dimensi kualitas `laporan-generator` menjadi skor sempurna 10/10 melalui perbaikan kualitas skrip shell (ShellCheck zero-warning), penguatan sanitasi & parsing YAML, penambahan subprocess timeout & graceful handling pada pemrosesan DOCX, paritas fitur file watcher native di Windows PowerShell, panduan sintaks Markdown akademik, serta perluasan automated unit testing untuk utilitas Python tanpa regresi pada 91 assertion yang sudah ada.
+Menyempurnakan kompatibilitas ekosistem `laporan-generator` di platform Windows dengan menyelesaikan 4 celah teknis:
+1. Menghilangkan ketergantungan hardcoded `python3` pada `bin/laporan-generator.js` yang memicu crash App Execution Alias Microsoft Store di Windows 10/11.
+2. Memperbaiki fungsi `Cmd-Test` di `laporan.ps1` agar mengecek keberadaan `test.sh` sebelum memanggil bash, serta menyediakan fallback otomatis ke unit test Python (`scripts/test_scripts.py`) dan validator preset (`scripts/validate-preset.py`).
+3. Memastikan output terminal `scripts/report-stats.py` aman dari `UnicodeEncodeError` pada codepage Windows non-UTF8 (misalnya `cp1252`).
+4. Memperluas automated unit testing di `scripts/test_scripts.py` untuk menguji fungsionalitas parser statistik dan modul pendukung tanpa regresi.
 
 ## 2. Business Outcome & User Lifecycle Impact
-- Mahasiswa, peneliti, dan insinyur mendapatkan pengalaman build yang 100% andal, kebal crash input, serta memiliki paritas fungsional penuh di Linux, macOS, maupun Windows native.
-- Tidak ada lagi peringatan linter statis pada skrip pipeline.
-- Pengembang mendapatkan automated unit test untuk skrip Python pembantu dan panduan sintaks terpusat.
+- Pengguna Windows dapat menjalankan seluruh perintah CLI (`npx laporan-generator doctor`, `.\laporan.ps1 test`, `.\laporan.ps1 stats`) tanpa crash atau kegagalan eksekusi.
+- Pengalaman instalasi dan audit proyek menjadi 100% konsisten antara Linux, macOS, dan Windows.
+- Menjamin stabilitas jangka panjang melalui penambahan unit testing otomatis.
 
 ## 3. Acceptance Criteria (AC) - Failure Table
 
 | AC | Input / Skenario | Expected at Seam | Must Fail If Missing |
 |---|---|---|---|
-| **AC-1** | Happy Path: Kualitas Kode & ShellCheck Zero-Warning | `shellcheck build.sh laporan test.sh` lulus dengan exit code 0 tanpa error/warning (SC2064, SC2086, SC2016 teratasi) | Masih ada warning SC2064 atau SC2086 pada `build.sh` atau `test.sh` |
-| **AC-2** | Empty / Omit / Robustness Path: Sanitasi YAML & Robust Parser | Input wizard `cmd_init` di `laporan` dan `laporan.ps1` disanitasi dari tanda kutip ganda dan karakter pemecah YAML; `scripts/validate-preset.py` menangani inline comments dan whitespace dengan aman | Input nama/judul dengan tanda kutip ganda merusak `metadata.yml` |
-| **AC-3** | Boundary / Reliability Path: Timeout Subprocess & Graceful LibreOffice Notice | Eksekusi `soffice` dan `pdftotext` pada `scripts/docx-pagenum.py` memiliki timeout batas (30 detik) dan memberikan peringatan informatif ramah jika LibreOffice tidak tersedia | `docx-pagenum.py` berisiko hang tanpa batas waktu |
-| **AC-4** | Sibling / Parity Path: Native PowerShell Watcher & Cheatsheet | `laporan.ps1` mendukung perintah `watch` native via `FileSystemWatcher`; berkas `docs/syntax-cheatsheet.md` tersedia dan mencakup sintaks sitasi, gambar, dan tabel | `laporan.ps1 watch` tidak tersedia; panduan cheatsheet hilang |
-| **AC-5** | Error / Regression Protection: Python Unit Tests & 100% Suite Pass | Disediakan automated unit test untuk skrip Python (`scripts/test_scripts.py`) dan seluruh 91+ assertions di `test.sh` lulus tanpa regresi | Ada tes di `test.sh` yang gagal atau skrip python tidak memiliki unit testing |
+| **AC-1** | Windows CLI Doctor: `npx laporan-generator doctor` di Windows | Memanggil `python` jika `python3` tidak dapat dieksekusi, menghasilkan output audit kesehatan 100/100 tanpa error Microsoft Store | Masih memanggil `python3` secara kaku dan melempar error "Python was not found" |
+| **AC-2** | PowerShell Test Fallback: `.\laporan.ps1 test` di direktori proyek tanpa `test.sh` | Mengecek `Test-Path "test.sh"`; jika tidak ada, fallback mengeksekusi `scripts/validate-preset.py --all` dan `scripts/test_scripts.py` | Melempar error `/bin/bash: test.sh: No such file or directory` |
+| **AC-3** | Windows Terminal Encoding: `.\laporan.ps1 stats` pada codepage cp1252 | Stream stdout/stderr direkonfigurasi ke UTF-8 dengan penggantian error aman; grafik batang `■` tercetak normal | Melempar `UnicodeEncodeError: 'charmap'` |
+| **AC-4** | Unit Test Expansion & Zero Regression | `python3 scripts/test_scripts.py` mencakup tes baru dan lulus 100% (semua assertions hijau) | Ada test case yang gagal atau regresi pada tes yang sudah ada |
 
 ## 4. Technical Constraints
-- Tidak menambahkan dependensi eksternal berat (gunakan Python standard library).
-- Pertahankan kompatibilitas mundur: template Typst, preset kampus, dan CLI arguments tidak boleh berubah perilakunya bagi pengguna yang sudah ada.
-- Zero regression pada dokumen output PDF dan DOCX.
+- Menggunakan library bawaan Python (`sys`, `unittest`, `re`, `os`).
+- Menggunakan standar Node.js bawaan tanpa dependensi npm eksternal baru di `bin/laporan-generator.js`.
+- Pertahankan kompatibilitas penuh dengan Linux dan macOS.
 
 ## 5. Out of Scope
-- Mengubah arsitektur dasar Pandoc + Typst.
-- Mengubah skema metadata inti yang sudah dipakai pengguna.
+- Mengubah core Typst template (`template.typ`).
+- Mengubah skema metadata akademik `metadata.yml`.
 
 ## 6. Ubiquitous Language
-- **ShellCheck**: Tool analisa statis untuk script shell POSIX/Bash.
-- **FileSystemWatcher**: Komponen .NET/PowerShell untuk memantau perubahan berkas secara reaktif.
-- **PAGEREF Injection**: Proses penyuntikan nomor halaman nyata ke tabel konten Word via LibreOffice headless.
+- **App Execution Alias**: Fitur Windows 10/11 yang mengarahkan perintah `python3` ke Microsoft Store jika belum dipetakan secara manual.
+- **Console Codepage**: Pengaturan encoding default terminal Windows (misal CP-1252 / Western European).
+- **Test Seam Fallback**: Mekanisme degradasi elegan saat lingkungan pengembangan (development tools) tidak tersedia di lingkungan pengguna akhir.
 
 ## 7. Test Seams
-- Linter Seam: `nix develop --command shellcheck build.sh laporan test.sh`
-- Python Test Seam: `python3 scripts/test_scripts.py`
-- Integration Test Seam: `nix develop --command ./test.sh`
+- CLI Doctor Seam: `node bin/laporan-generator.js doctor`
+- PowerShell Test Seam: `powershell -ExecutionPolicy Bypass -File .\laporan.ps1 test`
+- Stats Encoding Seam: `powershell -ExecutionPolicy Bypass -File .\laporan.ps1 stats`
+- Unit Test Seam: `python scripts/test_scripts.py`
 
-## 8. Verification Requirements
-- Linter: ShellCheck 0 warnings, 0 errors.
-- Unit Testing: Test suite Python baru lulus 100%.
-- Full Regression Test: `./test.sh` lulus 100%.
-
-## 9. Definition of Done (DoD)
-- [ ] AC-1 sampai AC-5 tervalidasi dengan kode hijau.
-- [ ] Diff terisolasi dan terdokumentasi dalam `diff.patch`.
-- [ ] Devil's Advocate adversarial review selesai dengan 0 temuan SEV-1/SEV-2.
-- [ ] Judge Agent menerbitkan putusan PASS.
+## 8. Definition of Done (DoD)
+- [x] AC-1 sampai AC-4 tervalidasi dengan kode hijau.
+- [x] Verifikasi `test_scripts.py` lulus 100%.
+- [x] Dokumentasi `claimed-vs-reality.md` diperbarui dengan bukti eksekusi nyata.
+- [x] Seluruh perubahan ter-push ke branch PR #7 di GitHub.
