@@ -4,6 +4,27 @@ Semua perubahan penting pada project **Laporan Generator** akan didokumentasikan
 
 Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/1.0.0/) dan mematuhi [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-09-29
+
+### Added
+- **Kontrol Opt-in Front-Matter (`daftar_gambar` & `daftar_tabel`)**: Penambahan opsi eksplisit pada `metadata.yml` untuk mengendalikan pembentukan halaman DAFTAR GAMBAR dan DAFTAR TABEL. Halaman ini kini tidak dimunculkan secara otomatis kecuali diaktifkan secara eksplisit (`daftar_gambar: true`, `daftar_tabel: true`).
+- **Skema Parameter MCP `laporan_init`**: Penambahan parameter opsional `daftar_gambar` dan `daftar_tabel` bertipe boolean pada tool MCP `laporan_init`.
+- **Protokol Wawancara Struktur Interaktif AI Agent (`prompt.md` & `SKILL.md`)**: Tahap 2 mewajibkan agen AI melakukan konfirmasi struktur dokumen (menanyakan kebutuhan Abstrak, Lembar Pengesahan, Daftar Gambar, Daftar Tabel, Lampiran) kepada pengguna sebelum membuat berkas.
+- **Suite Pengujian Dinamis (`scripts/test_scripts.py`)**: Penambahan unit test `TestFrontMatterOptIn` yang memverifikasi penanganan tipe skalar boolean YAML pada Lua filter dan koersi boolean string pada Node.js `lib/init.js`.
+- **Arsitektur Keputusan ADR 001**: Dokumentasi formal keputusan perampingan struktur default di `.ai-engineering-loop/adrs/001-minimal-default-structure-and-opt-in-front-matter.md`.
+
+### Changed
+- **Struktur Default Dokumen Minimal**: Struktur dokumen bawaan kini diperamping menjadi 5 elemen baku: Cover -> Kata Pengantar -> Daftar Isi -> Batang Tubuh (BAB I..n) -> Daftar Pustaka.
+- **Placeholder Abstrak Bawaan**: Entri `abstract_id` dan `abstract_en` di `metadata.yml` kini dikomentari secara default guna mencegah kemunculan halaman dummy abstrak tanpa persetujuan pengguna.
+- **Sinkronisasi Versi Seluruh CLI**: Memperbarui seluruh banner CLI (Node.js, Bash, PowerShell) dan server MCP menjadi versi `v2.8.0`.
+
+### Fixed
+- **Type Safety Skalar Boolean Lua Filter (`docx.lua`)**: Memperbaiki fungsi `meta_str` dan menambahkan fungsi `meta_bool` agar aman terhadap nilai skalar native boolean YAML pada Pandoc, mencegah error tipe data atau evaluasi string kosong saat kompilasi DOCX.
+- **Koersi String Truthy JavaScript (`lib/init.js`)**: Mengganti evaluasi ternary langsung dengan fungsi `isTruthy` agar string `'false'` dari antarmuka CLI tidak dievaluasi menjadi nilai boolean `true`.
+- **Penghapusan Empty Catch Blocks (`lib/init.js`)**: Mengganti blok `catch (_) {}` dengan pencatatan peringatan terstruktur (`console.warn`) sesuai standar repository conventions.
+
+---
+
 ## [2.7.0] - 2026-09-20
 
 ### Added

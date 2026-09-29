@@ -49,6 +49,8 @@ abstract: |
 | `faculty` | String | **Ya** | Nama Fakultas, Departemen, atau Program Studi. |
 | `year` | String | **Ya** | Tahun Ajaran (contoh: `2025/2026`). |
 | `date` | String | Opsional | Bulan dan Tahun pembuatan (contoh: `Juli 2026`). |
+| `daftar_gambar` | Boolean | Opsional | Aktifkan halaman DAFTAR GAMBAR (`true`/`false`, default: `false`). |
+| `daftar_tabel` | Boolean | Opsional | Aktifkan halaman DAFTAR TABEL (`true`/`false`, default: `false`). |
 | `abstract` | Multiline String | Opsional | Ringkasan/Abstrak laporan dalam Bahasa Indonesia. |
 
 ---

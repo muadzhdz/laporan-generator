@@ -39,82 +39,103 @@ Sapa pengguna dan tanyakan jenis karya tulis yang ingin dibuat:
 
 ---
 
-### TAHAP 2.2: Tampilkan Struktur Halaman Default & Konfirmasi Penyesuaian
-Setelah pengguna memilih, tampilkan struktur halaman standar untuk jenis tersebut dan tanyakan penyesuaian:
+### TAHAP 2.2: Tampilkan Struktur Dokumen & Konfirmasi Komponen Halaman
 
-#### A. Jika Memilih [1] Makalah:
-- **Halaman Depan (Front Matter):**
+> [!IMPORTANT]
+> **STANDAR STRUKTUR DEFAULT BERSIH (MINIMALIS):**
+> Secara default, seluruh jenis dokumen hanya terdiri dari:
+> **1. Sampul / Cover -> 2. Kata Pengantar -> 3. Daftar Isi -> 4. Batang Tubuh (BAB I..n) -> 5. Daftar Pustaka**.
+> 
+> Komponen berikut ini bersifat **STRICTLY OPT-IN (TIDAK AKTIF SECARA DEFAULT)**:
+> - **Daftar Gambar** (`daftar_gambar: false` by default, hanya aktif jika diminta)
+> - **Daftar Tabel** (`daftar_tabel: false` by default, hanya aktif jika diminta)
+> - **Abstrak / Abstract** (dikosongkan by default, hanya aktif jika diminta)
+> - **Lembar Pengesahan** (hanya jika diminta)
+> - **Lampiran** (hanya jika diminta)
+
+Setelah pengguna memilih jenis dokumen, tampilkan susunan halaman dan WAJIB tanyakan konfirmasi komponen:
+
+#### A. Jika Memilih [1] Makalah / Paper Akademik:
+- **Halaman Depan (Default):**
   - [x] Sampul / Cover Ringkas (Judul, Nama, NIM, Mata Kuliah, Dosen, Kampus)
+  - [x] Kata Pengantar
   - [x] Daftar Isi
+- **Komponen Opsional (Hanya jika disetujui pengguna):**
   - [ ] Lembar Pengesahan (Default: Tidak ada)
-  - [ ] Kata Pengantar (Opsional)
-  - [ ] Abstrak (Opsional)
+  - [ ] Abstrak / Abstract Ringkas (Default: Tidak ada)
+  - [ ] Daftar Gambar (`daftar_gambar: true`) (Default: Tidak ada)
+  - [ ] Daftar Tabel (`daftar_tabel: true`) (Default: Tidak ada)
 - **Batang Tubuh (Main Body):**
   - BAB I: Pendahuluan (Latar Belakang, Rumusan Masalah, Tujuan)
   - BAB II: Pembahasan & Kajian Teori
   - BAB III: Penutup (Kesimpulan & Saran)
-- **Halaman Akhir (Back Matter):**
+- **Halaman Akhir:**
   - [x] Daftar Pustaka
   - [ ] Lampiran (Opsional)
 
 #### B. Jika Memilih [2] Laporan Proyek / Praktikum:
-- **Halaman Depan (Front Matter):**
-  - [x] Sampul / Cover Proyek (dengan Logo Kampus/Fakultas)
+- **Halaman Depan (Default):**
+  - [x] Sampul / Cover Proyek (Logo Kampus/Fakultas, Judul, Penyusun)
   - [x] Kata Pengantar
   - [x] Daftar Isi
-  - [x] Daftar Gambar & Daftar Tabel (Otomatis jika ada)
-  - [ ] Lembar Pengesahan Dosen (Default: Tidak ada / Opsional)
-  - [ ] Abstrak Dwibahasa (Default: Tidak ada / Opsional)
+- **Komponen Opsional (Hanya jika disetujui pengguna):**
+  - [ ] Lembar Pengesahan Dosen (Default: Tidak ada)
+  - [ ] Abstrak Dwibahasa (Default: Tidak ada)
+  - [ ] Daftar Gambar (`daftar_gambar: true`) (Default: Tidak ada)
+  - [ ] Daftar Tabel (`daftar_tabel: true`) (Default: Tidak ada)
 - **Batang Tubuh (Main Body):**
   - BAB I: Pendahuluan (Latar Belakang Proyek, Batasan Masalah, Tujuan)
-  - BAB II: Analisis Kebutuhan & Perancangan Sistem (Arsitektur, UML/ERD, Wireframe UI)
-  - BAB III: Implementasi & Cara Kerja Sistem (Penjelasan Kode Kunci, Framework, Database)
-  - BAB IV: Pengujian & Evaluasi (Blackbox Testing / UAT / Hasil Uji)
+  - BAB II: Analisis Kebutuhan & Perancangan Sistem
+  - BAB III: Implementasi & Cara Kerja Sistem
+  - BAB IV: Pengujian & Evaluasi
   - BAB V: Penutup (Kesimpulan & Saran Pengembangan)
-- **Halaman Akhir (Back Matter):**
+- **Halaman Akhir:**
   - [x] Daftar Pustaka
-  - [x] Lampiran (Panduan Deployment / Dokumentasi API)
+  - [ ] Lampiran (Opsional: Panduan Deployment / API)
 
 #### C. Jika Memilih [3] Laporan Magang / PKL:
-- **Halaman Depan (Front Matter):**
-  - [x] Sampul Laporan Magang (Logo Kampus + Nama Tempat Magang)
-  - [x] Lembar Pengesahan (Pembimbing Lapangan & Dosen Pembimbing)
+- **Halaman Depan (Default):**
+  - [x] Sampul Laporan Magang (Logo Kampus + Mitra)
   - [x] Kata Pengantar
-  - [x] Daftar Isi, Daftar Tabel, Daftar Gambar, Daftar Lampiran
+  - [x] Daftar Isi
+- **Komponen Opsional (Tanyakan ke user):**
+  - [ ] Lembar Pengesahan Mitra & Kampus (Direkomendasikan untuk PKL)
+  - [ ] Abstrak / Ringkasan Eksekutif
+  - [ ] Daftar Gambar (`daftar_gambar: true`)
+  - [ ] Daftar Tabel (`daftar_tabel: true`)
 - **Batang Tubuh (Main Body):**
-  - BAB I: Pendahuluan (Latar Belakang Magang, Waktu & Tempat, Maksud & Tujuan)
-  - BAB II: Profil Perusahaan / Mitra (Sejarah, Visi Misi, Struktur Organisasi)
+  - BAB I: Pendahuluan (Latar Belakang Magang, Waktu & Tempat, Tujuan)
+  - BAB II: Profil Perusahaan / Mitra
   - BAB III: Pelaksanaan Magang (Jobdesk, Aktivitas Kerja, Alur SOP)
-  - BAB IV: Pembahasan Hasil Kerja & Tugas Khusus (Proyek yang Dikerjakan, Kendala & Solusi)
-  - BAB V: Penutup (Kesimpulan, Saran untuk Perusahaan & Kampus)
-- **Halaman Akhir (Back Matter):**
+  - BAB IV: Pembahasan Hasil Kerja & Proyek Khusus
+  - BAB V: Penutup (Kesimpulan & Saran)
+- **Halaman Akhir:**
   - [x] Daftar Pustaka
-  - [x] Lampiran (Logbook Harian, Surat Keterangan Selesai Magang, Penilaian)
+  - [ ] Lampiran (Logbook Harian, Surat Selesai Magang)
 
 #### D. Jika Memilih [4] Tugas Akhir / Skripsi / Tesis:
-- **Halaman Depan (Front Matter):**
-  - [x] Sampul Depan Resmi (Hardcover / Softcover format)
-  - [x] Lembar Pengesahan Tim Penguji & Dekan
-  - [x] Pernyataan Orisinalitas (Bebas Plagiarisme)
-  - [x] Abstrak Bahasa Indonesia + Kata Kunci
-  - [x] Abstract Bahasa Inggris + Keywords
+- **Halaman Depan (Default):**
+  - [x] Sampul Depan Resmi (Hardcover format)
   - [x] Kata Pengantar
-  - [x] Daftar Isi, Daftar Gambar, Daftar Tabel, Daftar Lampiran
+  - [x] Daftar Isi
+- **Komponen Khusus Skripsi (Tanyakan apakah ingin diaktifkan):**
+  - [ ] Lembar Pengesahan Tim Penguji & Dekan (`approval`)
+  - [ ] Pernyataan Orisinalitas (Bebas Plagiarisme)
+  - [ ] Abstrak Bahasa Indonesia & Abstract English (`abstract_id` & `abstract_en`)
+  - [ ] Daftar Gambar (`daftar_gambar: true`)
+  - [ ] Daftar Tabel (`daftar_tabel: true`)
 - **Batang Tubuh (Main Body):**
   - BAB I: Pendahuluan
   - BAB II: Tinjauan Pustaka & Landasan Teori
   - BAB III: Metodologi Penelitian
   - BAB IV: Hasil dan Pembahasan
   - BAB V: Penutup (Kesimpulan & Saran)
-- **Halaman Akhir (Back Matter):**
+- **Halaman Akhir:**
   - [x] Daftar Pustaka (Standar APA / IEEE)
-  - [x] Lampiran (Data Mentah, Instrumen Kuesioner)
+  - [ ] Lampiran (Data Mentah, Kuisioner)
 
-#### E. Jika Memilih [5] Artikel Ilmiah / Jurnal:
-- Format IMRAD: Judul, Penulis, Abstrak Dwibahasa, 1. Pendahuluan, 2. Metode, 3. Hasil & Pembahasan, 4. Kesimpulan, Acknowledgment, Daftar Pustaka.
-
-**WAJIB TANYAKAN KE USER:**
-*"Berikut adalah susunan halaman default untuk [Pilihan Anda]. Apakah ada halaman atau bab yang ingin Anda **TAMBAHKAN**, **UBAH**, atau **HAPUS**?"*
+**PERTANYAAN WAJIB KE USER SEBELUM GENERATE FILE:**
+*"Struktur default dokumen Anda saat ini adalah minimalis: **Cover -> Kata Pengantar -> Daftar Isi -> Bab Batang Tubuh -> Daftar Pustaka** (tanpa Daftar Gambar, Daftar Tabel, maupun Abstrak). Apakah Anda ingin mengaktifkan komponen opsional seperti Abstrak, Lembar Pengesahan, Daftar Gambar, atau Daftar Tabel?"*
 
 ---
 

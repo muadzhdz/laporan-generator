@@ -113,7 +113,7 @@ npx laporan-generator sync-hosts
 
 ## Dukungan Model Context Protocol (MCP)
 
-Laporan Generator v2.7.0 dilengkapi dengan **Native MCP Server** resmi yang berjalan melalui `stdio` berbasis protokol JSON-RPC 2.0 (spesifikasi 2024-11-05). Server ini memungkinkan AI Agent otonom (seperti Google Antigravity, Claude Desktop, Claude Code, dan OpenCode) untuk berinteraksi langsung dengan dokumen akademik melalui tools deterministik.
+Laporan Generator v2.8.0 dilengkapi dengan **Native MCP Server** resmi yang berjalan melalui `stdio` berbasis protokol JSON-RPC 2.0 (spesifikasi 2024-11-05). Server ini memungkinkan AI Agent otonom (seperti Google Antigravity, Claude Desktop, Claude Code, dan OpenCode) untuk berinteraksi langsung dengan dokumen akademik melalui tools deterministik.
 
 ### Konfigurasi Otomatis (Direkomendasikan)
 Cukup jalankan satu perintah berikut untuk mendaftarkan skill sekaligus konfigurasi MCP Server ke seluruh agent di mesin Anda:
@@ -292,6 +292,11 @@ Seluruh struktur dokumen, judul, informasi kepenulisan, tanda tangan lembar peng
 title: "Analisis dan Implementasi Sistem Deteksi Intrusi Jaringan Berbasis eBPF"
 document_type: "Skripsi"
 margin_preset: "itb-ta"
+
+# Kontrol Struktur Halaman Depan (Opt-In)
+# Default struktur bersih: Cover -> Kata Pengantar -> Daftar Isi -> Batang Tubuh -> Daftar Pustaka
+daftar_gambar: false   # Ubah true jika dokumen memuat gambar dan membutuhkan DAFTAR GAMBAR
+daftar_tabel: false    # Ubah true jika dokumen memuat tabel dan membutuhkan DAFTAR TABEL
 
 author:
   - name: "Mu'adz Hudzaifah"

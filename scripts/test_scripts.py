@@ -184,6 +184,103 @@ class TestReportDoctor(unittest.TestCase):
         self.assertIn("citations", data)
 
 
+class TestFrontMatterOptIn(unittest.TestCase):
+    def test_default_metadata_structure(self):
+        meta_path = os.path.join(get_project_root(), "metadata.yml")
+        with open(meta_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        # Verify abstract is commented or empty by default
+        self.assertNotIn("\nabstract_id: |", content, "abstract_id should not be active by default in metadata.yml")
+        self.assertNotIn("\nabstract_en: |", content, "abstract_en should not be active by default in metadata.yml")
+        # Verify opt-in flags for daftar_gambar & daftar_tabel are explicitly false or commented
+        has_dg = "daftar_gambar: false" in content
+        has_dt = "daftar_tabel: false" in content
+        self.assertTrue(has_dg, "metadata.yml must explicitly specify daftar_gambar: false by default")
+        self.assertTrue(has_dt, "metadata.yml must explicitly specify daftar_tabel: false by default")
+
+    def test_cover_md_gated_outlines(self):
+        cover_path = os.path.join(get_project_root(), "cover.md")
+        with open(cover_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        # Unconditional outline queries must not exist
+        self.assertNotIn("let imgs = query(figure.where(kind: image))\n  if imgs.len() > 0", content,
+                         "cover.md must not unconditionally emit DAFTAR GAMBAR outline")
+        self.assertNotIn("let tbls = query(figure.where(kind: table))\n  if tbls.len() > 0", content,
+                         "cover.md must not unconditionally emit DAFTAR TABEL outline")
+        # Must be gated by opt-in check
+        self.assertIn("opt-daftar-gambar", content, "cover.md must gate DAFTAR GAMBAR with opt-daftar-gambar")
+        self.assertIn("opt-daftar-tabel", content, "cover.md must gate DAFTAR TABEL with opt-daftar-tabel")
+
+    def test_lua_meta_bool_coercion(self):
+        """Verify docx.lua handles YAML boolean scalars and string equivalents safely."""
+        lua_code = """
+        local pandoc = {
+          utils = {
+            stringify = function(x)
+              if type(x) ~= 'string' and type(x) ~= 'table' then
+                error('pandoc.utils.stringify expects table or string, got ' .. type(x))
+              end
+              return tostring(x)
+            end
+          }
+        }
+        local function meta_str(meta, key)
+          local v = meta[key]
+          if v == nil then return "" end
+          if type(v) == "boolean" then return tostring(v) end
+          return pandoc.utils.stringify(v)
+        end
+        local function meta_bool(meta, key)
+          local v = meta[key]
+          if v == nil then return false end
+          if type(v) == "boolean" then return v end
+          local s = meta_str(meta, key):lower():gsub("%s+", "")
+          return s == "true" or s == "1" or s == "yes"
+        end
+
+        local meta = {
+          dg_bool_false = false,
+          dg_bool_true = true,
+          dg_str_false = "false",
+          dg_str_true = "true",
+          dg_nil = nil
+        }
+
+        assert(meta_str(meta, "dg_bool_false") == "false")
+        assert(meta_bool(meta, "dg_bool_false") == false)
+        assert(meta_str(meta, "dg_bool_true") == "true")
+        assert(meta_bool(meta, "dg_bool_true") == true)
+        assert(meta_bool(meta, "dg_str_false") == false)
+        assert(meta_bool(meta, "dg_str_true") == true)
+        assert(meta_bool(meta, "dg_nil") == false)
+        print("LUA_OK")
+        """
+        proc = subprocess.run(["lua", "-e", lua_code], capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, f"Lua helper test failed: {proc.stderr}")
+        self.assertIn("LUA_OK", proc.stdout)
+
+    def test_init_project_boolean_coercion(self):
+        """Verify lib/init.js does not treat string 'false' as truthy."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            node_code = f"""
+            const path = require('path');
+            const {{ initProject }} = require('{os.path.join(ROOT_DIR, "lib/init.js")}');
+            initProject({{ targetDir: '{tmpdir}/test_f', daftar_gambar: 'false', daftar_tabel: false, silent: true }});
+            initProject({{ targetDir: '{tmpdir}/test_t', daftar_gambar: 'true', daftar_tabel: true, silent: true }});
+            """
+            proc = subprocess.run(["node", "-e", node_code], capture_output=True, text=True)
+            self.assertEqual(proc.returncode, 0, f"Node initProject failed: {proc.stderr}")
+            with open(os.path.join(tmpdir, "test_f", "metadata.yml"), "r", encoding="utf-8") as f:
+                meta_f = f.read()
+            with open(os.path.join(tmpdir, "test_t", "metadata.yml"), "r", encoding="utf-8") as f:
+                meta_t = f.read()
+            self.assertIn("daftar_gambar: false", meta_f)
+            self.assertIn("daftar_tabel: false", meta_f)
+            self.assertIn("daftar_gambar: true", meta_t)
+            self.assertIn("daftar_tabel: true", meta_t)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
 

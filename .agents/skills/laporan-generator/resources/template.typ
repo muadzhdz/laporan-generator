@@ -391,4 +391,7 @@ $endif$
 #pagebreak()
 $endif$
 
+#let opt-daftar-gambar = $if(daftar_gambar)$$daftar_gambar$$else$$if(list_of_figures)$$list_of_figures$$else$false$endif$$endif$
+#let opt-daftar-tabel = $if(daftar_tabel)$$daftar_tabel$$else$$if(list_of_tables)$$list_of_tables$$else$false$endif$$endif$
+
 $body$

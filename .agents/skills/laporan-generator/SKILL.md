@@ -58,15 +58,25 @@ Identify the document type and target university:
    - `unpad-skripsi`: Universitas Padjadjaran.
    - `standard`: General University (2.5cm / 2cm).
 
-### Stage 2: Scaffolding & Metadata Configuration
-1. Initialize the workspace:
-   - Call MCP tool `laporan_init` or run `npx laporan-generator init`.
-2. Configure `metadata.yml`:
+### Stage 2: Document Structure Confirmation & Scaffolding
+1. **Confirm Document Structure**:
+   - The universal default structure is minimal: **Cover -> Kata Pengantar -> Daftar Isi -> Batang Tubuh (BAB I..n) -> Daftar Pustaka**.
+   - **MANDATORY INQUIRY**: Ask the user before scaffolding if they want to activate optional components:
+     - Abstrak / Abstract (`abstract_id` / `abstract_en`)
+     - Lembar Pengesahan (`approval`)
+     - Daftar Gambar (`daftar_gambar: true`)
+     - Daftar Tabel (`daftar_tabel: true`)
+     - Lampiran
+2. **Initialize the workspace**:
+   - Call MCP tool `laporan_init` (e.g. `laporan_init({ preset, title, daftar_gambar, daftar_tabel })`) or run `npx laporan-generator init`.
+3. **Configure `metadata.yml`**:
    - `title`: Clear, concise, capitalized (rendered as inverted pyramid).
    - `author`: Author array with `name` and `nim` (Student ID).
    - `preset`: Selected university preset (e.g. `skripsi-4433`, `itb-ta`).
+   - `daftar_gambar: false`, `daftar_tabel: false` (set to `true` only if opted-in).
+   - `abstract_id`: Kept empty or commented out unless user requested Abstrak.
    - `institution`, `faculty`, `department`, `year`.
-3. Configure `cover.md`: Set formal title, institutional affiliations, and kata pengantar.
+4. **Configure `cover.md`**: Set formal title, institutional affiliations, and kata pengantar.
 
 ### Stage 3: Rigorous Academic Writing Standard
 When authoring content into `chapters/bab*.md`, strictly enforce **Indonesian Standard Academic Tone**:

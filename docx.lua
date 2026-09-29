@@ -138,7 +138,22 @@ local function meta_str(meta, key)
   if v == nil then
     return ""
   end
+  if type(v) == "boolean" then
+    return tostring(v)
+  end
   return pandoc.utils.stringify(v)
+end
+
+local function meta_bool(meta, key)
+  local v = meta[key]
+  if v == nil then
+    return false
+  end
+  if type(v) == "boolean" then
+    return v
+  end
+  local s = meta_str(meta, key):lower():gsub("%s+", "")
+  return s == "true" or s == "1" or s == "yes"
 end
 
 local function format_chapter_number(n)
@@ -280,6 +295,44 @@ local function daftar_isi()
   return out
 end
 
+local function daftar_gambar()
+  local out = pandoc.List{}
+  out[#out + 1] = pagebreak()
+  out[#out + 1] = pandoc.RawBlock(
+    "openxml",
+    '<w:p><w:pPr><w:pStyle w:val="TOCHeading"/><w:jc w:val="center"/><w:outlineLvl w:val="9"/></w:pPr>' ..
+      '<w:r><w:rPr><w:b/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr><w:t>DAFTAR GAMBAR</w:t></w:r></w:p>'
+  )
+  out[#out + 1] = pandoc.RawBlock(
+    "openxml",
+    '<w:p><w:pPr><w:pStyle w:val="TOC1"/></w:pPr>' ..
+      '<w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r>' ..
+      '<w:r><w:instrText xml:space="preserve"> TOC \\c "Gambar" \\h \\z </w:instrText></w:r>' ..
+      '<w:r><w:fldChar w:fldCharType="separate"/></w:r>' ..
+      '<w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>'
+  )
+  return out
+end
+
+local function daftar_tabel()
+  local out = pandoc.List{}
+  out[#out + 1] = pagebreak()
+  out[#out + 1] = pandoc.RawBlock(
+    "openxml",
+    '<w:p><w:pPr><w:pStyle w:val="TOCHeading"/><w:jc w:val="center"/><w:outlineLvl w:val="9"/></w:pPr>' ..
+      '<w:r><w:rPr><w:b/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr><w:t>DAFTAR TABEL</w:t></w:r></w:p>'
+  )
+  out[#out + 1] = pandoc.RawBlock(
+    "openxml",
+    '<w:p><w:pPr><w:pStyle w:val="TOC1"/></w:pPr>' ..
+      '<w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r>' ..
+      '<w:r><w:instrText xml:space="preserve"> TOC \\c "Tabel" \\h \\z </w:instrText></w:r>' ..
+      '<w:r><w:fldChar w:fldCharType="separate"/></w:r>' ..
+      '<w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>'
+  )
+  return out
+end
+
 function Pandoc(doc)
   if FORMAT ~= "docx" then
     return doc
@@ -292,6 +345,8 @@ function Pandoc(doc)
   local faculty = meta_str(meta, "faculty")
   local institution = meta_str(meta, "institution")
   local year = meta_str(meta, "year")
+  local show_dg = (meta_bool(meta, "daftar_gambar") or meta_bool(meta, "list_of_figures"))
+  local show_dt = (meta_bool(meta, "daftar_tabel") or meta_bool(meta, "list_of_tables"))
 
   local blocks = pandoc.List{}
 
@@ -400,6 +455,16 @@ function Pandoc(doc)
     then
       for _, b in ipairs(daftar_isi()) do
         body[#body + 1] = b
+      end
+      if show_dg then
+        for _, b in ipairs(daftar_gambar()) do
+          body[#body + 1] = b
+        end
+      end
+      if show_dt then
+        for _, b in ipairs(daftar_tabel()) do
+          body[#body + 1] = b
+        end
       end
       inserted = true
     end
