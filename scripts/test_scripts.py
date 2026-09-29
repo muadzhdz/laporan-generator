@@ -213,6 +213,18 @@ class TestFrontMatterOptIn(unittest.TestCase):
 
     def test_lua_meta_bool_coercion(self):
         """Verify docx.lua handles YAML boolean scalars and string equivalents safely."""
+        import shutil
+        lua_bin = (
+            shutil.which("lua")
+            or shutil.which("luajit")
+            or shutil.which("lua5.4")
+            or shutil.which("lua5.3")
+            or shutil.which("lua5.2")
+            or shutil.which("lua5.1")
+        )
+        if not lua_bin:
+            self.skipTest("Standalone Lua interpreter not found in PATH")
+
         lua_code = """
         local pandoc = {
           utils = {
@@ -255,13 +267,17 @@ class TestFrontMatterOptIn(unittest.TestCase):
         assert(meta_bool(meta, "dg_nil") == false)
         print("LUA_OK")
         """
-        proc = subprocess.run(["lua", "-e", lua_code], capture_output=True, text=True)
+        proc = subprocess.run([lua_bin, "-e", lua_code], capture_output=True, text=True)
         self.assertEqual(proc.returncode, 0, f"Lua helper test failed: {proc.stderr}")
         self.assertIn("LUA_OK", proc.stdout)
 
     def test_init_project_boolean_coercion(self):
         """Verify lib/init.js does not treat string 'false' as truthy."""
+        import shutil
         import tempfile
+        if not shutil.which("node"):
+            self.skipTest("Node.js runtime not found in PATH")
+
         with tempfile.TemporaryDirectory() as tmpdir:
             node_code = f"""
             const path = require('path');

@@ -18,7 +18,7 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y imagemagick poppler-utils xz-utils unzip
+          sudo apt-get install -y imagemagick poppler-utils xz-utils unzip python3 lua5.4 nodejs
           wget -q "https://github.com/jgm/pandoc/releases/download/3.7.0.2/pandoc-3.7.0.2-1-amd64.deb" -O /tmp/pandoc.deb
           sudo dpkg -i /tmp/pandoc.deb
           wget -q "https://github.com/typst/typst/releases/download/v0.15.1/typst-x86_64-unknown-linux-musl.tar.xz" -O /tmp/typst.tar.xz
