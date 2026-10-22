@@ -32,7 +32,19 @@ jobs:
       - name: Build Report Documents
         run: |
           ./build.sh
-          make docx
+          ./build-docx.sh
+
+      - name: Setup Node.js for npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: ${{ env.NODE_AUTH_TOKEN != '' }}
 
       - name: Extract Release Notes from CHANGELOG
         id: changelog

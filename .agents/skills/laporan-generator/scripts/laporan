@@ -15,10 +15,19 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Resolve Python (handle WindowsApps stub redirector on Windows)
+if ! command -v python3 >/dev/null 2>&1 || ! python3 -V >/dev/null 2>&1; then
+  if command -v python >/dev/null 2>&1 && python -V >/dev/null 2>&1; then
+    python3() { python "$@"; }
+    export -f python3 2>/dev/null || true
+  fi
+fi
+export PYTHONUTF8=1
+
 show_banner() {
     echo -e "${CYAN}${BOLD}"
     echo "  ========================================================"
-    echo "                 LAPORAN GENERATOR CLI v2.6.0             "
+    echo "                 LAPORAN GENERATOR CLI v2.9.0             "
     echo "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   "
     echo "  ========================================================"
     echo -e "${NC}"
@@ -29,6 +38,7 @@ show_help() {
     echo -e "${BOLD}Penggunaan:${NC} ./laporan <perintah>"
     echo ""
     echo -e "${BOLD}Perintah yang Tersedia:${NC}"
+    echo -e "  ${GREEN}mcp${NC}          Jalankan Model Context Protocol (MCP) Server untuk AI Agent"
     echo -e "  ${GREEN}build${NC}        Kompilasi PDF dan DOCX sekaligus"
     echo -e "  ${GREEN}pdf${NC}          Kompilasi dokumen PDF (via Typst)"
     echo -e "  ${GREEN}docx${NC}         Kompilasi dokumen Microsoft Word (.docx)"
@@ -38,7 +48,8 @@ show_help() {
     echo -e "  ${GREEN}doctor${NC}       Audit kesehatan proyek (broken images, sitasi hilang, dll.)"
     echo -e "  ${GREEN}bundle${NC}       Kemas seluruh laporan (PDF, DOCX, MD) menjadi arsip zip"
     echo -e "  ${GREEN}setup${NC}        Pasang dependensi sistem otomatis (Linux, macOS, Nix, Docker)"
-    echo -e "  ${GREEN}sync-skills${NC}  Sinkronkan skill AI agent ke Antigravity, Claude, Gemini, Grok"
+    echo -e "  ${GREEN}sync-skills${NC}  Sinkronkan skill AI agent & MCP ke Antigravity, Claude, OpenCode"
+    echo -e "  ${GREEN}uninstall${NC}    Hapus integrasi skill dan perintah AI agent dari seluruh sistem"
     echo -e "  ${GREEN}check${NC}        Audit dependensi sistem dan struktur proyek"
     echo -e "  ${GREEN}test${NC}         Jalankan suite pengujian otomatis (test.sh)"
     echo -e "  ${GREEN}view${NC}         Buka dokumen Laporan.pdf di viewer"
@@ -334,7 +345,7 @@ cmd_build() {
     ./build.sh
     echo ""
     echo -e "${BLUE}${BOLD}2. Membangun Dokumen Microsoft Word (DOCX Multi-Pass)...${NC}"
-    make docx
+    ./build-docx.sh
     echo ""
     echo -e "${GREEN}${BOLD}Dokumen PDF dan DOCX berhasil dibuat!${NC}"
     echo -e "  - ${CYAN}Laporan.pdf${NC}"
@@ -350,7 +361,7 @@ cmd_pdf() {
 cmd_docx() {
     show_banner
     echo -e "${BLUE}${BOLD}Membangun Dokumen DOCX...${NC}"
-    make docx
+    ./build-docx.sh
 }
 
 cmd_test() {
@@ -414,11 +425,50 @@ case "${1:-help}" in
     setup)
         bash scripts/setup-deps.sh
         ;;
-    sync-skills|sync-hosts)
+    mcp|server)
+        shift
         if command -v node >/dev/null 2>&1; then
-            node bin/laporan-generator.js sync-hosts
+            if [ -f "bin/mcp-server.js" ]; then
+                node bin/mcp-server.js "$@"
+            elif command -v npx >/dev/null 2>&1; then
+                npx -y laporan-generator mcp "$@"
+            else
+                echo "Berkas bin/mcp-server.js tidak ditemukan dan npx tidak tersedia."
+                exit 1
+            fi
+        else
+            echo "Node.js diperlukan untuk menjalankan MCP Server."
+            exit 1
+        fi
+        ;;
+    sync-skills|sync-hosts)
+        shift
+        if command -v node >/dev/null 2>&1; then
+            if [ -f "bin/laporan-generator.js" ]; then
+                node bin/laporan-generator.js sync-hosts "$@"
+            elif command -v npx >/dev/null 2>&1; then
+                npx -y laporan-generator sync-hosts "$@"
+            else
+                echo "Berkas bin/laporan-generator.js tidak ditemukan dan npx tidak tersedia."
+                exit 1
+            fi
         else
             echo "Node.js diperlukan untuk sinkronisasi multi-host AI agent."
+        fi
+        ;;
+    uninstall|clean-skills)
+        shift
+        if command -v node >/dev/null 2>&1; then
+            if [ -f "bin/laporan-generator.js" ]; then
+                node bin/laporan-generator.js uninstall "$@"
+            elif command -v npx >/dev/null 2>&1; then
+                npx -y laporan-generator uninstall "$@"
+            else
+                echo "Berkas bin/laporan-generator.js tidak ditemukan dan npx tidak tersedia."
+                exit 1
+            fi
+        else
+            echo "Node.js diperlukan untuk membersihkan integrasi AI agent."
         fi
         ;;
     check)

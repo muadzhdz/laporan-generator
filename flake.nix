@@ -15,17 +15,13 @@
           name = "laporan-generator";
           packages = [
             pkgs.pandoc
-            pkgs.imagemagick
-            pkgs.gnumake
-            pkgs.coreutils
-            pkgs.inotify-tools
-            pkgs.xdg-utils
-            pkgs.poppler-utils
-            pkgs.haskellPackages.pandoc-crossref
-            pkgs.shellcheck
             pkgs.typst
-            pkgs.unzip
             pkgs.python3
+            pkgs.imagemagick_light
+            pkgs.poppler-utils
+            pkgs.unzip
+            pkgs.gnumake
+            pkgs.inotify-tools
           ];
         };
       });

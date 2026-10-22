@@ -9,14 +9,38 @@ param (
     [Parameter(Position=2)]
     [string]$Arg1 = "",
     [Parameter(Position=3)]
-    [string]$Arg2 = ""
+    [string]$Arg2 = "",
+    [Parameter(ValueFromRemainingArguments=$true)]
+    [string[]]$RemainingArgs
 )
 
 $ErrorActionPreference = "Stop"
+$env:PYTHONUTF8 = "1"
+
+# Pastikan folder localBin ada di PATH sesi saat ini jika ada
+$localBin = Join-Path $env:LOCALAPPDATA "laporan-generator\bin"
+if ((Test-Path $localBin) -and ($env:Path -notlike "*$localBin*")) {
+    $env:Path = "$localBin;$env:Path"
+}
+
+function Get-PythonCommand {
+    foreach ($cmd in @("python", "python3")) {
+        $c = Get-Command $cmd -ErrorAction SilentlyContinue
+        if ($c) {
+            if ($c.Source -match "WindowsApps\\python") {
+                continue
+            }
+            return $c.Source
+        }
+    }
+    $fallback = Get-Command "python" -ErrorAction SilentlyContinue
+    if ($fallback) { return $fallback.Source }
+    return ""
+}
 
 function Show-Banner {
     Write-Host "  ========================================================" -ForegroundColor Cyan
-    Write-Host "                 LAPORAN GENERATOR CLI v2.6.0             " -ForegroundColor Cyan
+    Write-Host "                 LAPORAN GENERATOR CLI v2.9.0             " -ForegroundColor Cyan
     Write-Host "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   " -ForegroundColor Cyan
     Write-Host "  ========================================================" -ForegroundColor Cyan
     Write-Host ""
@@ -36,7 +60,9 @@ function Show-Help {
     Write-Host "  doctor       Audit kesehatan proyek (broken images, sitasi hilang, dll.)" -ForegroundColor Green
     Write-Host "  bundle       Kemas seluruh laporan (PDF, DOCX, MD) menjadi arsip zip" -ForegroundColor Green
     Write-Host "  setup        Pasang dependensi sistem otomatis Windows (Typst, Pandoc, Magick)" -ForegroundColor Green
-    Write-Host "  sync-skills  Sinkronkan skill AI agent ke Antigravity, Claude, Gemini, Grok" -ForegroundColor Green
+    Write-Host "  mcp          Jalankan Model Context Protocol (MCP) Server untuk AI Agent" -ForegroundColor Green
+    Write-Host "  sync-skills  Sinkronkan skill AI agent & MCP ke Antigravity, Claude, OpenCode" -ForegroundColor Green
+    Write-Host "  uninstall    Hapus integrasi skill dan perintah AI agent dari seluruh sistem" -ForegroundColor Green
     Write-Host "  check        Audit dependensi sistem dan struktur proyek" -ForegroundColor Green
     Write-Host "  test         Jalankan suite pengujian otomatis" -ForegroundColor Green
     Write-Host "  view         Buka dokumen Laporan.pdf di PDF viewer" -ForegroundColor Green
@@ -55,11 +81,13 @@ function Cmd-Check {
     Show-Banner
     Write-Host "[1/2] Memeriksa Dependensi Sistem..." -ForegroundColor Blue
 
-    $pyFound = Get-Command "python" -ErrorAction SilentlyContinue
-    if (-not $pyFound) { $pyFound = Get-Command "python3" -ErrorAction SilentlyContinue }
+    $pyPath = Get-PythonCommand
+    $pyFound = if ($pyPath) { Get-Command $pyPath -ErrorAction SilentlyContinue } else { $null }
 
     $imFound = Get-Command "magick" -ErrorAction SilentlyContinue
-    if (-not $imFound) { $imFound = Get-Command "convert" -ErrorAction SilentlyContinue }
+    if (-not $imFound -and -not ($env:OS -match "Windows")) {
+        $imFound = Get-Command "convert" -ErrorAction SilentlyContinue
+    }
 
     $deps = @(
         @{ Name="Pandoc"; Cmd="pandoc"; Found=(Get-Command "pandoc" -ErrorAction SilentlyContinue); Req=$true },
@@ -129,20 +157,19 @@ function Cmd-Build-PDF {
         }
     }
 
-    $pandocArgs = @(
-        $inputFiles,
-        "--template=template.typ",
-        $presetOpt,
-        "--metadata-file=metadata.yml",
-        "--citeproc",
-        "--bibliography=references.bib",
-        "--csl=apa.csl",
-        "--metadata=reference-section-title=DAFTAR PUSTAKA",
-        "--top-level-division=chapter",
-        "--pdf-engine=typst",
-        "--no-highlight",
-        "-o", "Laporan.pdf"
-    ) | Where-Object { $_ -ne "" }
+    $pandocArgs = @()
+    $pandocArgs += $inputFiles
+    $pandocArgs += "--template=template.typ"
+    if ($presetOpt) { $pandocArgs += $presetOpt }
+    $pandocArgs += "--metadata-file=metadata.yml"
+    $pandocArgs += "--citeproc"
+    $pandocArgs += "--bibliography=references.bib"
+    $pandocArgs += "--csl=apa.csl"
+    $pandocArgs += "--metadata=reference-section-title=DAFTAR PUSTAKA"
+    $pandocArgs += "--top-level-division=chapter"
+    $pandocArgs += "--pdf-engine=typst"
+    $pandocArgs += "--no-highlight"
+    $pandocArgs += @("-o", "Laporan.pdf")
 
     & pandoc $pandocArgs
     if ($LASTEXITCODE -eq 0) {
@@ -163,7 +190,7 @@ function Cmd-Build-DOCX {
         return
     }
 
-    $pyCmd = if (Get-Command "python3" -ErrorAction SilentlyContinue) { "python3" } elseif (Get-Command "python" -ErrorAction SilentlyContinue) { "python" } else { "" }
+    $pyCmd = Get-PythonCommand
     if (-not $pyCmd) {
         Write-Host "[ERROR] Python 3 dibutuhkan untuk memproses DOCX." -ForegroundColor Red
         return
@@ -185,19 +212,18 @@ function Cmd-Build-DOCX {
     $sectDocx = [System.IO.Path]::GetTempFileName() + ".docx"
 
     try {
-        $pandocArgs = @(
-            $inputFiles,
-            $presetOpt,
-            "--metadata-file=metadata.yml",
-            "--citeproc",
-            "--bibliography=references.bib",
-            "--csl=apa.csl",
-            "--metadata=reference-section-title=DAFTAR PUSTAKA",
-            "--top-level-division=chapter",
-            "--reference-doc=reference.docx",
-            "--lua-filter=docx.lua",
-            "-o", $tmpDocx
-        ) | Where-Object { $_ -ne "" }
+        $pandocArgs = @()
+        $pandocArgs += $inputFiles
+        if ($presetOpt) { $pandocArgs += $presetOpt }
+        $pandocArgs += "--metadata-file=metadata.yml"
+        $pandocArgs += "--citeproc"
+        $pandocArgs += "--bibliography=references.bib"
+        $pandocArgs += "--csl=apa.csl"
+        $pandocArgs += "--metadata=reference-section-title=DAFTAR PUSTAKA"
+        $pandocArgs += "--top-level-division=chapter"
+        $pandocArgs += "--reference-doc=reference.docx"
+        $pandocArgs += "--lua-filter=docx.lua"
+        $pandocArgs += @("-o", $tmpDocx)
 
         & pandoc $pandocArgs
         if ($LASTEXITCODE -ne 0) {
@@ -315,14 +341,22 @@ preset: "$escPreset"
 function Cmd-Test {
     Show-Banner
     Write-Host "Menjalankan Test Suite..." -ForegroundColor Blue
-    $bashCmd = Get-Command "bash" -ErrorAction SilentlyContinue
-    if ($bashCmd) {
-        & bash test.sh
+    $gitBash = "C:\Program Files\Git\bin\bash.exe"
+    $bashCmd = if (Test-Path $gitBash) { $gitBash } elseif ((Get-Command "bash" -ErrorAction SilentlyContinue) -and (Get-Command "bash").Source -notmatch "system32\\bash\.exe") { "bash" } else { "" }
+    if ($bashCmd -and (Test-Path "test.sh")) {
+        & $bashCmd test.sh
     } else {
-        $pyCmd = if (Get-Command "python3" -ErrorAction SilentlyContinue) { "python3" } elseif (Get-Command "python" -ErrorAction SilentlyContinue) { "python" } else { "" }
+        $pyCmd = Get-PythonCommand
         if ($pyCmd) {
             Write-Host "Menjalankan validasi skema preset..." -ForegroundColor Blue
-            & $pyCmd scripts/validate-preset.py --all
+            if (Test-Path "scripts/validate-preset.py") {
+                & $pyCmd scripts/validate-preset.py --all
+            }
+            if (Test-Path "scripts/test_scripts.py") {
+                Write-Host ""
+                Write-Host "Menjalankan unit test skrip Python..." -ForegroundColor Blue
+                & $pyCmd scripts/test_scripts.py
+            }
         } else {
             Write-Host "Test suite membutuhkan bash atau python3." -ForegroundColor Yellow
         }
@@ -331,7 +365,7 @@ function Cmd-Test {
 
 function Cmd-Preset {
     param ($Sub, $P1, $P2)
-    $pyCmd = if (Get-Command "python3" -ErrorAction SilentlyContinue) { "python3" } elseif (Get-Command "python" -ErrorAction SilentlyContinue) { "python" } else { "" }
+    $pyCmd = Get-PythonCommand
 
     switch ($Sub) {
         "list" {
@@ -339,10 +373,10 @@ function Cmd-Preset {
             Write-Host "Daftar Preset Format Kampus Tersedia:" -ForegroundColor Blue
             Write-Host ""
             Get-ChildItem -Path "presets" -Filter "*.yml" | ForEach-Object {
-                $pid = $_.BaseName
+                $presetId = $_.BaseName
                 $name = (Select-String -Path $_.FullName -Pattern "^\s*name:\s*`"?(.*?)`"?\s*$" | Select-Object -First 1).Matches.Groups[1].Value
                 $desc = (Select-String -Path $_.FullName -Pattern "^\s*description:\s*`"?(.*?)`"?\s*$" | Select-Object -First 1).Matches.Groups[1].Value
-                Write-Host "  * $pid - $name" -ForegroundColor Green
+                Write-Host "  * $presetId - $name" -ForegroundColor Green
                 if ($desc) { Write-Host "    $desc" -ForegroundColor Gray }
                 Write-Host ""
             }
@@ -423,27 +457,30 @@ function Cmd-Clean {
 }
 
 function Cmd-Stats {
-    $pyCmd = if (Get-Command "python3" -ErrorAction SilentlyContinue) { "python3" } elseif (Get-Command "python" -ErrorAction SilentlyContinue) { "python" } else { "" }
+    param([string[]]$ArgsList)
+    $pyCmd = Get-PythonCommand
     if ($pyCmd) {
-        & $pyCmd scripts/report-stats.py
+        & $pyCmd scripts/report-stats.py @ArgsList
     } else {
         Write-Host "Error: Python 3 tidak ditemukan." -ForegroundColor Red
     }
 }
 
 function Cmd-Doctor {
-    $pyCmd = if (Get-Command "python3" -ErrorAction SilentlyContinue) { "python3" } elseif (Get-Command "python" -ErrorAction SilentlyContinue) { "python" } else { "" }
+    param([string[]]$ArgsList)
+    $pyCmd = Get-PythonCommand
     if ($pyCmd) {
-        & $pyCmd scripts/report-doctor.py
+        & $pyCmd scripts/report-doctor.py @ArgsList
     } else {
         Write-Host "Error: Python 3 tidak ditemukan." -ForegroundColor Red
     }
 }
 
 function Cmd-Bundle {
-    $pyCmd = if (Get-Command "python3" -ErrorAction SilentlyContinue) { "python3" } elseif (Get-Command "python" -ErrorAction SilentlyContinue) { "python" } else { "" }
+    param([string[]]$ArgsList)
+    $pyCmd = Get-PythonCommand
     if ($pyCmd) {
-        & $pyCmd scripts/bundle.py
+        & $pyCmd scripts/bundle.py @ArgsList
     } else {
         Write-Host "Error: Python 3 tidak ditemukan." -ForegroundColor Red
     }
@@ -495,27 +532,89 @@ function Cmd-Watch {
     }
 }
 
+$extraArgs = @()
+if ($SubCommand) { $extraArgs += $SubCommand }
+if ($Arg1) { $extraArgs += $Arg1 }
+if ($Arg2) { $extraArgs += $Arg2 }
+if ($RemainingArgs) { $extraArgs += $RemainingArgs }
+
 switch ($Command.ToLower()) {
     "build"  { Cmd-Build }
     "pdf"    { Cmd-Build-PDF }
     "docx"   { Cmd-Build-DOCX }
     "init"   { Cmd-Init }
-    "stats"  { Cmd-Stats }
-    "doctor" { Cmd-Doctor }
-    "bundle"      { Cmd-Bundle }
-    "setup"       { & powershell -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "scripts\setup-deps.ps1") }
+    "stats"  { Cmd-Stats $extraArgs }
+    "doctor" { Cmd-Doctor $extraArgs }
+    "bundle" { Cmd-Bundle $extraArgs }
+    "setup"  { & powershell -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "scripts\setup-deps.ps1") }
+    "mcp"    {
+        if (Get-Command "node" -ErrorAction SilentlyContinue) {
+            $mcpPath = Join-Path $PSScriptRoot "bin\mcp-server.js"
+            if (Test-Path $mcpPath) {
+                node $mcpPath @extraArgs
+            } elseif (Get-Command "npx" -ErrorAction SilentlyContinue) {
+                npx -y laporan-generator mcp @extraArgs
+            } else {
+                Write-Host "bin\mcp-server.js tidak ditemukan dan npx tidak tersedia." -ForegroundColor Red
+            }
+        } else {
+            Write-Host "Node.js diperlukan untuk menjalankan MCP Server." -ForegroundColor Yellow
+        }
+    }
     "sync-skills" { 
         if (Get-Command "node" -ErrorAction SilentlyContinue) {
-            node (Join-Path $PSScriptRoot "bin\laporan-generator.js") sync-hosts
+            $genPath = Join-Path $PSScriptRoot "bin\laporan-generator.js"
+            if (Test-Path $genPath) {
+                node $genPath sync-hosts @extraArgs
+            } elseif (Get-Command "npx" -ErrorAction SilentlyContinue) {
+                npx -y laporan-generator sync-hosts @extraArgs
+            } else {
+                Write-Host "bin\laporan-generator.js tidak ditemukan dan npx tidak tersedia." -ForegroundColor Red
+            }
         } else {
             Write-Host "Node.js diperlukan untuk sinkronisasi multi-host AI agent." -ForegroundColor Yellow
         }
     }
     "sync-hosts"  {
         if (Get-Command "node" -ErrorAction SilentlyContinue) {
-            node (Join-Path $PSScriptRoot "bin\laporan-generator.js") sync-hosts
+            $genPath = Join-Path $PSScriptRoot "bin\laporan-generator.js"
+            if (Test-Path $genPath) {
+                node $genPath sync-hosts @extraArgs
+            } elseif (Get-Command "npx" -ErrorAction SilentlyContinue) {
+                npx -y laporan-generator sync-hosts @extraArgs
+            } else {
+                Write-Host "bin\laporan-generator.js tidak ditemukan dan npx tidak tersedia." -ForegroundColor Red
+            }
         } else {
             Write-Host "Node.js diperlukan untuk sinkronisasi multi-host AI agent." -ForegroundColor Yellow
+        }
+    }
+    "uninstall"   {
+        if (Get-Command "node" -ErrorAction SilentlyContinue) {
+            $genPath = Join-Path $PSScriptRoot "bin\laporan-generator.js"
+            if (Test-Path $genPath) {
+                node $genPath uninstall @extraArgs
+            } elseif (Get-Command "npx" -ErrorAction SilentlyContinue) {
+                npx -y laporan-generator uninstall @extraArgs
+            } else {
+                Write-Host "bin\laporan-generator.js tidak ditemukan dan npx tidak tersedia." -ForegroundColor Red
+            }
+        } else {
+            Write-Host "Node.js diperlukan untuk membersihkan integrasi AI agent." -ForegroundColor Yellow
+        }
+    }
+    "clean-skills" {
+        if (Get-Command "node" -ErrorAction SilentlyContinue) {
+            $genPath = Join-Path $PSScriptRoot "bin\laporan-generator.js"
+            if (Test-Path $genPath) {
+                node $genPath uninstall @extraArgs
+            } elseif (Get-Command "npx" -ErrorAction SilentlyContinue) {
+                npx -y laporan-generator uninstall @extraArgs
+            } else {
+                Write-Host "bin\laporan-generator.js tidak ditemukan dan npx tidak tersedia." -ForegroundColor Red
+            }
+        } else {
+            Write-Host "Node.js diperlukan untuk membersihkan integrasi AI agent." -ForegroundColor Yellow
         }
     }
     "check"       { Cmd-Check }

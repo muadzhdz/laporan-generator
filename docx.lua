@@ -14,6 +14,28 @@ local subsub = 0
 local toc_entries = {}
 local chapter_prefix = "BAB "
 local chapter_num_fmt = "roman"
+local sub_dot = true
+local subsub_dot = false
+local doc_margins = { top = 1134, right = 1417, bottom = 1701, left = 1417 }
+
+local function dim_to_twips(val, fallback)
+  if not val or val == "" then return fallback end
+  local num, unit = val:match("^%s*([0-9]+%.?[0-9]*)%s*([a-zA-Z]+)%s*$")
+  if not num then return fallback end
+  local n = tonumber(num)
+  if not n then return fallback end
+  unit = unit:lower()
+  if unit == "cm" then
+    return math.floor(n * 566.929133858 + 0.5)
+  elseif unit == "mm" then
+    return math.floor(n * 56.6929133858 + 0.5)
+  elseif unit == "in" then
+    return math.floor(n * 1440 + 0.5)
+  elseif unit == "pt" then
+    return math.floor(n * 20 + 0.5)
+  end
+  return fallback
+end
 
 local function is_unnumbered(el)
   for _, cls in ipairs(el.attr.classes or {}) do
@@ -180,6 +202,20 @@ local function Meta(meta)
   if fmt ~= "" then
     chapter_num_fmt = fmt
   end
+  if meta["heading_sub_dot"] ~= nil then
+    sub_dot = meta_bool(meta, "heading_sub_dot")
+  end
+  if meta["heading_subsub_dot"] ~= nil then
+    subsub_dot = meta_bool(meta, "heading_subsub_dot")
+  end
+  local m_preset = meta_str(meta, "margin_preset")
+  if m_preset == "skripsi-4433" or m_preset == "4-4-3-3" then
+    doc_margins = { top = 2268, right = 1701, bottom = 1701, left = 2268 }
+  end
+  doc_margins.top = dim_to_twips(meta_str(meta, "margin_top"), doc_margins.top)
+  doc_margins.bottom = dim_to_twips(meta_str(meta, "margin_bottom"), doc_margins.bottom)
+  doc_margins.left = dim_to_twips(meta_str(meta, "margin_left"), doc_margins.left)
+  doc_margins.right = dim_to_twips(meta_str(meta, "margin_right"), doc_margins.right)
 end
 
 function Header(el)
@@ -228,20 +264,22 @@ function Header(el)
   elseif el.level == 2 then
     sub = sub + 1
     subsub = 0
+    local sep2 = sub_dot and ". " or " "
     toc_entries[#toc_entries + 1] = {
       level = 2,
       id = el.identifier,
-      text = bab .. "." .. sub .. ". " .. title,
+      text = bab .. "." .. sub .. sep2 .. title,
     }
-    el.content = pandoc.Str(bab .. "." .. sub .. ". " .. title)
+    el.content = pandoc.Str(bab .. "." .. sub .. sep2 .. title)
   elseif el.level == 3 then
     subsub = subsub + 1
+    local sep3 = subsub_dot and ". " or " "
     toc_entries[#toc_entries + 1] = {
       level = 3,
       id = el.identifier,
-      text = bab .. "." .. sub .. "." .. subsub .. " " .. title,
+      text = bab .. "." .. sub .. "." .. subsub .. sep3 .. title,
     }
-    el.content = pandoc.Str(bab .. "." .. sub .. "." .. subsub .. " " .. title)
+    el.content = pandoc.Str(bab .. "." .. sub .. "." .. subsub .. sep3 .. title)
   end
   return el
 end
@@ -434,8 +472,108 @@ function Pandoc(doc)
   -- Section break (Next Page) penutup cover: tanpa footer/nomor halaman
   blocks[#blocks + 1] = pandoc.RawBlock(
     "openxml",
-    '<w:p><w:pPr><w:sectPr><w:footnotePr><w:numRestart w:val="eachSect"/></w:footnotePr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1417" w:bottom="1701" w:left="1417" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:pPr></w:p>'
+    string.format(
+      '<w:p><w:pPr><w:sectPr><w:footnotePr><w:numRestart w:val="eachSect"/></w:footnotePr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="%d" w:right="%d" w:bottom="%d" w:left="%d" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:pPr></w:p>',
+      doc_margins.top, doc_margins.right, doc_margins.bottom, doc_margins.left
+    )
   )
+
+  -- Optional Lembar Pengesahan (approval)
+  if meta["approval"] ~= nil and type(meta["approval"]) == "table" then
+    local app = meta["approval"]
+    local app_city = meta_str(app, "city")
+    local app_date = meta_str(app, "date")
+    if app_date == "" then app_date = meta_str(meta, "date") end
+    blocks[#blocks + 1] = pandoc.Header(1, { pandoc.Str("LEMBAR PENGESAHAN") }, pandoc.Attr("lembar-pengesahan", { "unnumbered" }, {}))
+    if title ~= "" then
+      blocks[#blocks + 1] = para({ pandoc.Strong(pandoc.Str(string.upper(title))) }, "CoverLine")
+    end
+    local date_line = (app_city ~= "" and (app_city .. ", ") or "") .. app_date
+    if date_line ~= "" then
+      blocks[#blocks + 1] = para({ pandoc.Str("Telah diperiksa dan disetujui pada: " .. date_line) }, "CoverLine")
+    end
+    if app["supervisors"] ~= nil and type(app["supervisors"]) == "table" then
+      for _, sup in ipairs(app["supervisors"]) do
+        local s_role = pandoc.utils.stringify(sup["role"] or "Pembimbing")
+        local s_name = pandoc.utils.stringify(sup["name"] or "")
+        local s_nip = pandoc.utils.stringify(sup["nip"] or "")
+        blocks[#blocks + 1] = spacer(360)
+        blocks[#blocks + 1] = para({ pandoc.Str(s_role) }, "CoverLine")
+        blocks[#blocks + 1] = spacer(480)
+        blocks[#blocks + 1] = para({ pandoc.Strong(pandoc.Str(s_name)) }, "CoverName")
+        if s_nip ~= "" then
+          blocks[#blocks + 1] = para({ pandoc.Str("NIP. " .. s_nip) }, "CoverLine")
+        end
+      end
+    end
+    if app["dean"] ~= nil and type(app["dean"]) == "table" then
+      local d_role = pandoc.utils.stringify(app["dean"]["role"] or "Dekan")
+      local d_name = pandoc.utils.stringify(app["dean"]["name"] or "")
+      local d_nip = pandoc.utils.stringify(app["dean"]["nip"] or "")
+      blocks[#blocks + 1] = spacer(360)
+      blocks[#blocks + 1] = para({ pandoc.Str("Mengetahui, " .. d_role) }, "CoverLine")
+      blocks[#blocks + 1] = spacer(480)
+      blocks[#blocks + 1] = para({ pandoc.Strong(pandoc.Str(d_name)) }, "CoverName")
+      if d_nip ~= "" then
+        blocks[#blocks + 1] = para({ pandoc.Str("NIP. " .. d_nip) }, "CoverLine")
+      end
+    end
+    blocks[#blocks + 1] = pagebreak()
+  end
+
+  -- Optional Abstrak Bahasa Indonesia (abstract_id)
+  local abs_id = meta_str(meta, "abstract_id")
+  if abs_id ~= "" then
+    blocks[#blocks + 1] = pandoc.Header(1, { pandoc.Str("ABSTRAK") }, pandoc.Attr("abstrak", { "unnumbered" }, {}))
+    if title ~= "" then
+      blocks[#blocks + 1] = para({ pandoc.Strong(pandoc.Str(string.upper(title))) }, "CoverLine")
+    end
+    blocks[#blocks + 1] = pandoc.Para({ pandoc.Str(abs_id) })
+    if meta["keywords_id"] ~= nil then
+      local kw_list = {}
+      if type(meta["keywords_id"]) == "table" and meta["keywords_id"][1] ~= nil then
+        for _, k in ipairs(meta["keywords_id"]) do
+          kw_list[#kw_list + 1] = pandoc.utils.stringify(k)
+        end
+      else
+        kw_list[#kw_list + 1] = meta_str(meta, "keywords_id")
+      end
+      if #kw_list > 0 then
+        blocks[#blocks + 1] = pandoc.Para({
+          pandoc.Strong(pandoc.Str("Kata Kunci: ")),
+          pandoc.Emph(pandoc.Str(table.concat(kw_list, ", ")))
+        })
+      end
+    end
+    blocks[#blocks + 1] = pagebreak()
+  end
+
+  -- Optional Abstract English (abstract_en)
+  local abs_en = meta_str(meta, "abstract_en")
+  if abs_en ~= "" then
+    blocks[#blocks + 1] = pandoc.Header(1, { pandoc.Str("ABSTRACT") }, pandoc.Attr("abstract", { "unnumbered" }, {}))
+    if title ~= "" then
+      blocks[#blocks + 1] = para({ pandoc.Strong(pandoc.Emph(pandoc.Str(string.upper(title)))) }, "CoverLine")
+    end
+    blocks[#blocks + 1] = pandoc.Para({ pandoc.Emph(pandoc.Str(abs_en)) })
+    if meta["keywords_en"] ~= nil then
+      local kw_en = {}
+      if type(meta["keywords_en"]) == "table" and meta["keywords_en"][1] ~= nil then
+        for _, k in ipairs(meta["keywords_en"]) do
+          kw_en[#kw_en + 1] = pandoc.utils.stringify(k)
+        end
+      else
+        kw_en[#kw_en + 1] = meta_str(meta, "keywords_en")
+      end
+      if #kw_en > 0 then
+        blocks[#blocks + 1] = pandoc.Para({
+          pandoc.Strong(pandoc.Str("Keywords: ")),
+          pandoc.Emph(pandoc.Str(table.concat(kw_en, ", ")))
+        })
+      end
+    end
+    blocks[#blocks + 1] = pagebreak()
+  end
 
   meta.title = nil
   meta.subtitle = nil

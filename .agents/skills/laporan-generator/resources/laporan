@@ -27,7 +27,7 @@ export PYTHONUTF8=1
 show_banner() {
     echo -e "${CYAN}${BOLD}"
     echo "  ========================================================"
-    echo "                 LAPORAN GENERATOR CLI v2.8.0             "
+    echo "                 LAPORAN GENERATOR CLI v2.9.0             "
     echo "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   "
     echo "  ========================================================"
     echo -e "${NC}"
@@ -345,7 +345,7 @@ cmd_build() {
     ./build.sh
     echo ""
     echo -e "${BLUE}${BOLD}2. Membangun Dokumen Microsoft Word (DOCX Multi-Pass)...${NC}"
-    make docx
+    ./build-docx.sh
     echo ""
     echo -e "${GREEN}${BOLD}Dokumen PDF dan DOCX berhasil dibuat!${NC}"
     echo -e "  - ${CYAN}Laporan.pdf${NC}"

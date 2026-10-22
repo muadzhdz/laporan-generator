@@ -4,6 +4,37 @@ Semua perubahan penting pada project **Laporan Generator** akan didokumentasikan
 
 Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/1.0.0/) dan mematuhi [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0] - 2026-10-22
+
+### Added
+- **5 Preset Kampus Resmi Terverifikasi Baru**: Penambahan preset resmi berdasarkan pedoman akademik universitas:
+  - `ub-skripsi.yml`: Universitas Brawijaya (Pedoman Penulisan Karya Ilmiah UB - Margin 4-4-3-3, Times New Roman 12pt).
+  - `undip-skripsi.yml`: Universitas Diponegoro (Buku Pedoman Skripsi UNDIP - Margin 4-4-3-3, Times New Roman 12pt, Spasi 1.5).
+  - `unair-skripsi.yml`: Universitas Airlangga (Pedoman Skripsi UNAIR - Margin 4-4-3-3, Times New Roman 12pt).
+  - `ipb-ppki.yml`: IPB University (Pedoman Penulisan Karya Ilmiah IPB Edisi ke-4 - Margin Kiri 4cm, Atas/Kanan/Bawah 3cm, Indensitas Paragraf 1cm).
+  - `telkom-ta.yml`: Telkom University (Pedoman Tugas Akhir Telkom University - Margin Kiri 4cm, Atas/Kanan/Bawah 3cm, Arial 11pt / Times New Roman 12pt).
+- **DOCX Parity untuk Front-Matter**: Render otomatis halaman Lembar Pengesahan (`approval: true`), Abstrak Bahasa Indonesia (`abstract_id`), dan Abstrak Bahasa Inggris (`abstract_en`) di `docx.lua`.
+- **Dukungan Multi-Arsitektur Typst Installer**: Penambahan deteksi arsitektur CPU (`x86_64` vs `aarch64`/`arm64`) pada `scripts/setup-deps.sh` serta upgrade instalasi Typst ke v0.15.1.
+- **Routing Eksekusi Langsung Build DOCX**: Penambahan eksekusi `build-docx.sh` langsung di skrip Bash (`laporan`), Python bundle (`scripts/bundle.py`), dan MCP `laporan_build` tanpa ketergantungan pada utilitas `make`.
+- **Skrip npm `prepack`**: Menjamin sinkronisasi otomatis seluruh direktori templates, presets, dan referensi internal ke dalam `.agents/` sebelum paket dipublikasikan ke npm registry.
+
+### Changed
+- **Audit dan Penyesuaian Margin Presisi**:
+  - `presets/ui-skripsi.yml`: Penyesuaian dari 2.5cm ke pedoman resmi SK Rektor UI (Kiri 4cm, Atas/Kanan/Bawah 3cm).
+  - `presets/its-skripsi.yml`: Penyesuaian ke format resmi Buku Pedoman TA ITS (Atas 3cm, Kiri 3cm, Bawah 2.5cm, Kanan 2cm).
+- **Perampingan Ukuran Nix Flake (`flake.nix`)**: Menghilangkan redundansi paket `pandoc-crossref`, `shellcheck`, dan `coreutils`, serta mengganti ImageMagick dengan varian `imagemagick_light` (tanpa dependensi X11 GUI) yang menghemat ukuran unduhan devShell lebih dari 450MB+.
+- **Perombakan Total AI Directive (`prompt.md`)**: Penguatan panduan agen AI dengan alur wawancara interaktif 3 tahap, penegakan integritas akademis anti-halusinasi, serta kepatuhan ketat PUEBI dan skema metadata.
+- **Peningkatan Suite Pengujian Otomatis**: Memperluas assertion pengujian menjadi 111/111 passed pada `test.sh` dan 24/24 passed pada `scripts/test_scripts.py`.
+- **Sinkronisasi Versi Seluruh CLI**: Memperbarui seluruh banner CLI (Node.js, Bash, PowerShell) dan server MCP menjadi versi `v2.9.0`.
+
+### Fixed
+- **Konversi Margin Dinamis DOCX (`docx.lua`)**: Implementasi parser dimensi `dim_to_twips` sehingga margin kustom kampus (cm, mm, in, pt) diterapkan secara presisi pada setiap section OpenXML DOCX.
+- **Resolusi Halaman Daftar Isi DOCX (`scripts/docx-pagenum.py`)**: Memperbaiki false-positive nomor halaman Daftar Pustaka dengan memprioritaskan pencocokan baris tepat (*exact line matching*) sebelum pencarian substring, mencegah rujukan salah ke bab batang tubuh.
+- **String Interpolasi Pesan Kesalahan MCP (`lib/mcp.js`)**: Memperbaiki sintaks string literal menjadi template string pada penanganan error validasi preset kampus.
+- **Izin Eksekusi Skrip Terprogram (`lib/init.js`)**: Penambahan `chmod 755` otomatis untuk berkas `build-docx.sh`.
+
+---
+
 ## [2.8.0] - 2026-09-29
 
 ### Added

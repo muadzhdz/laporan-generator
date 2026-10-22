@@ -1,0 +1,27 @@
+# Preset: IPB University (Institut Pertanian Bogor)
+preset_id: "ipb-ppki"
+name: "IPB University (PPKI)"
+description: "Format Tugas Akhir sesuai Pedoman Penulisan Karya Ilmiah (PPKI) IPB University (Margin Kiri 4cm, Atas/Kanan/Bawah 3cm)."
+
+# 1. Geometri & Margin Halaman (Standar Resmi PPKI IPB: Kiri 4cm, Atas 3cm, Bawah 3cm, Kanan 3cm)
+margin_top: 3cm
+margin_bottom: 3cm
+margin_left: 4cm
+margin_right: 3cm
+
+# 2. Tipografi & Spasi
+font_family: "Libertinus Serif"
+font_size: 12pt
+line_spacing: 0.75em
+first_line_indent: 1.0cm
+
+# 3. Penomoran Heading
+heading_chapter_prefix: "BAB "
+heading_chapter_num_format: "roman"
+heading_sub_dot: false
+heading_subsub_dot: false
+
+# 4. Pengaturan Halaman Sampul
+cover_show_lecturer: false
+cover_hide_lecturer: true
+cover_logo_width: 4cm

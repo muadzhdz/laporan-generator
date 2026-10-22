@@ -1,13 +1,13 @@
 # Preset: Universitas Indonesia (UI)
 preset_id: "ui-skripsi"
 name: "Universitas Indonesia (UI)"
-description: "Format Tugas Akhir & Skripsi sesuai Pedoman Penulisan Karya Ilmiah Universitas Indonesia."
+description: "Format Tugas Akhir & Skripsi sesuai Keputusan Rektor UI (Margin Kiri 4cm, Atas/Kanan/Bawah 3cm, TNR 12pt)."
 
-# Margin halaman (Standar UI: Top 2.5cm / 2cm, Left 2.5cm, Bottom 2.5cm / 3cm, Right 2.5cm)
-margin_top: 2.5cm
-margin_bottom: 2.5cm
-margin_left: 2.5cm
-margin_right: 2.5cm
+# Margin halaman (Standar Resmi Pedoman Teknis TA UI: Kiri 4cm, Atas 3cm, Bawah 3cm, Kanan 3cm)
+margin_top: 3cm
+margin_bottom: 3cm
+margin_left: 4cm
+margin_right: 3cm
 
 # Tipografi
 font_family: "Libertinus Serif"

@@ -40,7 +40,7 @@ function Get-PythonCommand {
 
 function Show-Banner {
     Write-Host "  ========================================================" -ForegroundColor Cyan
-    Write-Host "                 LAPORAN GENERATOR CLI v2.8.0             " -ForegroundColor Cyan
+    Write-Host "                 LAPORAN GENERATOR CLI v2.9.0             " -ForegroundColor Cyan
     Write-Host "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   " -ForegroundColor Cyan
     Write-Host "  ========================================================" -ForegroundColor Cyan
     Write-Host ""
@@ -60,7 +60,9 @@ function Show-Help {
     Write-Host "  doctor       Audit kesehatan proyek (broken images, sitasi hilang, dll.)" -ForegroundColor Green
     Write-Host "  bundle       Kemas seluruh laporan (PDF, DOCX, MD) menjadi arsip zip" -ForegroundColor Green
     Write-Host "  setup        Pasang dependensi sistem otomatis Windows (Typst, Pandoc, Magick)" -ForegroundColor Green
-    Write-Host "  sync-skills  Sinkronkan skill AI agent ke Antigravity, Claude, Grok" -ForegroundColor Green
+    Write-Host "  mcp          Jalankan Model Context Protocol (MCP) Server untuk AI Agent" -ForegroundColor Green
+    Write-Host "  sync-skills  Sinkronkan skill AI agent & MCP ke Antigravity, Claude, OpenCode" -ForegroundColor Green
+    Write-Host "  uninstall    Hapus integrasi skill dan perintah AI agent dari seluruh sistem" -ForegroundColor Green
     Write-Host "  check        Audit dependensi sistem dan struktur proyek" -ForegroundColor Green
     Write-Host "  test         Jalankan suite pengujian otomatis" -ForegroundColor Green
     Write-Host "  view         Buka dokumen Laporan.pdf di PDF viewer" -ForegroundColor Green
@@ -585,6 +587,34 @@ switch ($Command.ToLower()) {
             }
         } else {
             Write-Host "Node.js diperlukan untuk sinkronisasi multi-host AI agent." -ForegroundColor Yellow
+        }
+    }
+    "uninstall"   {
+        if (Get-Command "node" -ErrorAction SilentlyContinue) {
+            $genPath = Join-Path $PSScriptRoot "bin\laporan-generator.js"
+            if (Test-Path $genPath) {
+                node $genPath uninstall @extraArgs
+            } elseif (Get-Command "npx" -ErrorAction SilentlyContinue) {
+                npx -y laporan-generator uninstall @extraArgs
+            } else {
+                Write-Host "bin\laporan-generator.js tidak ditemukan dan npx tidak tersedia." -ForegroundColor Red
+            }
+        } else {
+            Write-Host "Node.js diperlukan untuk membersihkan integrasi AI agent." -ForegroundColor Yellow
+        }
+    }
+    "clean-skills" {
+        if (Get-Command "node" -ErrorAction SilentlyContinue) {
+            $genPath = Join-Path $PSScriptRoot "bin\laporan-generator.js"
+            if (Test-Path $genPath) {
+                node $genPath uninstall @extraArgs
+            } elseif (Get-Command "npx" -ErrorAction SilentlyContinue) {
+                npx -y laporan-generator uninstall @extraArgs
+            } else {
+                Write-Host "bin\laporan-generator.js tidak ditemukan dan npx tidak tersedia." -ForegroundColor Red
+            }
+        } else {
+            Write-Host "Node.js diperlukan untuk membersihkan integrasi AI agent." -ForegroundColor Yellow
         }
     }
     "check"       { Cmd-Check }

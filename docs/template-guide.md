@@ -17,16 +17,15 @@ File `template.typ` merupakan jantung dari pemformatan visual PDF pada **Laporan
 ```typst
 #set page(
   paper: "a4",
-  margin: (top: 2cm, bottom: 3cm, left: 2.5cm, right: 2.5cm),
+  margin: doc-margin,
+  numbering: none,
 )
 #set text(font: "Libertinus Serif", size: 12pt)
-#set par(justify: true, leading: 1.5em)
+#set par(justify: true, leading: 0.75em, first-line-indent: 1.25cm)
 ```
-* Margin Kiri & Kanan: 2.5 cm
-* Margin Atas: 2.0 cm
-* Margin Bawah: 3.0 cm
-* Spasi Antar Baris: 1.5 spasi (*one half spacing*)
-* Paragraf rata kanan-kiri (*justify*)
+* Margin Default (`standard`): Atas 2.0 cm, Bawah 3.0 cm, Kiri 2.5 cm, Kanan 2.5 cm (atau mengikuti `presets/*.yml` aktif).
+* Spasi Antar Baris: `0.75em` (setara 1.5 spasi di Typst).
+* Paragraf rata kanan-kiri (*justify*) dengan indentasi baris pertama `1.25cm`.
 
 ---
 
@@ -36,28 +35,35 @@ File `template.typ` merupakan jantung dari pemformatan visual PDF pada **Laporan
 ```typst
 #set heading(numbering: (..ns) => {
   if ns.len() == 1 {
-    "BAB " + numbering("I", ns.at(0)) + linebreak()
+    if chapter-prefix != "" {
+      chapter-prefix + format-chapter-num(ns.at(0))
+    } else {
+      format-chapter-num(ns.at(0))
+    }
   } else if ns.len() == 2 {
-    numbering("1.1", ..ns)
+    numbering("1.1.", ..ns)
   } else {
     numbering("1.1.1", ..ns)
   }
 })
 ```
-* **Bab**: Diformat dengan Angka Romawi (`BAB I`, `BAB II`, `BAB III`, dst). Angka Romawi dan judul dipisahkan oleh *line break*.
-* **Sub-bab**: Diformat dengan Angka Arab (`1.1`, `1.2`, `2.1`).
+* **Bab**: Diformat dengan Angka Romawi (`BAB I`, `BAB II`, `BAB III`, dst) atau Angka Arab sesuai preset (`heading_chapter_num_format`). Nomor bab dan judul dipisahkan oleh *line break* pada `#show heading.where(level: 1)`.
+* **Sub-bab**: Diformat dengan Angka Arab (`1.1.`, `1.2.`, `2.1.`) sesuai flag `heading_sub_dot`.
 * **Sub-sub-bab**: Diformat dengan Angka Arab 3 tingkat (`1.1.1`, `1.1.2`).
 * **Heading tanpa nomor** (Kata Pengantar, Daftar Isi, Daftar Pustaka): menggunakan `{-}` di Markdown yang diterjemahkan Pandoc menjadi `#heading(level: 1, numbering: none)`.
 
 > **Catatan**: Jangan menulis pola `"BAB I"` langsung sebagai format string `numbering(...)`. Typst menginterpretasikan rangkaian huruf `BAB` sebagai pola huruf dan memotong angka Romawinya. Selalu concat literal secara manual: `"BAB " + numbering("I", n)`.
 
 ### 2. Penomoran Halaman (frontmatter vs mainmatter)
-* **Bagian Depan** (Kata Pengantar, Daftar Isi): Menggunakan penomoran Romawi kapital (`I`, `II`, `III`) di bagian tengah bawah. Diatur di `cover.md`:
+* **Bagian Depan** (Lembar Pengesahan, Abstrak, Kata Pengantar, Daftar Isi): Menggunakan penomoran Romawi kecil (`i`, `ii`, `iii`) di bagian tengah bawah. Diatur di `template.typ` tepat setelah sampul depan:
   ```typst
-  #set page(numbering: "I")
+  #pagebreak()
+  #set page(numbering: "i")
+  #counter(page).update(1)
   ```
-* **Bagian Utama** (BAB I hingga BAB V): Menggunakan penomoran Angka Arab (`1`, `2`, `3`) berurutan, di-reset ulang:
+* **Bagian Utama** (BAB I hingga BAB V & Daftar Pustaka): Menggunakan penomoran Angka Arab (`1`, `2`, `3`) berurutan, di-reset ulang di akhir `cover.md`:
   ```typst
+  #pagebreak()
   #set page(numbering: "1")
   #counter(page).update(1)
   ```

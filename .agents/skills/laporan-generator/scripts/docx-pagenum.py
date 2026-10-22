@@ -74,6 +74,10 @@ def first_decimal_page(pages, start):
 
 def find_page(pages, needle, start, end):
     for p in range(start, end + 1):
+        lines = pages.get(p, [])
+        if any(l == needle for l in lines):
+            return p
+    for p in range(start, end + 1):
         text = "\n".join(pages.get(p, []))
         if needle in text:
             return p
@@ -160,8 +164,8 @@ def main():
     entries = parse_entries(doc)
     injected = 0
     for para, pid, text in entries:
-        if pid == "kata-pengantar":
-            page = find_page(pages, "KATA PENGANTAR", 1, toc_start - 1)
+        if pid in ("kata-pengantar", "lembar-pengesahan", "abstrak", "abstract"):
+            page = find_page(pages, text, 1, toc_start - 1)
         else:
             page = find_page(pages, needle_of(text), first_dec, max(pages))
         if not page:

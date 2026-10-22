@@ -29,10 +29,16 @@ Atau gunakan bantuan CLI interaktif:
 |---|---|---|---|
 | `standard` | Standar Modern | 2.0 cm - 3.0 cm - 2.5 cm - 2.5 cm | Format default tugas akhir, magang, praktikum |
 | `skripsi-4433` | Skripsi Tradisional | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Hardcover jilid tebal margin kiri 4cm |
-| `ui-skripsi` | Universitas Indonesia (UI) | 2.5 cm - 2.5 cm - 2.5 cm - 2.5 cm | Sesuai Pedoman Karya Ilmiah UI |
+| `ui-skripsi` | Universitas Indonesia (UI) | 3.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Sesuai Pedoman Teknis Tugas Akhir UI |
 | `itb-ta` | Institut Teknologi Bandung (ITB) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Cover minimalis (tanpa dosen pembimbing di cover luar) |
 | `ugm-skripsi` | Universitas Gadjah Mada (UGM) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Full academic cover |
-| `its-skripsi` | Institut Teknologi Sepuluh Nopember (ITS) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Standard Tugas Akhir & Tesis ITS |
+| `its-skripsi` | Institut Teknologi Sepuluh Nopember (ITS) | 3.0 cm - 2.5 cm - 3.0 cm - 2.0 cm | Sesuai Buku Pedoman TA & Tesis ITS |
+| `unpad-skripsi` | Universitas Padjadjaran (UNPAD) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Format skripsi & karya ilmiah UNPAD |
+| `ub-skripsi` | Universitas Brawijaya (UB) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Pedoman penulisan skripsi UB |
+| `undip-skripsi` | Universitas Diponegoro (UNDIP) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Pedoman akademik skripsi UNDIP |
+| `unair-skripsi` | Universitas Airlangga (UNAIR) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Pedoman penulisan karya ilmiah UNAIR |
+| `ipb-ppki` | IPB University (PPKI) | 3.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Pedoman PPKI IPB (Indent 1cm, sub-bab tanpa titik akhir) |
+| `telkom-ta` | Telkom University (Tel-U) | 3.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Pedoman Buku Tugas Akhir Telkom University |
 
 ---
 

@@ -31,12 +31,12 @@ When available in your environment, **always prefer calling the native MCP tools
 
 | Action | Native MCP Tool | CLI Fallback |
 | :--- | :--- | :--- |
-| **Initialize Project** | `laporan_init({ preset, title, author_name, institution })` | `npx laporan-generator init` |
+| **Initialize Project** | `laporan_init({ preset, title, author_name, author_id, institution, daftar_gambar, daftar_tabel })` | `npx laporan-generator init` |
 | **Audit & Health Check** | `laporan_doctor({ target_dir })` | `./laporan doctor` or `npx laporan-generator doctor --json` |
 | **Document Stats & Metrics** | `laporan_stats({ target_dir })` | `./laporan stats` or `npx laporan-generator stats --json` |
 | **Inspect Campus Presets** | `laporan_presets({ action: "list" \| "get", preset_name })` | `./laporan preset list` |
-| **Search & Add Citations** | `laporan_citations({ action: "search_doi" \| "add_citation", query, doi })` | Manual edit `references.bib` |
-| **Compile PDF & DOCX** | `laporan_build({ format: "all" \| "pdf" \| "docx" })` | `./laporan build` or `bash build.sh && make docx` |
+| **Search & Add Citations** | `laporan_citations({ action: "search_doi" \| "get_bibtex" \| "add_citation" \| "validate", query, doi, bibtex })` | Manual edit `references.bib` |
+| **Compile PDF & DOCX** | `laporan_build({ target_dir, format: "all" \| "pdf" \| "docx" })` | `./laporan build` or `npx laporan-generator build` |
 
 --------------------------------------------------------------------------------
 
@@ -51,12 +51,17 @@ Identify the document type and target university:
 3. **Makalah Kuliah / Paper Ilmiah**: Focus on research problem, methodology, findings, and discussion. (In Indonesia, course papers use standard Roman Bab headings: `BAB I`, `BAB II`, etc.).
 4. **Target University Preset**:
    - `skripsi-4433`: National Standard (Top 4cm, Left 4cm, Bottom 3cm, Right 3cm).
-   - `ui-skripsi`: Universitas Indonesia (Buku Panduan UI).
-   - `itb-ta`: Institut Teknologi Bandung (Pedoman TA ITB).
-   - `ugm-skripsi`: Universitas Gadjah Mada (Format Skripsi UGM).
-   - `its-skripsi`: Institut Teknologi Sepuluh Nopember.
-   - `unpad-skripsi`: Universitas Padjadjaran.
-   - `standard`: General University (2.5cm / 2cm).
+   - `ui-skripsi`: Universitas Indonesia (Left 4cm, Top/Right/Bottom 3cm).
+   - `itb-ta`: Institut Teknologi Bandung (Pedoman TA ITB 4-4-3-3, Minimalist Cover).
+   - `ugm-skripsi`: Universitas Gadjah Mada (Format Skripsi UGM 4-4-3-3).
+   - `its-skripsi`: Institut Teknologi Sepuluh Nopember (Top 3cm, Left 3cm, Bottom 2.5cm, Right 2cm).
+   - `unpad-skripsi`: Universitas Padjadjaran (4-4-3-3).
+   - `ub-skripsi`: Universitas Brawijaya (4-4-3-3).
+   - `undip-skripsi`: Universitas Diponegoro (4-4-3-3).
+   - `unair-skripsi`: Universitas Airlangga (4-4-3-3).
+   - `ipb-ppki`: IPB University - Pedoman PPKI (Left 4cm, Top/Right/Bottom 3cm, 1cm indent).
+   - `telkom-ta`: Telkom University (Left 4cm, Top/Right/Bottom 3cm).
+   - `standard`: General University (Top 2cm, Bottom 3cm, Left 2.5cm, Right 2.5cm).
 
 ### Stage 2: Document Structure Confirmation & Scaffolding
 1. **Confirm Document Structure**:

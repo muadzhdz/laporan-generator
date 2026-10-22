@@ -2,19 +2,43 @@
 set -e
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-OUTDIR="$DIR"
+if [ -n "$1" ]; then
+  OUTDIR="$1"
+elif [ -f "$(pwd)/metadata.yml" ] && [ -d "$(pwd)/chapters" ]; then
+  OUTDIR="$(pwd)"
+else
+  OUTDIR="$DIR"
+fi
 REPORT="$OUTDIR/Laporan.pdf"
 
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 
-cp "$OUTDIR/cover.md" "$TMPDIR/"
-cp "$OUTDIR/template.typ" "$TMPDIR/"
-cp "$OUTDIR/logo.jpg" "$TMPDIR/"
-cp "$OUTDIR/metadata.yml" "$TMPDIR/" 2>/dev/null || true
-cp "$OUTDIR/references.bib" "$TMPDIR/" 2>/dev/null || true
-cp "$OUTDIR/apa.csl" "$TMPDIR/" 2>/dev/null || true
-cp -r "$OUTDIR/presets" "$TMPDIR/" 2>/dev/null || true
+FALLBACK_DIRS=(
+  "$OUTDIR"
+  "$DIR"
+  "$HOME/.agents/skills/laporan-generator/resources"
+)
+
+copy_asset() {
+  local asset="$1"
+  local dest="$2"
+  for base in "${FALLBACK_DIRS[@]}"; do
+    if [ -e "$base/$asset" ]; then
+      cp -r "$base/$asset" "$dest/"
+      return 0
+    fi
+  done
+  return 1
+}
+
+copy_asset "cover.md" "$TMPDIR" || true
+copy_asset "template.typ" "$TMPDIR" || true
+copy_asset "logo.jpg" "$TMPDIR" || true
+copy_asset "metadata.yml" "$TMPDIR" || true
+copy_asset "references.bib" "$TMPDIR" || true
+copy_asset "apa.csl" "$TMPDIR" || true
+copy_asset "presets" "$TMPDIR" || true
 
 if [ -d "$OUTDIR/chapters" ]; then
   cp "$OUTDIR/chapters"/*.md "$TMPDIR/" 2>/dev/null || true

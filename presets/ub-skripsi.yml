@@ -1,0 +1,26 @@
+# Preset: Universitas Brawijaya (UB)
+preset_id: "ub-skripsi"
+name: "Universitas Brawijaya (UB)"
+description: "Format Skripsi & Tugas Akhir sesuai Pedoman Penulisan Karya Ilmiah Universitas Brawijaya (Margin 4-4-3-3)."
+
+# 1. Geometri & Margin Halaman (Standar UB: Atas 4cm, Kiri 4cm, Bawah 3cm, Kanan 3cm)
+margin_top: 4cm
+margin_bottom: 3cm
+margin_left: 4cm
+margin_right: 3cm
+
+# 2. Tipografi & Spasi
+font_family: "Libertinus Serif"
+font_size: 12pt
+line_spacing: 0.75em
+first_line_indent: 1.25cm
+
+# 3. Penomoran Heading
+heading_chapter_prefix: "BAB "
+heading_chapter_num_format: "roman"
+heading_sub_dot: true
+heading_subsub_dot: false
+
+# 4. Pengaturan Halaman Sampul
+cover_show_lecturer: true
+cover_logo_width: 4cm

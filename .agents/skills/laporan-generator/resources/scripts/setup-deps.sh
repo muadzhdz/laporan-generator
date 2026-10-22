@@ -83,11 +83,17 @@ elif has_cmd apt-get; then
     # Install typst binary jika belum ada
     if ! has_cmd typst; then
         echo -e "--> Mengunduh Typst standalone binary..."
-        TYPST_URL="https://github.com/typst/typst/releases/download/v0.13.0/typst-x86_64-unknown-linux-musl.tar.xz"
+        ARCH=$(uname -m)
+        if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+            TYPST_DIR="typst-aarch64-unknown-linux-musl"
+        else
+            TYPST_DIR="typst-x86_64-unknown-linux-musl"
+        fi
+        TYPST_URL="https://github.com/typst/typst/releases/download/v0.15.1/${TYPST_DIR}.tar.xz"
         wget -q "$TYPST_URL" -O /tmp/typst.tar.xz
         tar -xJf /tmp/typst.tar.xz -C /tmp
-        sudo mv /tmp/typst-x86_64-unknown-linux-musl/typst /usr/local/bin/typst
-        rm -rf /tmp/typst.tar.xz /tmp/typst-x86_64-unknown-linux-musl
+        sudo mv "/tmp/${TYPST_DIR}/typst" /usr/local/bin/typst
+        rm -rf /tmp/typst.tar.xz "/tmp/${TYPST_DIR}"
     fi
 elif has_cmd pacman; then
     echo -e "${CYAN}--> Menggunakan pacman (Arch Linux)...${NC}"

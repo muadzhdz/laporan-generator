@@ -7,7 +7,7 @@
 <p align="center">
   <b>Universal Academic Document & Thesis Engine for AI Agents and Engineers</b><br/>
   Otomatisasi dokumen akademik dan teknis dari Markdown ke PDF berstandar publikasi dan Microsoft Word (DOCX) dalam hitungan detik.<br/>
-  Mendukung pedoman resmi format penulisan kampus Indonesia (UI, ITB, UGM, ITS, UNPAD) dan standar internasional.
+  Mendukung pedoman resmi format penulisan kampus Indonesia (UI, ITB, UGM, ITS, UNPAD, UB, UNDIP, UNAIR, IPB, Telkom University) dan standar internasional.
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@
   <a href="#"><img src="https://img.shields.io/badge/Typst-0.13+-239DAD?style=for-the-badge&logo=typst&logoColor=white" alt="Typst"></a>
   <a href="#"><img src="https://img.shields.io/badge/Pandoc-3.0+-blue?style=for-the-badge&logo=markdown" alt="Pandoc"></a>
   <a href="#"><img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Tests-101%20Passed-success?style=for-the-badge" alt="Pengujian Lulus"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Tests-111%20Passed-success?style=for-the-badge" alt="Pengujian Lulus"></a>
   <a href="#"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="Lisensi"></a>
 </p>
 
@@ -113,7 +113,7 @@ npx laporan-generator sync-hosts
 
 ## Dukungan Model Context Protocol (MCP)
 
-Laporan Generator v2.8.0 dilengkapi dengan **Native MCP Server** resmi yang berjalan melalui `stdio` berbasis protokol JSON-RPC 2.0 (spesifikasi 2024-11-05). Server ini memungkinkan AI Agent otonom (seperti Google Antigravity, Claude Desktop, Claude Code, dan OpenCode) untuk berinteraksi langsung dengan dokumen akademik melalui tools deterministik.
+Laporan Generator v2.9.0 dilengkapi dengan **Native MCP Server** resmi yang berjalan melalui `stdio` berbasis protokol JSON-RPC 2.0 (spesifikasi 2024-11-05). Server ini memungkinkan AI Agent otonom (seperti Google Antigravity, Claude Desktop, Claude Code, dan OpenCode) untuk berinteraksi langsung dengan dokumen akademik melalui tools deterministik.
 
 ### Konfigurasi Otomatis (Direkomendasikan)
 Cukup jalankan satu perintah berikut untuk mendaftarkan skill sekaligus konfigurasi MCP Server ke seluruh agent di mesin Anda:
@@ -144,12 +144,12 @@ Jika ingin mendaftarkan server secara manual pada klien MCP apa pun:
 
 | Tool Name | Deskripsi Fungsi | Parameter Utama |
 |---|---|---|
-| `laporan_init` | Menginisialisasi dokumen baru (skripsi/makalah) secara terprogram | `target_dir`, `title`, `author`, `nim`, `institution`, `preset` |
-| `laporan_doctor` | Mengaudit integritas dependensi, berkas wajib, sitasi, dan broken media | `target_dir`, `fix` (opsional) |
+| `laporan_init` | Menginisialisasi dokumen baru (skripsi/makalah) secara terprogram | `target_dir`, `preset`, `title`, `author_name`, `author_id`, `institution`, `faculty`, `department`, `year`, `daftar_gambar`, `daftar_tabel`, `force` |
+| `laporan_doctor` | Mengaudit integritas dependensi, berkas wajib, sitasi, dan broken media | `target_dir` |
 | `laporan_stats` | Menghitung statistik kata, bab, karakter, dan estimasi halaman | `target_dir` |
-| `laporan_presets` | Memeriksa daftar dan detail konfigurasi preset kampus resmi | `action` (`list` / `get`), `preset_id` |
-| `laporan_citations` | Memvalidasi integritas BibTeX dan pencarian sitasi langsung ke Crossref API | `action` (`validate` / `search`), `query`, `bib_path` |
-| `laporan_build` | Mengompilasi dokumen ke PDF (Typst) dan/atau DOCX (Word) | `format` (`all` / `pdf` / `docx`), `preset` |
+| `laporan_presets` | Memeriksa daftar dan detail konfigurasi preset kampus resmi | `action` (`list` / `get`), `preset_name` |
+| `laporan_citations` | Memvalidasi integritas BibTeX dan pencarian sitasi langsung ke Crossref API | `action` (`search_doi` / `get_bibtex` / `add_citation` / `validate`), `query`, `doi`, `bibtex`, `target_dir` |
+| `laporan_build` | Mengompilasi dokumen ke PDF (Typst) dan/atau DOCX (Word) | `target_dir`, `format` (`all` / `pdf` / `docx`) |
 
 ---
 
@@ -256,17 +256,22 @@ Seluruh perintah didukung secara konsisten di NPX, Linux/macOS Bash (`./laporan`
 
 ## Preset Kampus Resmi
 
-Konfigurasi tata letak bawaan yang disesuaikan dengan pedoman penulisan universitas di Indonesia:
+Konfigurasi tata letak bawaan yang disesuaikan dengan pedoman penulisan resmi universitas di Indonesia:
 
-| ID Preset | Institusi / Standar | Batas Margin (A-B-K-Kn) | Tipografi | Gaya Judul Bab | Keterangan Khusus |
+| ID Preset | Institusi / Standar | Batas Margin (Atas-Bawah-Kiri-Kanan) | Tipografi | Gaya Judul Bab | Keterangan Khusus |
 |---|---|---|---|---|---|
-| `standard` | Standar Akademik Umum | 2.5cm - 2.5cm - 3.0cm - 2.5cm | Times New Roman, 12pt | `BAB I` (Tengah) | Format standar makalah, proyek, dan magang |
-| `skripsi-4433` | Standar Skripsi Nasional | 4.0cm - 3.0cm - 4.0cm - 3.0cm | Times New Roman, 12pt | `BAB I` (Tengah) | Standar jilid hardcover dengan margin kiri 4cm |
-| `ui-skripsi` | Universitas Indonesia | 2.5cm - 2.5cm - 2.5cm - 2.5cm | Times New Roman, 12pt | `BAB 1` (Angka Arab) | Format resmi Buku Pedoman Teknis UI |
-| `itb-ta` | Institut Teknologi Bandung | 4.0cm - 3.0cm - 4.0cm - 3.0cm | Times New Roman, 12pt | `BAB I` (Tengah) | Cover minimalis tanpa dosen pembimbing luar |
-| `ugm-skripsi` | Universitas Gadjah Mada | 4.0cm - 3.0cm - 4.0cm - 3.0cm | Times New Roman, 12pt | `BAB I` (Tengah) | Format resmi pedoman tugas akhir & tesis UGM |
-| `its-skripsi` | Institut Teknologi Sepuluh Nopember | 4.0cm - 3.0cm - 4.0cm - 3.0cm | Times New Roman, 12pt | `BAB 1` (Angka Arab) | Format baku buku Tugas Akhir ITS |
-| `unpad-skripsi` | Universitas Padjadjaran | 4.0cm - 3.0cm - 4.0cm - 3.0cm | Times New Roman, 12pt | `BAB I` (Tengah) | Format penulisan skripsi & karya ilmiah UNPAD |
+| `standard` | Standar Akademik Umum | 2.0cm - 3.0cm - 2.5cm - 2.5cm | Libertinus / TNR, 12pt | `BAB I` (Tengah) | Format standar makalah, proyek, dan magang |
+| `skripsi-4433` | Standar Skripsi Nasional | 4.0cm - 3.0cm - 4.0cm - 3.0cm | Libertinus / TNR, 12pt | `BAB I` (Tengah) | Standar jilid hardcover dengan margin kiri 4cm |
+| `ui-skripsi` | Universitas Indonesia (UI) | 3.0cm - 3.0cm - 4.0cm - 3.0cm | Libertinus / TNR, 12pt | `BAB I` (Tengah) | Sesuai Keputusan Rektor & Pedoman Teknis TA UI |
+| `itb-ta` | Institut Teknologi Bandung (ITB) | 4.0cm - 3.0cm - 4.0cm - 3.0cm | Libertinus / TNR, 12pt | `BAB I` (Tengah) | Cover minimalis tanpa dosen pembimbing luar |
+| `ugm-skripsi` | Universitas Gadjah Mada (UGM) | 4.0cm - 3.0cm - 4.0cm - 3.0cm | Libertinus / TNR, 12pt | `BAB I` (Tengah) | Format resmi pedoman tugas akhir & tesis UGM |
+| `its-skripsi` | Institut Teknologi Sepuluh Nopember (ITS) | 3.0cm - 2.5cm - 3.0cm - 2.0cm | Libertinus / TNR, 12pt | `BAB I` (Tengah) | Format baku buku Tugas Akhir ITS |
+| `unpad-skripsi` | Universitas Padjadjaran (UNPAD) | 4.0cm - 3.0cm - 4.0cm - 3.0cm | Libertinus / TNR, 12pt | `BAB I` (Tengah) | Format penulisan skripsi & karya ilmiah UNPAD |
+| `ub-skripsi` | Universitas Brawijaya (UB) | 4.0cm - 3.0cm - 4.0cm - 3.0cm | Libertinus / TNR, 12pt | `BAB I` (Tengah) | Pedoman penulisan skripsi Universitas Brawijaya |
+| `undip-skripsi` | Universitas Diponegoro (UNDIP) | 4.0cm - 3.0cm - 4.0cm - 3.0cm | Libertinus / TNR, 12pt | `BAB I` (Tengah) | Pedoman akademik skripsi Universitas Diponegoro |
+| `unair-skripsi` | Universitas Airlangga (UNAIR) | 4.0cm - 3.0cm - 4.0cm - 3.0cm | Libertinus / TNR, 12pt | `BAB I` (Tengah) | Pedoman penulisan karya ilmiah UNAIR |
+| `ipb-ppki` | IPB University (PPKI) | 3.0cm - 3.0cm - 4.0cm - 3.0cm | Libertinus / TNR, 12pt | `BAB I` (Tengah) | Pedoman PPKI IPB (Indent 1cm, sub-bab tanpa titik akhir) |
+| `telkom-ta` | Telkom University (Tel-U) | 3.0cm - 3.0cm - 4.0cm - 3.0cm | Libertinus / TNR, 12pt | `BAB I` (Tengah) | Pedoman Buku Tugas Akhir Telkom University |
 
 ### Cara Mengaktifkan Preset
 ```bash
@@ -290,8 +295,8 @@ Seluruh struktur dokumen, judul, informasi kepenulisan, tanda tangan lembar peng
 
 ```yaml
 title: "Analisis dan Implementasi Sistem Deteksi Intrusi Jaringan Berbasis eBPF"
-document_type: "Skripsi"
-margin_preset: "itb-ta"
+subtitle: "Skripsi Sarjana"
+preset: "itb-ta"
 
 # Kontrol Struktur Halaman Depan (Opt-In)
 # Default struktur bersih: Cover -> Kata Pengantar -> Daftar Isi -> Batang Tubuh -> Daftar Pustaka

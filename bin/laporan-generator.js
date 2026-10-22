@@ -25,7 +25,7 @@ function showHelp() {
   ========================================================
          LAPORAN GENERATOR CLI (Multi-Host AI Engine)     
   ========================================================
-  Versi: 2.8.0
+  Versi: 2.9.0
   
   Penggunaan:
     npx laporan-generator <perintah> [opsi]
@@ -36,8 +36,10 @@ function showHelp() {
     uninstall         Hapus/bersihkan skill dan perintah dari seluruh AI agent host
     setup             Jalankan installer dependensi otomatis multi-OS (Typst, Pandoc, ImageMagick)
     init              Inisialisasi template dokumen laporan/skripsi di direktori saat ini
+    preset            Kelola preset format kampus (list/show/apply/validate/diff/scan)
     doctor            Audit kesehatan lingkungan dan dependensi dokumen
     stats             Hitung statistik komprehensif dokumen (kata, bab, estimasi halaman)
+    bundle            Kemas seluruh laporan (PDF, DOCX, MD) menjadi arsip zip rilis
     build             Kompilasi dokumen ke PDF dan DOCX
     help              Tampilkan panduan ini
   `);
@@ -63,20 +65,42 @@ switch (command) {
   case 'init':
     require('../lib/init').run(args.slice(1));
     break;
-  case 'stats':
+  case 'stats': {
     const statsScript = path.join(__dirname, '../scripts/report-stats.py');
     const pyStatsCmd = getPythonCommand();
     const statsProc = spawnSync(pyStatsCmd, [statsScript, ...args.slice(1)], { stdio: 'inherit' });
     process.exit(statsProc.status || 0);
     break;
+  }
   case 'doctor':
-  case 'check':
+  case 'check': {
     const doctorScript = path.join(__dirname, '../scripts/report-doctor.py');
     const pyCmd = getPythonCommand();
     const proc = spawnSync(pyCmd, [doctorScript, ...args.slice(1)], { stdio: 'inherit' });
     process.exit(proc.status || 0);
     break;
-  case 'build':
+  }
+  case 'bundle': {
+    const bundleScript = path.join(__dirname, '../scripts/bundle.py');
+    const pyBundleCmd = getPythonCommand();
+    const bundleProc = spawnSync(pyBundleCmd, [bundleScript, ...args.slice(1)], { stdio: 'inherit' });
+    process.exit(bundleProc.status || 0);
+    break;
+  }
+  case 'preset': {
+    const isWinPreset = process.platform === 'win32';
+    if (isWinPreset) {
+      const psPreset = path.join(__dirname, '../laporan.ps1');
+      const winPresetProc = spawnSync('powershell', ['-ExecutionPolicy', 'Bypass', '-File', psPreset, 'preset', ...args.slice(1)], { stdio: 'inherit' });
+      process.exit(winPresetProc.status || 0);
+    } else {
+      const shPreset = path.join(__dirname, '../laporan');
+      const unixPresetProc = spawnSync('bash', [shPreset, 'preset', ...args.slice(1)], { stdio: 'inherit' });
+      process.exit(unixPresetProc.status || 0);
+    }
+    break;
+  }
+  case 'build': {
     const isWin = process.platform === 'win32';
     if (isWin) {
       const psScript = path.join(__dirname, '../laporan.ps1');
@@ -84,10 +108,14 @@ switch (command) {
       process.exit(winProc.status || 0);
     } else {
       const shScript = path.join(__dirname, '../build.sh');
-      const unixProc = spawnSync('bash', [shScript], { stdio: 'inherit' });
-      process.exit(unixProc.status || 0);
+      const docxScript = path.join(__dirname, '../build-docx.sh');
+      const pdfProc = spawnSync('bash', [shScript, ...args.slice(1)], { stdio: 'inherit' });
+      if (pdfProc.status !== 0) process.exit(pdfProc.status || 1);
+      const docxProc = spawnSync('bash', [docxScript, ...args.slice(1)], { stdio: 'inherit' });
+      process.exit(docxProc.status || 0);
     }
     break;
+  }
   case 'help':
   case '--help':
   case '-h':

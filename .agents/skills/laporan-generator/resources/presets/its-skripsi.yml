@@ -1,13 +1,13 @@
 # Preset: Institut Teknologi Sepuluh Nopember (ITS)
 preset_id: "its-skripsi"
 name: "Institut Teknologi Sepuluh Nopember (ITS)"
-description: "Format Tugas Akhir & Skripsi Institut Teknologi Sepuluh Nopember (Margin 4-4-3-3, Standard Academic)."
+description: "Format Tugas Akhir & Skripsi sesuai Pedoman Resmi ITS (Margin Atas 3cm, Kiri 3cm, Bawah 2.5cm, Kanan 2cm)."
 
-# Margin halaman (Standar ITS: Kiri 4cm, Atas 4cm, Bawah 3cm, Kanan 3cm)
-margin_top: 4cm
-margin_bottom: 3cm
-margin_left: 4cm
-margin_right: 3cm
+# Margin halaman (Standar Resmi Pedoman TA ITS: Atas 3.0cm, Bawah 2.5cm, Kiri 3.0cm, Kanan 2.0cm)
+margin_top: 3cm
+margin_bottom: 2.5cm
+margin_left: 3cm
+margin_right: 2cm
 
 # Tipografi
 font_family: "Libertinus Serif"

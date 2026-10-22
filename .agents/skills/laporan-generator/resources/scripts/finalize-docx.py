@@ -43,6 +43,8 @@ def next_heading_text(doc, start):
 def is_front_matter_heading(t):
     norm = t.strip().upper()
     return norm in (
+        "LEMBAR PENGESAHAN",
+        "HALAMAN PENGESAHAN",
         "KATA PENGANTAR",
         "PRAKATA",
         "ABSTRAK",
@@ -103,7 +105,18 @@ def add_pgnum(sect, fmt, start):
     return sect + tag
 
 
+def sync_section_margins(doc):
+    first_mar = re.search(
+        r'<w:sectPr[^>]*>.*?(<w:pgMar\b[^>]*/>).*?</w:sectPr>', doc, re.S
+    )
+    if not first_mar:
+        return doc
+    target_pgmar = first_mar.group(1)
+    return re.sub(r'<w:pgMar\b[^>]*/>', target_pgmar, doc)
+
+
 def process(doc):
+    doc = sync_section_margins(doc)
     matches = list(SECT_IN_PPR.finditer(doc))
     if not matches:
         return doc, 0

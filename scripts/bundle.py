@@ -36,7 +36,13 @@ def main():
     # Cek apakah PDF & DOCX sudah ada
     if not os.path.isfile("Laporan.pdf") or not os.path.isfile("Laporan.docx"):
         print(f"  {BLUE}[1/3] Menjalankan build PDF dan DOCX...{NC}")
-        ret = os.system("./build.sh && make docx")
+        import subprocess
+        if sys.platform == "win32":
+            ret = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", "laporan.ps1", "build"]).returncode
+        else:
+            ret_pdf = subprocess.run(["bash", "build.sh"]).returncode
+            ret_docx = subprocess.run(["bash", "build-docx.sh"]).returncode
+            ret = ret_pdf or ret_docx
         if ret != 0:
             print("Gagal mengompilasi dokumen untuk bundling.")
             return 1

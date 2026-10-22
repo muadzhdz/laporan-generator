@@ -84,6 +84,13 @@ class TestDocxPagenum(unittest.TestCase):
         self.assertEqual(docx_pagenum.needle_of("1.1 Latar Belakang"), "1.1 Latar Belakang")
         self.assertEqual(docx_pagenum.needle_of("KATA PENGANTAR"), "KATA PENGANTAR")
 
+    def test_find_page_exact_line_priority(self):
+        pages = {
+            10: ["Mencegah penomoran ganda pada KATA PENGANTAR dan DAFTAR PUSTAKA.", "6"],
+            23: ["DAFTAR PUSTAKA", "American Psychological Association. (2020).", "19"],
+        }
+        self.assertEqual(docx_pagenum.find_page(pages, "DAFTAR PUSTAKA", 5, 25), 23)
+
     def test_roman_pattern(self):
         self.assertTrue(docx_pagenum.ROMAN.match("iv"))
         self.assertTrue(docx_pagenum.ROMAN.match("xii"))
@@ -97,9 +104,19 @@ class TestDocxPagenum(unittest.TestCase):
 
 class TestFinalizeDocx(unittest.TestCase):
     def test_classify_front_matter(self):
+        self.assertEqual(finalize_docx.classify("LEMBAR PENGESAHAN"), "cover")
         self.assertEqual(finalize_docx.classify("KATA PENGANTAR"), "cover")
         self.assertEqual(finalize_docx.classify("ABSTRAK"), "cover")
         self.assertEqual(finalize_docx.classify("DAFTAR ISI"), "cover")
+
+    def test_sync_section_margins(self):
+        raw_xml = (
+            '<w:sectPr><w:pgSz w:w="11906"/><w:pgMar w:top="2268" w:right="1701" w:bottom="1701" w:left="2268"/></w:sectPr>'
+            '<w:p><w:pPr><w:sectPr><w:pgMar w:top="1134" w:right="1417" w:bottom="1701" w:left="1417"/></w:sectPr></w:pPr></w:p>'
+        )
+        synced = finalize_docx.sync_section_margins(raw_xml)
+        self.assertEqual(synced.count('w:top="2268"'), 2)
+        self.assertEqual(synced.count('w:left="2268"'), 2)
 
     def test_classify_standard_thesis_headings(self):
         self.assertEqual(finalize_docx.classify("BAB I"), "roman")

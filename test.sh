@@ -342,7 +342,7 @@ if [ -d "presets" ]; then
 else
   fail "Direktori presets/ tidak ditemukan"
 fi
-for p in standard.yml skripsi-4433.yml ui-skripsi.yml itb-ta.yml ugm-skripsi.yml its-skripsi.yml; do
+for p in standard.yml skripsi-4433.yml ui-skripsi.yml itb-ta.yml ugm-skripsi.yml its-skripsi.yml unpad-skripsi.yml ub-skripsi.yml undip-skripsi.yml unair-skripsi.yml ipb-ppki.yml telkom-ta.yml; do
   if [ -f "presets/$p" ]; then
     pass "Preset $p tersedia"
   else
