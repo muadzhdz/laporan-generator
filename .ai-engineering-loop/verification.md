@@ -7,6 +7,8 @@
 - **build**: `npm run build`
 
 
+
 ## Verification Protocol
+- Default order, cheapest first, stop at the first failure: build -> typecheck -> lint -> test_unit -> security scan (for example `npm audit --omit=dev`) -> e2e (optional).
 - 100% deterministic checks must pass before Devil's Advocate review.
 - Unit tests must cover boundary cases, null safety, and error paths.

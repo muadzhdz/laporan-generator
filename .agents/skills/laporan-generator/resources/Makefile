@@ -44,26 +44,30 @@ reference-docx:
 	@command -v python3 >/dev/null 2>&1 || { echo "ERROR: python3 not found"; exit 1; }
 	@mkdir -p tmp
 	pandoc --print-default-data-file reference.docx > tmp/ref-default.docx
-	python3 scripts/make-reference-docx.py tmp/ref-default.docx reference.docx
+	python3 scripts/make-reference-docx.py tmp/ref-default.docx templates/default/reference.docx
 	@rm -f tmp/ref-default.docx
 
 html:
-	@if [ ! -d chapters ]; then \
+	@SRC_DIR="."; \
+	if [ ! -d "$$SRC_DIR/chapters" ] && [ -d "templates/default/chapters" ]; then \
+		SRC_DIR="templates/default"; \
+	fi; \
+	if [ ! -d "$$SRC_DIR/chapters" ]; then \
 		echo "ERROR: Direktori chapters/ tidak ditemukan."; \
 		exit 1; \
 	fi; \
-	PRESET=$$(grep -E '^[[:space:]]*(preset|margin_preset):' metadata.yml 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '\"'\''\r\n '); \
+	PRESET=$$(grep -E '^[[:space:]]*(preset|margin_preset):' "$$SRC_DIR/metadata.yml" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '\"'\''\r\n '); \
 	PRESET_FILE=""; \
 	if [ -n "$$PRESET" ] && [ -f "presets/$${PRESET}.yml" ]; then \
 		PRESET_FILE="--metadata-file=presets/$${PRESET}.yml"; \
 	elif [ -f "presets/standard.yml" ]; then \
 		PRESET_FILE="--metadata-file=presets/standard.yml"; \
 	fi; \
-	pandoc chapters/bab*.md \
+	pandoc "$$SRC_DIR"/chapters/bab*.md \
 		$$PRESET_FILE \
-		--metadata-file=metadata.yml \
-		--citeproc --bibliography=references.bib \
-		--csl=apa.csl \
+		--metadata-file="$$SRC_DIR/metadata.yml" \
+		--citeproc --bibliography="$$SRC_DIR/references.bib" \
+		--csl="$$SRC_DIR/apa.csl" \
 		--metadata=reference-section-title="DAFTAR PUSTAKA" \
 		--top-level-division=chapter \
 		--standalone --toc \

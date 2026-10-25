@@ -31,8 +31,10 @@ jobs:
 
       - name: Build Report Documents
         run: |
-          ./build.sh
-          ./build-docx.sh
+          ./build.sh templates/default
+          ./build-docx.sh templates/default
+          cp templates/default/Laporan.pdf .
+          cp templates/default/Laporan.docx .
 
       - name: Setup Node.js for npm
         uses: actions/setup-node@v4
@@ -64,7 +66,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          name: laporan-generator ${{ github.ref_name }}
           body: ${{ steps.changelog.outputs.RELEASE_NOTES }}
           files: |
             Laporan.pdf

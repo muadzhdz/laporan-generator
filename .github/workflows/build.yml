@@ -29,8 +29,10 @@ jobs:
 
       - name: Build PDF and DOCX
         run: |
-          ./build.sh
-          make docx
+          ./build.sh templates/default
+          ./build-docx.sh templates/default
+          cp templates/default/Laporan.pdf .
+          cp templates/default/Laporan.docx .
 
       - name: Upload PDF and DOCX artifacts
         uses: actions/upload-artifact@v4

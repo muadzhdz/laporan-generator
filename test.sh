@@ -26,30 +26,40 @@ if command -v typst &>/dev/null; then pass "typst tersedia"; else fail "typst ti
 if command -v convert &>/dev/null; then pass "imagemagick tersedia"; else fail "imagemagick tidak ada"; fi
 echo ""
 
+# Set template directory
+if [ -d "templates/default" ]; then
+  TPL_DIR="templates/default"
+else
+  TPL_DIR="."
+fi
+
 # T2: Cek file wajib
 echo "[T2] File structure check"
-for f in cover.md template.typ build.sh metadata.yml references.bib reference.docx docx.lua; do
-  if [ -f "$f" ]; then pass "$f ditemukan"; else fail "$f tidak ada"; fi
+for f in cover.md template.typ metadata.yml references.bib reference.docx docx.lua; do
+  if [ -f "$TPL_DIR/$f" ]; then pass "$f ditemukan ($TPL_DIR)"; else fail "$f tidak ada di $TPL_DIR"; fi
 done
-if [ -d chapters ] && ls chapters/bab*.md &>/dev/null; then
-  pass "Konten laporan ditemukan (chapters/)"
+for f in build.sh Makefile laporan laporan.ps1; do
+  if [ -f "$f" ]; then pass "$f ditemukan (root)"; else fail "$f tidak ada di root"; fi
+done
+if [ -d "$TPL_DIR/chapters" ] && ls "$TPL_DIR/chapters"/bab*.md &>/dev/null; then
+  pass "Konten laporan ditemukan ($TPL_DIR/chapters/)"
 else
-  fail "Tidak ada konten laporan di chapters/"
+  fail "Tidak ada konten laporan di $TPL_DIR/chapters/"
 fi
 echo ""
 
 # T3: Cek metadata validity
 echo "[T3] Metadata check"
-if grep -q '^title:' metadata.yml 2>/dev/null; then pass "metadata.yml punya title"; else fail "metadata.yml tidak punya title"; fi
-if grep -q '^author:' metadata.yml 2>/dev/null; then pass "metadata.yml punya author"; else fail "metadata.yml tidak punya author"; fi
+if grep -q '^title:' "$TPL_DIR/metadata.yml" 2>/dev/null; then pass "metadata.yml punya title"; else fail "metadata.yml tidak punya title"; fi
+if grep -q '^author:' "$TPL_DIR/metadata.yml" 2>/dev/null; then pass "metadata.yml punya author"; else fail "metadata.yml tidak punya author"; fi
 echo ""
 
 # T4: Cek template validity
 echo "[T4] Template check"
-if grep -q '^#set page' template.typ; then pass "template punya konfigurasi halaman (#set page)"; else fail "template tanpa #set page"; fi
+if grep -q '^#set page' "$TPL_DIR/template.typ"; then pass "template punya konfigurasi halaman (#set page)"; else fail "template tanpa #set page"; fi
 # shellcheck disable=SC2016
-if grep -Fq '$body$' template.typ; then pass "template punya placeholder \$body\$"; else fail "template tanpa placeholder \$body\$"; fi
-if grep -Fq 'set heading(numbering' template.typ; then pass "template punya penomoran heading otomatis"; else fail "template tanpa penomoran heading"; fi
+if grep -Fq '$body$' "$TPL_DIR/template.typ"; then pass "template punya placeholder \$body\$"; else fail "template tanpa placeholder \$body\$"; fi
+if grep -Fq 'set heading(numbering' "$TPL_DIR/template.typ"; then pass "template punya penomoran heading otomatis"; else fail "template tanpa penomoran heading"; fi
 echo ""
 
 # T5: Cek gitignore
@@ -66,10 +76,12 @@ echo ""
 
 # T7: Build test
 echo "[T7] Build PDF"
-if ./build.sh; then
+if ./build.sh "$TPL_DIR"; then
   pass "Build sukses"
-  if [ -f Laporan.pdf ]; then
-    SIZE=$(stat -c%s Laporan.pdf 2>/dev/null || stat -f%z Laporan.pdf 2>/dev/null)
+  PDF_FILE="$TPL_DIR/Laporan.pdf"
+  [ -f Laporan.pdf ] && PDF_FILE="Laporan.pdf"
+  if [ -f "$PDF_FILE" ]; then
+    SIZE=$(stat -c%s "$PDF_FILE" 2>/dev/null || stat -f%z "$PDF_FILE" 2>/dev/null)
     if [ "$SIZE" -gt 50000 ]; then
       pass "PDF valid ($(numfmt --to=iec "$SIZE" 2>/dev/null || echo "${SIZE}B"))"
     else
@@ -85,7 +97,7 @@ echo ""
 
 # T8: Cek box-drawing di konten
 echo "[T8] No box-drawing characters"
-if grep -rn -E '(├|─|└|│)' chapters/ 2>/dev/null; then
+if grep -rn -E '(├|─|└|│)' "$TPL_DIR/chapters/" 2>/dev/null; then
   fail "Masih ada box-drawing characters"
 else
   pass "Tidak ada box-drawing characters"
@@ -94,12 +106,12 @@ echo ""
 
 # T9: Cek manual numbering di heading
 echo "[T9] No manual numbering in headings"
-if grep -rn '^## [0-9]\+\.' chapters/ 2>/dev/null; then
+if grep -rn '^## [0-9]\+\.' "$TPL_DIR/chapters/" 2>/dev/null; then
   fail "Masih ada manual numbering di heading (harusnya ## Judul, bukan ## 1.1 Judul)"
 else
   pass "Tidak ada manual numbering di heading level 2"
 fi
-if grep -rn '^### [0-9]\+\.' chapters/ 2>/dev/null; then
+if grep -rn '^### [0-9]\+\.' "$TPL_DIR/chapters/" 2>/dev/null; then
   fail "Masih ada manual numbering di heading level 3"
 else
   pass "Tidak ada manual numbering di heading level 3"
@@ -108,12 +120,12 @@ echo ""
 
 # T10: Cek metadata fields
 echo "[T10] Metadata fields check"
-if grep -q '^lecturer:' metadata.yml 2>/dev/null; then
+if grep -q '^lecturer:' "$TPL_DIR/metadata.yml" 2>/dev/null; then
   pass "metadata.yml punya lecturer"
 else
   fail "metadata.yml tidak punya lecturer"
 fi
-if grep -q '^course:' metadata.yml 2>/dev/null; then
+if grep -q '^course:' "$TPL_DIR/metadata.yml" 2>/dev/null; then
   pass "metadata.yml punya course"
 else
   fail "metadata.yml tidak punya course"
@@ -122,7 +134,7 @@ echo ""
 
 # T11: Cek format BibTeX
 echo "[T11] References check"
-if grep -qE '^@[a-zA-Z]+{' references.bib 2>/dev/null; then
+if grep -qE '^@[a-zA-Z]+{' "$TPL_DIR/references.bib" 2>/dev/null; then
   pass "references.bib memiliki struktur BibTeX valid"
 else
   fail "references.bib tidak memiliki entri BibTeX valid"
@@ -150,8 +162,10 @@ echo ""
 # T14: Cek ekstrasi dan keterbacaan teks PDF
 echo "[T14] PDF content readability check"
 if command -v pdftotext &>/dev/null; then
-  if [ -f Laporan.pdf ]; then
-    WORDS=$(pdftotext Laporan.pdf - 2>/dev/null | wc -w)
+  PDF_FILE="$TPL_DIR/Laporan.pdf"
+  [ -f Laporan.pdf ] && PDF_FILE="Laporan.pdf"
+  if [ -f "$PDF_FILE" ]; then
+    WORDS=$(pdftotext "$PDF_FILE" - 2>/dev/null | wc -w)
     if [ "$WORDS" -gt 200 ]; then
       pass "PDF readable ($WORDS kata terdeteksi)"
     else
@@ -177,11 +191,13 @@ echo ""
 # T16: Cek kualitas DOCX export
 echo "[T16] DOCX export check"
 if command -v unzip &>/dev/null; then
-  if ./build-docx.sh >/dev/null 2>&1 || (command -v make >/dev/null 2>&1 && make docx >/dev/null 2>&1); then
+  if ./build-docx.sh "$TPL_DIR" >/dev/null 2>&1 || (command -v make >/dev/null 2>&1 && make docx >/dev/null 2>&1); then
     pass "build-docx sukses"
-    if [ -f Laporan.docx ]; then
-      DOCXML=$(unzip -p Laporan.docx word/document.xml 2>/dev/null)
-      STYXML=$(unzip -p Laporan.docx word/styles.xml 2>/dev/null)
+    DOCX_FILE="$TPL_DIR/Laporan.docx"
+    [ -f Laporan.docx ] && DOCX_FILE="Laporan.docx"
+    if [ -f "$DOCX_FILE" ]; then
+      DOCXML=$(unzip -p "$DOCX_FILE" word/document.xml 2>/dev/null)
+      STYXML=$(unzip -p "$DOCX_FILE" word/styles.xml 2>/dev/null)
       if echo "$DOCXML" | grep -q 'BAB I</w:t></w:r><w:r><w:br'; then
         pass "docx penomoran BAB I dua baris"
       else
@@ -324,7 +340,7 @@ if ./laporan help | grep -q "LAPORAN GENERATOR CLI"; then
 else
   fail "./laporan help gagal"
 fi
-if grep -q "doc-margin" template.typ; then
+if grep -q "doc-margin" "$TPL_DIR/template.typ"; then
   pass "template.typ mendukung preset margin"
 else
   fail "template.typ tidak memiliki variabel doc-margin"
@@ -450,7 +466,7 @@ else
   fail "build.sh belum mendukung deteksi bab dinamis"
 fi
 
-if grep -q "heading_chapter_num_format" docx.lua && grep -q "heading_chapter_num_format" template.typ; then
+if grep -q "heading_chapter_num_format" "$TPL_DIR/docx.lua" && grep -q "heading_chapter_num_format" "$TPL_DIR/template.typ"; then
   pass "Typst dan DOCX keduanya mendukung heading_chapter_num_format dinamis"
 else
   fail "Dukungan heading_chapter_num_format belum lengkap di kedua engine"
@@ -464,13 +480,15 @@ fi
 echo ""
 
 echo "[T22] BAB I Spacing Fix, CLI Supercharged & Multi-Genre Protocol check"
-if pdftotext Laporan.pdf - 2>/dev/null | grep -q "BAB I PENDAHULUAN"; then
+PDF_FILE="$TPL_DIR/Laporan.pdf"
+[ -f Laporan.pdf ] && PDF_FILE="Laporan.pdf"
+if pdftotext "$PDF_FILE" - 2>/dev/null | grep -q "BAB I PENDAHULUAN"; then
   pass "Judul Bab I berjarak spasi sempurna ('BAB I PENDAHULUAN') di PDF"
 else
   fail "Judul Bab I tidak memiliki spasi yang tepat di PDF"
 fi
 
-if ! pdftotext Laporan.pdf - 2>/dev/null | grep -q "BABI PENDAHULUAN"; then
+if ! pdftotext "$PDF_FILE" - 2>/dev/null | grep -q "BABI PENDAHULUAN"; then
   pass "Bebas dari bug teks rapat 'BABI PENDAHULUAN'"
 else
   fail "Terdeteksi bug teks rapat 'BABI PENDAHULUAN'"
@@ -500,10 +518,12 @@ else
   fail "laporan.ps1 belum mendukung perintah supercharged"
 fi
 
-if grep -q "PROTOKOL WAWANCARA INTERAKTIF" prompt.md && grep -q "Makalah / Paper Akademik" prompt.md; then
-  pass "prompt.md memuat protokol wawancara 3 tahap dan dukungan multi-karya ilmiah"
+PROMPT_FILE="docs/prompt.md"
+[ -f "prompt.md" ] && PROMPT_FILE="prompt.md"
+if grep -q "PROTOKOL WAWANCARA INTERAKTIF" "$PROMPT_FILE" && grep -q "Makalah / Paper Akademik" "$PROMPT_FILE"; then
+  pass "docs/prompt.md memuat protokol wawancara 3 tahap dan dukungan multi-karya ilmiah"
 else
-  fail "prompt.md belum memuat protokol wawancara interaktif multi-genre"
+  fail "docs/prompt.md belum memuat protokol wawancara interaktif multi-genre"
 fi
 echo ""
 
@@ -601,6 +621,45 @@ else
   fail "MCP Server integration test gagal"
 fi
 echo ""
+
+# T26: Document Ingestion Pipeline check (scripts/ingest.py)
+echo "[T26] Document Ingestion Pipeline check (scripts/ingest.py)"
+if [ -x "scripts/ingest.py" ]; then
+  pass "scripts/ingest.py dapat dieksekusi"
+else
+  fail "scripts/ingest.py tidak dapat dieksekusi"
+fi
+
+DOCX_FILE="$TPL_DIR/Laporan.docx"
+[ -f Laporan.docx ] && DOCX_FILE="Laporan.docx"
+if python3 scripts/ingest.py "$DOCX_FILE" | grep -q "KATA PENGANTAR"; then
+  pass "scripts/ingest.py berhasil mengekstrak konten Laporan.docx menjadi Markdown"
+else
+  fail "scripts/ingest.py gagal mengekstrak konten DOCX"
+fi
+
+if node bin/laporan-generator.js --help | grep -q "import"; then
+  pass "CLI router npx laporan-generator mendukung perintah import"
+else
+  fail "CLI router belum mendukung perintah import"
+fi
+
+if ./laporan help | grep -q "import"; then
+  pass "laporan (Bash) mendukung perintah import"
+else
+  fail "laporan (Bash) belum mendukung perintah import"
+fi
+
+if grep -q "import" laporan.ps1; then
+  pass "laporan.ps1 (PowerShell) mendukung perintah import"
+else
+  fail "laporan.ps1 belum mendukung perintah import"
+fi
+echo ""
+
+# Cleanup test artifacts
+rm -f "$TPL_DIR/Laporan.pdf" "$TPL_DIR/Laporan.docx" Laporan.pdf Laporan.docx
+rm -rf dist templates/default/dist
 
 echo "========================"
 echo "Hasil: $PASS passed, $FAIL failed"

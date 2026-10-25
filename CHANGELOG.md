@@ -4,6 +4,30 @@ Semua perubahan penting pada project **Laporan Generator** akan didokumentasikan
 
 Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/1.0.0/) dan mematuhi [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-10-25
+
+### Added
+- **Bidirectional Ingestion Pipeline (Microsoft MarkItDown Integration)**: Menambahkan modul `scripts/ingest.py` dan perintah `./laporan import` / `npx laporan-generator import` yang mampu mengonversi dokumen eksternal (`.docx`, `.pdf`, `.pptx`, `.xlsx`, `.txt`) menjadi Markdown siap kompilasi. Memiliki *zero-dependency fallback parser* untuk DOCX dan integrasi penuh dengan Microsoft MarkItDown.
+- **Model Context Protocol (MCP) 2.0 Full Suite**:
+  - Penambahan Tool baru: `laporan_import` untuk konversi dokumen otomatis oleh AI agent.
+  - Penambahan Standar MCP Resources (`resources/list` & `resources/read`): `laporan://presets/all`, `laporan://presets/{preset_id}`, `laporan://docs/campus-guide`, dan `laporan://docs/metadata-schema`.
+  - Penambahan Standar MCP Prompts (`prompts/list` & `prompts/get`): `academic_interview` dan `puebi_compliance_audit`.
+- **Ekspansi Test Suite Otomatis**: Penambahan kategori pengujian `[T26]` untuk verifikasi pipeline import dokumen di `test.sh` dan 11 test kasus integrasi MCP di `tests/test_mcp.js` (total 116 passed).
+- **Tata Kelola AI Engineering Loop (AEL) v2.3.0 & ADR 002**: Rekonsiliasi living context dan pencatatan arsitektur resmi v3.0.0 pada `.ai-engineering-loop/adrs/002-v3-architectural-leap.md`.
+
+### Changed
+- **Refactoring Arsitektur Total (Encapsulation ke `templates/default/`)**:
+  - Mengisolasi seluruh aset template dokumen skripsi (`chapters/`, `cover.md`, `metadata.yml`, `template.typ`, `reference.docx`, `docx.lua`, `references.bib`, `apa.csl`, `logo.jpg`) ke dalam direktori terisolasi `templates/default/`.
+  - Membersihkan root repository sehingga 100% fokus sebagai CLI Toolchain Engine & Multi-Host Agent Skill tanpa ada file dummy skripsi yang berceceran.
+  - Memperbarui resolusi path pada `lib/init.js`, `lib/sync-hosts.js`, `build.sh`, `build-docx.sh`, utilitas `scripts/`, `package.json`, dan `test.sh`.
+  - Memindahkan `prompt.md` ke `docs/prompt.md` sebagai dokumentasi directive resmi.
+  - Memperluas assertion pengujian otomatis menjadi **119/119 passed** (0 failed) pada `test.sh` dan 24/24 passed pada `scripts/test_scripts.py`.
+- **Perombakan Total Dokumentasi README.md**: Memangkas README dari 598 baris (24 KB) menjadi 103 baris minimalis, elegan, dan profesional berstandar developer tools modern (`uv`, `typst`, `ripgrep`) dalam Bahasa Indonesia.
+- **Standardisasi Penamaan Rilis GitHub Actions**: Memperbarui `.github/workflows/release.yml` agar rilis tag diterbitkan dengan nama teridentifikasi: `laporan-generator ${{ github.ref_name }}` (contoh: `laporan-generator v3.0.0`).
+- **Sinkronisasi Versi Global ke v3.0.0**: Memperbarui versi pada `package.json`, `bin/laporan-generator.js`, `lib/mcp.js`, `laporan` (Bash), dan `laporan.ps1` (PowerShell).
+
+---
+
 ## [2.9.0] - 2026-10-22
 
 ### Added

@@ -12,3 +12,4 @@
 
 ## Observed Evidence
 - Manifest: package.json
+- Adapter: github (remote origin host github.com)

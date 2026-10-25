@@ -6,6 +6,8 @@ if [ -n "$1" ]; then
   OUTDIR="$1"
 elif [ -f "$(pwd)/metadata.yml" ] && [ -d "$(pwd)/chapters" ]; then
   OUTDIR="$(pwd)"
+elif [ -f "$DIR/templates/default/metadata.yml" ] && [ -d "$DIR/templates/default/chapters" ]; then
+  OUTDIR="$DIR/templates/default"
 else
   OUTDIR="$DIR"
 fi
@@ -16,6 +18,7 @@ trap 'rm -rf "$TMPDIR"' EXIT
 
 FALLBACK_DIRS=(
   "$OUTDIR"
+  "$DIR/templates/default"
   "$DIR"
   "$HOME/.agents/skills/laporan-generator/resources"
 )

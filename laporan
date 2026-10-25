@@ -27,7 +27,7 @@ export PYTHONUTF8=1
 show_banner() {
     echo -e "${CYAN}${BOLD}"
     echo "  ========================================================"
-    echo "                 LAPORAN GENERATOR CLI v2.9.0             "
+    echo "                 LAPORAN GENERATOR CLI v3.0.0             "
     echo "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   "
     echo "  ========================================================"
     echo -e "${NC}"
@@ -43,6 +43,7 @@ show_help() {
     echo -e "  ${GREEN}pdf${NC}          Kompilasi dokumen PDF (via Typst)"
     echo -e "  ${GREEN}docx${NC}         Kompilasi dokumen Microsoft Word (.docx)"
     echo -e "  ${GREEN}init${NC}         Wizard interaktif untuk konfigurasi awal metadata"
+    echo -e "  ${GREEN}import${NC}       Konversi berkas eksternal (DOCX, PDF, PPTX, XLSX) ke Markdown"
     echo -e "  ${GREEN}preset${NC}       Kelola preset format kampus (list/show/apply/diff/validate)"
     echo -e "  ${GREEN}stats${NC}        Analisis statistik kata, halaman, gambar, dan durasi baca"
     echo -e "  ${GREEN}doctor${NC}       Audit kesehatan proyek (broken images, sitasi hilang, dll.)"
@@ -116,13 +117,17 @@ cmd_check() {
         fi
     }
 
-    check_file "metadata.yml" "Metadata laporan"
-    check_file "cover.md" "Kata pengantar & outline"
-    check_file "template.typ" "Template Typst"
-    check_file "reference.docx" "Template Word"
-    check_file "references.bib" "Daftar pustaka"
+    local tpl_prefix=""
+    if [ ! -f "metadata.yml" ] && [ -f "templates/default/metadata.yml" ]; then
+        tpl_prefix="templates/default/"
+    fi
+    check_file "${tpl_prefix}metadata.yml" "Metadata laporan"
+    check_file "${tpl_prefix}cover.md" "Kata pengantar & outline"
+    check_file "${tpl_prefix}template.typ" "Template Typst"
+    check_file "${tpl_prefix}reference.docx" "Template Word"
+    check_file "${tpl_prefix}references.bib" "Daftar pustaka"
     check_dir  "presets" "Direktori preset kampus"
-    check_dir  "chapters" "Direktori bab laporan"
+    check_dir  "${tpl_prefix}chapters" "Direktori bab laporan"
 
     echo ""
     if [ "$all_ok" = true ]; then
@@ -248,20 +253,24 @@ cmd_preset() {
                 echo -e "${RED}Preset '${target}' tidak ditemukan di presets/${NC}"
                 exit 1
             fi
-            if [ ! -f "metadata.yml" ]; then
+            local meta_target="metadata.yml"
+            if [ ! -f "$meta_target" ] && [ -f "templates/default/metadata.yml" ]; then
+                meta_target="templates/default/metadata.yml"
+            fi
+            if [ ! -f "$meta_target" ]; then
                 echo -e "${RED}metadata.yml tidak ditemukan. Jalankan './laporan init' terlebih dahulu.${NC}"
                 exit 1
             fi
-            if grep -qE '^\s*preset:' metadata.yml; then
-                sed -i.bak -E "s/^\s*preset:.*/preset: \"$target\"/" metadata.yml && rm -f metadata.yml.bak
-            elif grep -qE '^\s*margin_preset:' metadata.yml; then
-                sed -i.bak -E "s/^\s*margin_preset:.*/preset: \"$target\"/" metadata.yml && rm -f metadata.yml.bak
-            elif grep -q '^\.\.\.' metadata.yml; then
-                sed -i.bak -E "s/^\.\.\./preset: \"$target\"\n.../" metadata.yml && rm -f metadata.yml.bak
+            if grep -qE '^\s*preset:' "$meta_target"; then
+                sed -i.bak -E "s/^\s*preset:.*/preset: \"$target\"/" "$meta_target" && rm -f "${meta_target}.bak"
+            elif grep -qE '^\s*margin_preset:' "$meta_target"; then
+                sed -i.bak -E "s/^\s*margin_preset:.*/preset: \"$target\"/" "$meta_target" && rm -f "${meta_target}.bak"
+            elif grep -q '^\.\.\.' "$meta_target"; then
+                sed -i.bak -E "s/^\.\.\./preset: \"$target\"\n.../" "$meta_target" && rm -f "${meta_target}.bak"
             else
-                echo "preset: \"$target\"" >> metadata.yml
+                echo "preset: \"$target\"" >> "$meta_target"
             fi
-            echo -e "${GREEN}${BOLD}[OK] Preset '${target}' berhasil diterapkan ke metadata.yml!${NC}"
+            echo -e "${GREEN}${BOLD}[OK] Preset '${target}' berhasil diterapkan ke ${meta_target}!${NC}"
             ;;
         *)
             echo -e "${RED}Sub-perintah preset tidak dikenal: $subcmd${NC}"
@@ -395,6 +404,10 @@ cmd_bundle() {
     python3 scripts/bundle.py
 }
 
+cmd_import() {
+    python3 scripts/ingest.py "$@"
+}
+
 # Main routing
 case "${1:-help}" in
     build)
@@ -408,6 +421,10 @@ case "${1:-help}" in
         ;;
     init)
         cmd_init
+        ;;
+    import|ingest)
+        shift
+        cmd_import "$@"
         ;;
     preset)
         shift

@@ -25,7 +25,7 @@ function showHelp() {
   ========================================================
          LAPORAN GENERATOR CLI (Multi-Host AI Engine)     
   ========================================================
-  Versi: 2.9.0
+  Versi: 3.0.0
   
   Penggunaan:
     npx laporan-generator <perintah> [opsi]
@@ -36,6 +36,7 @@ function showHelp() {
     uninstall         Hapus/bersihkan skill dan perintah dari seluruh AI agent host
     setup             Jalankan installer dependensi otomatis multi-OS (Typst, Pandoc, ImageMagick)
     init              Inisialisasi template dokumen laporan/skripsi di direktori saat ini
+    import            Konversi berkas DOCX, PDF, PPTX, XLSX ke Markdown (via MarkItDown)
     preset            Kelola preset format kampus (list/show/apply/validate/diff/scan)
     doctor            Audit kesehatan lingkungan dan dependensi dokumen
     stats             Hitung statistik komprehensif dokumen (kata, bab, estimasi halaman)
@@ -65,6 +66,14 @@ switch (command) {
   case 'init':
     require('../lib/init').run(args.slice(1));
     break;
+  case 'import':
+  case 'ingest': {
+    const ingestScript = path.join(__dirname, '../scripts/ingest.py');
+    const pyCmd = getPythonCommand();
+    const proc = spawnSync(pyCmd, [ingestScript, ...args.slice(1)], { stdio: 'inherit' });
+    process.exit(proc.status || 0);
+    break;
+  }
   case 'stats': {
     const statsScript = path.join(__dirname, '../scripts/report-stats.py');
     const pyStatsCmd = getPythonCommand();

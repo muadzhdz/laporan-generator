@@ -286,7 +286,7 @@ def main():
     print(f"[3/3] [OK] Preset berhasil disimpan ke: {out_file}")
 
     if args.apply:
-        meta_file = "metadata.yml"
+        meta_file = "metadata.yml" if os.path.exists("metadata.yml") else ("templates/default/metadata.yml" if os.path.exists("templates/default/metadata.yml") else "metadata.yml")
         if os.path.exists(meta_file):
             with open(meta_file, "r", encoding="utf-8") as f:
                 content = f.read()

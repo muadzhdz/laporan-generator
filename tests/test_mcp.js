@@ -83,7 +83,8 @@ async function runMcpTest() {
   assert.ok(toolNames.includes("laporan_presets"));
   assert.ok(toolNames.includes("laporan_citations"));
   assert.ok(toolNames.includes("laporan_build"));
-  console.log("  ✔ [OK] tools/list returns all 6 tools:", toolNames.join(", "));
+  assert.ok(toolNames.includes("laporan_import"));
+  console.log("  ✔ [OK] tools/list returns all 7 tools:", toolNames.join(", "));
 
   // 3. Test tools/call: laporan_presets (list)
   send({
@@ -162,6 +163,52 @@ async function runMcpTest() {
   assert.strictEqual(citeData.valid, true);
   assert.ok(citeData.totalEntries > 0);
   console.log("  ✔ [OK] laporan_citations validate returned " + citeData.totalEntries + " bib entries");
+
+  // 8. Test resources/list
+  send({
+    jsonrpc: "2.0",
+    id: 8,
+    method: "resources/list",
+    params: {}
+  });
+  const resList = await waitForResponse(8);
+  assert.ok(Array.isArray(resList.result.resources));
+  assert.ok(resList.result.resources.length >= 3);
+  console.log("  ✔ [OK] resources/list returned " + resList.result.resources.length + " resources");
+
+  // 9. Test resources/read
+  send({
+    jsonrpc: "2.0",
+    id: 9,
+    method: "resources/read",
+    params: { uri: "laporan://presets/all" }
+  });
+  const resRead = await waitForResponse(9);
+  assert.ok(resRead.result.contents);
+  const presetsJson = JSON.parse(resRead.result.contents[0].text);
+  assert.ok(presetsJson.presets.length >= 10);
+  console.log("  ✔ [OK] resources/read laporan://presets/all returned " + presetsJson.presets.length + " presets");
+
+  // 10. Test prompts/list & prompts/get
+  send({
+    jsonrpc: "2.0",
+    id: 10,
+    method: "prompts/list",
+    params: {}
+  });
+  const promptList = await waitForResponse(10);
+  assert.ok(Array.isArray(promptList.result.prompts));
+  console.log("  ✔ [OK] prompts/list returned " + promptList.result.prompts.length + " prompts");
+
+  send({
+    jsonrpc: "2.0",
+    id: 11,
+    method: "prompts/get",
+    params: { name: "academic_interview" }
+  });
+  const promptGet = await waitForResponse(11);
+  assert.ok(promptGet.result.messages);
+  console.log("  ✔ [OK] prompts/get academic_interview returned valid prompt");
 
   proc.kill();
   console.log("\nAll MCP integration tests PASSED successfully!");

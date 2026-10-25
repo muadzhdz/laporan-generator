@@ -203,7 +203,10 @@ class TestReportDoctor(unittest.TestCase):
 
 class TestFrontMatterOptIn(unittest.TestCase):
     def test_default_metadata_structure(self):
-        meta_path = os.path.join(get_project_root(), "metadata.yml")
+        root = get_project_root()
+        meta_path = os.path.join(root, "templates", "default", "metadata.yml")
+        if not os.path.exists(meta_path):
+            meta_path = os.path.join(root, "metadata.yml")
         with open(meta_path, "r", encoding="utf-8") as f:
             content = f.read()
         # Verify abstract is commented or empty by default
@@ -216,7 +219,10 @@ class TestFrontMatterOptIn(unittest.TestCase):
         self.assertTrue(has_dt, "metadata.yml must explicitly specify daftar_tabel: false by default")
 
     def test_cover_md_gated_outlines(self):
-        cover_path = os.path.join(get_project_root(), "cover.md")
+        root = get_project_root()
+        cover_path = os.path.join(root, "templates", "default", "cover.md")
+        if not os.path.exists(cover_path):
+            cover_path = os.path.join(root, "cover.md")
         with open(cover_path, "r", encoding="utf-8") as f:
             content = f.read()
         # Unconditional outline queries must not exist

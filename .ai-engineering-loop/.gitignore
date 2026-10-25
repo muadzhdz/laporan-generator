@@ -1,4 +1,5 @@
 # Runtime artifacts may contain source excerpts and verification logs.
+.ael-generated.json
 runs/
 usage/
 worktrees/

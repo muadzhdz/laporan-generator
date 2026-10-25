@@ -40,7 +40,7 @@ function Get-PythonCommand {
 
 function Show-Banner {
     Write-Host "  ========================================================" -ForegroundColor Cyan
-    Write-Host "                 LAPORAN GENERATOR CLI v2.9.0             " -ForegroundColor Cyan
+    Write-Host "                 LAPORAN GENERATOR CLI v3.0.0             " -ForegroundColor Cyan
     Write-Host "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   " -ForegroundColor Cyan
     Write-Host "  ========================================================" -ForegroundColor Cyan
     Write-Host ""
@@ -113,17 +113,22 @@ function Cmd-Check {
 
     Write-Host ""
     Write-Host "[2/2] Memeriksa Berkas Proyek..." -ForegroundColor Blue
+    $tplPrefix = ""
+    if (-not (Test-Path "metadata.yml") -and (Test-Path "templates/default/metadata.yml")) {
+        $tplPrefix = "templates/default/"
+    }
     $files = @("metadata.yml", "cover.md", "template.typ", "reference.docx", "references.bib", "docx.lua")
     foreach ($f in $files) {
-        if (Test-Path $f) {
-            Write-Host "  [OK] Berkas $f ditemukan" -ForegroundColor Green
+        $targetPath = Join-Path $tplPrefix $f
+        if (Test-Path $targetPath) {
+            Write-Host "  [OK] Berkas $f ditemukan ($targetPath)" -ForegroundColor Green
         } else {
             Write-Host "  [FAIL] Berkas $f tidak ditemukan" -ForegroundColor Red
             $allOk = $false
         }
     }
 
-    $dirs = @("presets", "chapters")
+    $dirs = @("presets", "${tplPrefix}chapters")
     foreach ($d in $dirs) {
         if (Test-Path $d) {
             Write-Host "  [OK] Direktori $d ditemukan" -ForegroundColor Green
@@ -543,6 +548,8 @@ switch ($Command.ToLower()) {
     "pdf"    { Cmd-Build-PDF }
     "docx"   { Cmd-Build-DOCX }
     "init"   { Cmd-Init }
+    "import" { & (Get-Python-Command) (Join-Path $PSScriptRoot "scripts\ingest.py") @extraArgs }
+    "ingest" { & (Get-Python-Command) (Join-Path $PSScriptRoot "scripts\ingest.py") @extraArgs }
     "stats"  { Cmd-Stats $extraArgs }
     "doctor" { Cmd-Doctor $extraArgs }
     "bundle" { Cmd-Bundle $extraArgs }
