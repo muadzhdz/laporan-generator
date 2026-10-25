@@ -62,11 +62,15 @@ def main():
     target_dir = os.getcwd()
     if pos_args:
         target_dir = os.path.abspath(pos_args[0])
-    elif not (os.path.isfile(os.path.join(target_dir, "metadata.yml")) or os.path.isdir(os.path.join(target_dir, "chapters"))):
+    
+    if not (os.path.isfile(os.path.join(target_dir, "metadata.yml")) or os.path.isdir(os.path.join(target_dir, "chapters"))):
+        tpl_dir = os.path.join(target_dir, "templates", "default")
         pkg_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        tpl_dir = os.path.join(pkg_root, "templates", "default")
+        pkg_tpl = os.path.join(pkg_root, "templates", "default")
         if os.path.isfile(os.path.join(tpl_dir, "metadata.yml")):
             target_dir = tpl_dir
+        elif os.path.isfile(os.path.join(pkg_tpl, "metadata.yml")):
+            target_dir = pkg_tpl
         elif os.path.isfile(os.path.join(pkg_root, "metadata.yml")):
             target_dir = pkg_root
 

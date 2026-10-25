@@ -3,7 +3,7 @@ set -e
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 if [ -n "$1" ]; then
-  OUTDIR="$1"
+  OUTDIR="$(cd "$1" && pwd)"
 elif [ -f "$(pwd)/metadata.yml" ] && [ -d "$(pwd)/chapters" ]; then
   OUTDIR="$(pwd)"
 elif [ -f "$DIR/templates/default/metadata.yml" ] && [ -d "$DIR/templates/default/chapters" ]; then

@@ -17,7 +17,8 @@ NC = "\033[0m"
 def main():
     pos_args = [a for a in sys.argv[1:] if not a.startswith("-")]
 
-    target_dir = os.getcwd()
+    orig_cwd = os.getcwd()
+    target_dir = orig_cwd
     if pos_args:
         target_dir = os.path.abspath(pos_args[0])
     elif not (os.path.isfile(os.path.join(target_dir, "metadata.yml")) or os.path.isdir(os.path.join(target_dir, "chapters"))):
@@ -28,6 +29,7 @@ def main():
         elif os.path.isfile(os.path.join(pkg_root, "metadata.yml")):
             target_dir = pkg_root
 
+    pkg_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.chdir(target_dir)
 
     print(f"{CYAN}{BOLD}")
@@ -40,11 +42,14 @@ def main():
     if not os.path.isfile("Laporan.pdf") or not os.path.isfile("Laporan.docx"):
         print(f"  {BLUE}[1/3] Menjalankan build PDF dan DOCX...{NC}")
         import subprocess
+        sh_pdf = "build.sh" if os.path.isfile("build.sh") else os.path.join(pkg_root, "build.sh")
+        sh_docx = "build-docx.sh" if os.path.isfile("build-docx.sh") else os.path.join(pkg_root, "build-docx.sh")
+        ps_script = "laporan.ps1" if os.path.isfile("laporan.ps1") else os.path.join(pkg_root, "laporan.ps1")
         if sys.platform == "win32":
-            ret = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", "laporan.ps1", "build"]).returncode
+            ret = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", ps_script, "build"]).returncode
         else:
-            ret_pdf = subprocess.run(["bash", "build.sh"]).returncode
-            ret_docx = subprocess.run(["bash", "build-docx.sh"]).returncode
+            ret_pdf = subprocess.run(["bash", sh_pdf]).returncode
+            ret_docx = subprocess.run(["bash", sh_docx]).returncode
             ret = ret_pdf or ret_docx
         if ret != 0:
             print("Gagal mengompilasi dokumen untuk bundling.")
@@ -52,9 +57,13 @@ def main():
     else:
         print(f"  {GREEN}[OK]{NC} Berkas Laporan.pdf dan Laporan.docx siap dikemas.")
 
-    out_dir = "dist"
-    os.makedirs(out_dir, exist_ok=True)
-    zip_path = os.path.join(out_dir, "Laporan-Akademik-Lengkap.zip")
+    out_dirs = [os.path.join(target_dir, "dist")]
+    if orig_cwd != target_dir:
+        out_dirs.append(os.path.join(orig_cwd, "dist"))
+
+    for od in out_dirs:
+        os.makedirs(od, exist_ok=True)
+    zip_path = os.path.join(out_dirs[0], "Laporan-Akademik-Lengkap.zip")
 
     files_to_pack = [
         "Laporan.pdf",
@@ -79,6 +88,10 @@ def main():
                 zf.write(f, arcname=f)
                 sz = os.path.getsize(f) / 1024
                 print(f"    + {f:<30} ({sz:.1f} KB)")
+
+    import shutil
+    for od in out_dirs[1:]:
+        shutil.copy2(zip_path, os.path.join(od, "Laporan-Akademik-Lengkap.zip"))
 
     total_sz = os.path.getsize(zip_path) / 1024
     print("")
