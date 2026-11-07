@@ -1,0 +1,221 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/muadzhdz/laporan-generator/main/docs/metadata.schema.json",
+  "title": "Laporan Generator Metadata Schema",
+  "description": "JSON Schema untuk validasi dan autocompletion metadata.yml pada Laporan Generator (v3.1.0)",
+  "type": "object",
+  "required": [
+    "title",
+    "author",
+    "institution",
+    "year"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Judul utama laporan atau karya ilmiah"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Sub-judul atau keterangan jenis laporan (opsional)"
+    },
+    "author": {
+      "type": "array",
+      "description": "Daftar penulis laporan atau artikel",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nama lengkap penulis"
+          },
+          "nim": {
+            "type": "string",
+            "description": "Nomor Induk Mahasiswa (NIM / NPM / NISN)"
+          },
+          "affiliation": {
+            "type": "string",
+            "description": "Afiliasi institusi / prodi penulis (khusus jurnal)"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Alamat surel penulis (khusus jurnal)"
+          }
+        }
+      }
+    },
+    "lecturer": {
+      "type": "string",
+      "description": "Nama lengkap dan gelar dosen pengampu atau pembimbing"
+    },
+    "lecturer_label": {
+      "type": "string",
+      "default": "Dosen Pengampu:",
+      "description": "Label peran dosen pada halaman sampul"
+    },
+    "course": {
+      "type": "string",
+      "description": "Nama mata kuliah atau jenis proyek tugas akhir"
+    },
+    "institution": {
+      "type": "string",
+      "description": "Nama universitas, institut, politeknik, atau sekolah"
+    },
+    "faculty": {
+      "type": "string",
+      "description": "Nama fakultas atau sekolah tinggi"
+    },
+    "department": {
+      "type": "string",
+      "description": "Nama program studi atau departemen"
+    },
+    "city": {
+      "type": "string",
+      "description": "Kota lokasi institusi"
+    },
+    "year": {
+      "type": "string",
+      "description": "Tahun ajaran atau tahun kelulusan (contoh: 2026)"
+    },
+    "date": {
+      "type": "string",
+      "description": "Bulan dan tahun penyusunan (contoh: Juli 2026)"
+    },
+    "preset": {
+      "type": "string",
+      "default": "standard",
+      "enum": [
+        "standard",
+        "skripsi-4433",
+        "ui-skripsi",
+        "itb-ta",
+        "ugm-skripsi",
+        "its-skripsi",
+        "unpad-skripsi",
+        "ub-skripsi",
+        "undip-skripsi",
+        "unair-skripsi",
+        "ipb-ppki",
+        "telkom-ta",
+        "jurnal-uajy",
+        "jurnal-standar"
+      ],
+      "description": "ID preset format kampus atau standar jurnal ilmiah"
+    },
+    "doc_type": {
+      "type": "string",
+      "default": "thesis",
+      "enum": [
+        "thesis",
+        "journal"
+      ],
+      "description": "Paradigma dokumen: thesis (skripsi dengan sampul/TOC) atau journal (artikel IMRaD)"
+    },
+    "citation_style": {
+      "type": "string",
+      "default": "apa",
+      "enum": [
+        "apa",
+        "ieee"
+      ],
+      "description": "Gaya sitasi utama (apa atau ieee)"
+    },
+    "csl": {
+      "type": "string",
+      "default": "apa.csl",
+      "enum": [
+        "apa.csl",
+        "ieee.csl"
+      ],
+      "description": "Nama berkas CSL spesifik"
+    },
+    "daftar_gambar": {
+      "type": "boolean",
+      "default": false,
+      "description": "Aktifkan halaman DAFTAR GAMBAR pada front-matter"
+    },
+    "daftar_tabel": {
+      "type": "boolean",
+      "default": false,
+      "description": "Aktifkan halaman DAFTAR TABEL pada front-matter"
+    },
+    "abstract_id": {
+      "type": "string",
+      "description": "Teks ringkasan/abstrak Bahasa Indonesia"
+    },
+    "keywords_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Daftar kata kunci Bahasa Indonesia"
+    },
+    "abstract_en": {
+      "type": "string",
+      "description": "Teks abstract Bahasa Inggris"
+    },
+    "keywords_en": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Daftar keywords Bahasa Inggris"
+    },
+    "approval": {
+      "type": "object",
+      "description": "Konfigurasi Lembar Pengesahan",
+      "properties": {
+        "city": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "supervisors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "role"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "nip": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "dean": {
+          "type": "object",
+          "required": [
+            "name",
+            "role"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "nip": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

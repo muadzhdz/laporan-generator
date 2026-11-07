@@ -7,7 +7,6 @@ FAIL=0
 pass() { PASS=$((PASS+1)); echo "  [OK] $1"; }
 fail() { FAIL=$((FAIL+1)); echo "  [FAIL] $1"; }
 
-# Resolve Python (handle WindowsApps stub redirector on Windows)
 if ! command -v python3 >/dev/null 2>&1 || ! python3 -V >/dev/null 2>&1; then
   if command -v python >/dev/null 2>&1 && python -V >/dev/null 2>&1; then
     python3() { python "$@"; }
@@ -19,21 +18,18 @@ export PYTHONUTF8=1
 echo "=== Test Suite: Laporan Generator ==="
 echo ""
 
-# T1: Cek dependensi
 echo "[T1] Dependency check"
 if command -v pandoc &>/dev/null; then pass "pandoc tersedia"; else fail "pandoc tidak ada"; fi
 if command -v typst &>/dev/null; then pass "typst tersedia"; else fail "typst tidak ada"; fi
 if command -v convert &>/dev/null; then pass "imagemagick tersedia"; else fail "imagemagick tidak ada"; fi
 echo ""
 
-# Set template directory
 if [ -d "templates/default" ]; then
   TPL_DIR="templates/default"
 else
   TPL_DIR="."
 fi
 
-# T2: Cek file wajib
 echo "[T2] File structure check"
 for f in cover.md template.typ metadata.yml references.bib reference.docx docx.lua; do
   if [ -f "$TPL_DIR/$f" ]; then pass "$f ditemukan ($TPL_DIR)"; else fail "$f tidak ada di $TPL_DIR"; fi
@@ -48,33 +44,27 @@ else
 fi
 echo ""
 
-# T3: Cek metadata validity
 echo "[T3] Metadata check"
 if grep -q '^title:' "$TPL_DIR/metadata.yml" 2>/dev/null; then pass "metadata.yml punya title"; else fail "metadata.yml tidak punya title"; fi
 if grep -q '^author:' "$TPL_DIR/metadata.yml" 2>/dev/null; then pass "metadata.yml punya author"; else fail "metadata.yml tidak punya author"; fi
 echo ""
 
-# T4: Cek template validity
 echo "[T4] Template check"
 if grep -q '^#set page' "$TPL_DIR/template.typ"; then pass "template punya konfigurasi halaman (#set page)"; else fail "template tanpa #set page"; fi
-# shellcheck disable=SC2016
 if grep -Fq '$body$' "$TPL_DIR/template.typ"; then pass "template punya placeholder \$body\$"; else fail "template tanpa placeholder \$body\$"; fi
 if grep -Fq 'set heading(numbering' "$TPL_DIR/template.typ"; then pass "template punya penomoran heading otomatis"; else fail "template tanpa penomoran heading"; fi
 echo ""
 
-# T5: Cek gitignore
 echo "[T5] .gitignore check"
 if grep -Fq '*.pdf' .gitignore; then pass ".gitignore mengecualikan *.pdf"; else fail ".gitignore tidak exclude *.pdf"; fi
 if ! grep -q '!Laporan.pdf' .gitignore 2>/dev/null; then pass ".gitignore tidak exception Laporan.pdf"; else fail ".gitignore masih exception Laporan.pdf"; fi
 echo ""
 
-# T6: Cek Dockerfile
 echo "[T6] Docker check"
 if [ -f Dockerfile ]; then pass "Dockerfile ada"; else fail "Dockerfile tidak ada"; fi
 if [ -f docker-compose.yml ]; then pass "docker-compose.yml ada"; else fail "docker-compose.yml tidak ada"; fi
 echo ""
 
-# T7: Build test
 echo "[T7] Build PDF"
 if ./build.sh "$TPL_DIR"; then
   pass "Build sukses"
@@ -95,7 +85,6 @@ else
 fi
 echo ""
 
-# T8: Cek box-drawing di konten
 echo "[T8] No box-drawing characters"
 if grep -rn -E '(├|─|└|│)' "$TPL_DIR/chapters/" 2>/dev/null; then
   fail "Masih ada box-drawing characters"
@@ -104,7 +93,6 @@ else
 fi
 echo ""
 
-# T9: Cek manual numbering di heading
 echo "[T9] No manual numbering in headings"
 if grep -rn '^## [0-9]\+\.' "$TPL_DIR/chapters/" 2>/dev/null; then
   fail "Masih ada manual numbering di heading (harusnya ## Judul, bukan ## 1.1 Judul)"
@@ -118,7 +106,6 @@ else
 fi
 echo ""
 
-# T10: Cek metadata fields
 echo "[T10] Metadata fields check"
 if grep -q '^lecturer:' "$TPL_DIR/metadata.yml" 2>/dev/null; then
   pass "metadata.yml punya lecturer"
@@ -132,7 +119,6 @@ else
 fi
 echo ""
 
-# T11: Cek format BibTeX
 echo "[T11] References check"
 if grep -qE '^@[a-zA-Z]+{' "$TPL_DIR/references.bib" 2>/dev/null; then
   pass "references.bib memiliki struktur BibTeX valid"
@@ -141,7 +127,6 @@ else
 fi
 echo ""
 
-# T12: Cek target Makefile (init & view)
 echo "[T12] Makefile targets check"
 if grep -q 'init:' Makefile 2>/dev/null && grep -q 'view:' Makefile 2>/dev/null; then
   pass "Makefile memiliki target init dan view"
@@ -150,7 +135,6 @@ else
 fi
 echo ""
 
-# T13: Cek recursive image processing
 echo "[T13] Recursive image processing check"
 if grep -q 'find.*gambar' build.sh 2>/dev/null; then
   pass "build.sh mendukung pemrosesan gambar rekursif (find)"
@@ -159,7 +143,6 @@ else
 fi
 echo ""
 
-# T14: Cek ekstrasi dan keterbacaan teks PDF
 echo "[T14] PDF content readability check"
 if command -v pdftotext &>/dev/null; then
   PDF_FILE="$TPL_DIR/Laporan.pdf"
@@ -179,7 +162,6 @@ else
 fi
 echo ""
 
-# T15: Cek engine Typst pada pipeline
 echo "[T15] Typst engine check"
 if grep -q -- '--pdf-engine=typst' build.sh 2>/dev/null; then
   pass "build.sh menggunakan pdf-engine typst"
@@ -188,7 +170,6 @@ else
 fi
 echo ""
 
-# T16: Cek kualitas DOCX export
 echo "[T16] DOCX export check"
 if command -v unzip &>/dev/null; then
   if ./build-docx.sh "$TPL_DIR" >/dev/null 2>&1 || (command -v make >/dev/null 2>&1 && make docx >/dev/null 2>&1); then
@@ -527,7 +508,6 @@ else
 fi
 echo ""
 
-# T23: 10/10 Enterprise Hardening, Python Unit Tests & Cross-Platform Parity
 echo "[T23] 10/10 Enterprise Hardening & Python Test Suite check"
 if python3 scripts/test_scripts.py >/dev/null 2>&1; then
   pass "Python scripts unit test suite lulus 100% (scripts/test_scripts.py)"
@@ -562,7 +542,6 @@ else
 fi
 echo ""
 
-# T24: AI Agent Skills & Multi-OS Universal Installer check
 echo "[T24] AI Agent Skills, npx Tooling & Multi-OS Installer check"
 if [ -f "package.json" ] && [ -f "bin/laporan-generator.js" ]; then
   pass "package.json dan bin/laporan-generator.js tersedia untuk npx"
@@ -595,7 +574,6 @@ else
 fi
 echo ""
 
-# T25: Native Model Context Protocol (MCP) Server check
 echo "[T25] Native Model Context Protocol (MCP) Server check"
 if [ -f "bin/mcp-server.js" ] && [ -f "lib/mcp.js" ]; then
   pass "MCP Server files (bin/mcp-server.js & lib/mcp.js) tersedia"
@@ -622,7 +600,6 @@ else
 fi
 echo ""
 
-# T26: Document Ingestion Pipeline check (scripts/ingest.py)
 echo "[T26] Document Ingestion Pipeline check (scripts/ingest.py)"
 if [ -x "scripts/ingest.py" ]; then
   pass "scripts/ingest.py dapat dieksekusi"
@@ -657,7 +634,108 @@ else
 fi
 echo ""
 
-# Cleanup test artifacts
+echo "[T27] Forensic Stylometry Engine check (scripts/audit-forensics.py)"
+if [ -x "scripts/audit-forensics.py" ]; then
+  pass "scripts/audit-forensics.py dapat dieksekusi"
+else
+  fail "scripts/audit-forensics.py tidak dapat dieksekusi"
+fi
+if python3 scripts/audit-forensics.py "$TPL_DIR/chapters" --json | grep -q '"summary"'; then
+  pass "scripts/audit-forensics.py berhasil menganalisis bab dalam format JSON"
+else
+  fail "scripts/audit-forensics.py gagal menganalisis bab dalam format JSON"
+fi
+if node bin/laporan-generator.js --help | grep -q "audit"; then
+  pass "CLI router npx laporan-generator mendukung perintah audit"
+else
+  fail "CLI router belum mendukung perintah audit"
+fi
+if ./laporan help | grep -q "audit"; then
+  pass "laporan (Bash) mendukung perintah audit"
+else
+  fail "laporan (Bash) belum mendukung perintah audit"
+fi
+if grep -q "audit" laporan.ps1; then
+  pass "laporan.ps1 (PowerShell) mendukung perintah audit"
+else
+  fail "laporan.ps1 belum mendukung perintah audit"
+fi
+echo ""
+
+echo "[T28] Citation DOI Verifier check (scripts/verify-citations.py)"
+if [ -x "scripts/verify-citations.py" ]; then
+  pass "scripts/verify-citations.py dapat dieksekusi"
+else
+  fail "scripts/verify-citations.py tidak dapat dieksekusi"
+fi
+if python3 scripts/verify-citations.py --bib "$TPL_DIR/references.bib" --offline --json | grep -q '"total_entries"'; then
+  pass "scripts/verify-citations.py berhasil memverifikasi sitasi secara offline (JSON)"
+else
+  fail "scripts/verify-citations.py gagal memverifikasi sitasi"
+fi
+if node bin/laporan-generator.js --help | grep -q "citations"; then
+  pass "CLI router npx laporan-generator mendukung perintah citations"
+else
+  fail "CLI router belum mendukung perintah citations"
+fi
+if ./laporan help | grep -q "citations"; then
+  pass "laporan (Bash) mendukung perintah citations"
+else
+  fail "laporan (Bash) belum mendukung perintah citations"
+fi
+if grep -q "citations" laporan.ps1; then
+  pass "laporan.ps1 (PowerShell) mendukung perintah citations"
+else
+  fail "laporan.ps1 belum mendukung perintah citations"
+fi
+echo ""
+
+echo "[T29] Journal Presets & IEEE CSL check"
+if [ -f "presets/jurnal-uajy.yml" ]; then
+  pass "presets/jurnal-uajy.yml ditemukan"
+else
+  fail "presets/jurnal-uajy.yml tidak ada"
+fi
+if [ -f "presets/jurnal-standar.yml" ]; then
+  pass "presets/jurnal-standar.yml ditemukan"
+else
+  fail "presets/jurnal-standar.yml tidak ada"
+fi
+if python3 scripts/validate-preset.py presets/jurnal-uajy.yml presets/jurnal-standar.yml | grep -q "2 valid"; then
+  pass "presets/jurnal-uajy.yml dan jurnal-standar.yml lolos validasi skema"
+else
+  fail "preset jurnal gagal divalidasi"
+fi
+if [ -f "$TPL_DIR/ieee.csl" ] || [ -f "templates/default/ieee.csl" ]; then
+  pass "Berkas ieee.csl tersedia untuk sitasi format IEEE"
+else
+  fail "Berkas ieee.csl tidak ditemukan"
+fi
+echo ""
+
+echo "[T30] JSON Schema, Shell Completions & Real Examples check"
+if [ -f "docs/metadata.schema.json" ] && python3 -c "import json; json.load(open('docs/metadata.schema.json'))" >/dev/null 2>&1; then
+  pass "docs/metadata.schema.json tersedia dan valid JSON Schema"
+else
+  fail "docs/metadata.schema.json tidak valid"
+fi
+if [ -f "completions/laporan.bash" ] && [ -f "completions/laporan.zsh" ] && [ -f "completions/laporan.fish" ]; then
+  pass "Berkas tab autocompletions (bash, zsh, fish) lengkap"
+else
+  fail "Berkas shell completions tidak lengkap"
+fi
+if [ -x "examples/build_examples.sh" ]; then
+  pass "examples/build_examples.sh dapat dieksekusi"
+else
+  fail "examples/build_examples.sh tidak executable"
+fi
+if [ -d "examples/01-Skripsi-Nasional" ] && [ -d "examples/02-Makalah-Kuliah" ] && [ -d "examples/03-Jurnal-UAJY-IEEE" ]; then
+  pass "Struktur 3 contoh riil dokumen (Skripsi, Makalah, Jurnal) lengkap"
+else
+  fail "Contoh riil dokumen tidak lengkap"
+fi
+echo ""
+
 rm -f "$TPL_DIR/Laporan.pdf" "$TPL_DIR/Laporan.docx" Laporan.pdf Laporan.docx
 rm -rf dist templates/default/dist
 

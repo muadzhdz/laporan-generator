@@ -13,7 +13,6 @@ else
 fi
 REPORT="$OUTDIR/Laporan.docx"
 
-# Resolve Python (handle WindowsApps stub redirector on Windows)
 PYTHON_BIN="python3"
 if ! command -v python3 >/dev/null 2>&1 || ! python3 -V >/dev/null 2>&1; then
   if command -v python >/dev/null 2>&1 && python -V >/dev/null 2>&1; then
@@ -55,6 +54,7 @@ copy_asset "docx.lua" "$TMPDIR" || true
 copy_asset "metadata.yml" "$TMPDIR" || true
 copy_asset "references.bib" "$TMPDIR" || true
 copy_asset "apa.csl" "$TMPDIR" || true
+copy_asset "ieee.csl" "$TMPDIR" || true
 copy_asset "presets" "$TMPDIR" || true
 copy_asset "scripts" "$TMPDIR" || true
 
@@ -64,19 +64,6 @@ elif [ -d "$DIR/gambar" ]; then
   cp -r "$DIR/gambar" "$TMPDIR/"
 fi
 
-cp "$OUTDIR/chapters"/*.md "$TMPDIR/" 2>/dev/null || true
-CHAPTER_FILES=$(find "$TMPDIR" -maxdepth 1 -name "bab*.md" | sort -V)
-if [ -z "$CHAPTER_FILES" ]; then
-  echo "ERROR: Tidak ada berkas bab*.md di direktori chapters/."
-  exit 1
-fi
-INPUT_FILES=("$TMPDIR/cover.md")
-while IFS= read -r f; do
-  [ -n "$f" ] && INPUT_FILES+=("$f")
-done < <(find "$TMPDIR" -maxdepth 1 -name "bab*.md" | sort -V)
-
-cd "$TMPDIR"
-
 PRESET_NAME=$(grep -E '^[[:space:]]*(preset|margin_preset):' "$TMPDIR/metadata.yml" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"'\''\r\n ')
 PRESET_OPTS=()
 if [ -n "$PRESET_NAME" ] && [ -f "$TMPDIR/presets/${PRESET_NAME}.yml" ]; then
@@ -85,15 +72,54 @@ elif [ -f "$TMPDIR/presets/standard.yml" ]; then
   PRESET_OPTS=("--metadata-file=$TMPDIR/presets/standard.yml")
 fi
 
+DOC_TYPE=$(grep -E '^[[:space:]]*doc_type:' "$TMPDIR/metadata.yml" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"'\''\r\n ')
+if [ -z "$DOC_TYPE" ] && [ -n "$PRESET_NAME" ] && [ -f "$TMPDIR/presets/${PRESET_NAME}.yml" ]; then
+  DOC_TYPE=$(grep -E '^[[:space:]]*doc_type:' "$TMPDIR/presets/${PRESET_NAME}.yml" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"'\''\r\n ')
+fi
+
+CSL_FILE="apa.csl"
+REQ_CSL=$(grep -E '^[[:space:]]*(csl|citation_style):' "$TMPDIR/metadata.yml" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"'\''\r\n ')
+if [ -z "$REQ_CSL" ] && [ -n "$PRESET_NAME" ] && [ -f "$TMPDIR/presets/${PRESET_NAME}.yml" ]; then
+  REQ_CSL=$(grep -E '^[[:space:]]*(csl|citation_style):' "$TMPDIR/presets/${PRESET_NAME}.yml" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"'\''\r\n ')
+fi
+if [ "$REQ_CSL" = "ieee" ] || [ "$REQ_CSL" = "ieee.csl" ]; then
+  CSL_FILE="ieee.csl"
+fi
+
+TOP_DIV="chapter"
+if [ "$DOC_TYPE" = "journal" ]; then
+  TOP_DIV="section"
+fi
+
+cp "$OUTDIR/chapters"/*.md "$TMPDIR/" 2>/dev/null || true
+if [ "$DOC_TYPE" = "journal" ]; then
+  INPUT_FILES=()
+  while IFS= read -r f; do
+    [ -n "$f" ] && INPUT_FILES+=("$f")
+  done < <(find "$TMPDIR" -maxdepth 1 -name "*.md" ! -name "cover.md" | sort -V)
+else
+  CHAPTER_FILES=$(find "$TMPDIR" -maxdepth 1 -name "bab*.md" | sort -V)
+  if [ -z "$CHAPTER_FILES" ]; then
+    echo "ERROR: Tidak ada berkas bab*.md di direktori chapters/."
+    exit 1
+  fi
+  INPUT_FILES=("$TMPDIR/cover.md")
+  while IFS= read -r f; do
+    [ -n "$f" ] && INPUT_FILES+=("$f")
+  done < <(find "$TMPDIR" -maxdepth 1 -name "bab*.md" | sort -V)
+fi
+
+cd "$TMPDIR"
+
 pandoc \
   "${INPUT_FILES[@]}" \
   "${PRESET_OPTS[@]}" \
   --metadata-file="metadata.yml" \
   --citeproc \
   --bibliography="references.bib" \
-  --csl="apa.csl" \
+  --csl="$CSL_FILE" \
   --metadata=reference-section-title="DAFTAR PUSTAKA" \
-  --top-level-division=chapter \
+  --top-level-division="$TOP_DIV" \
   --reference-doc="reference.docx" \
   --lua-filter="docx.lua" \
   -o "$TMPDIR/Laporan-tmp.docx" 2>&1

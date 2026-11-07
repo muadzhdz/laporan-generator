@@ -1,0 +1,22 @@
+---
+title: "Pengembangan Platform Web Interaktif Visualisasi 3D dengan Metode Multimedia Development Life Cycle"
+author:
+  - name: "Mu'adz Hudzaifah"
+    nim: "24903460014"
+    affiliation: "Program Studi Informatika, Fakultas Teknologi Industri, Universitas Atma Jaya Yogyakarta"
+    email: "muadz@students.uajy.ac.id"
+institution: "Universitas Atma Jaya Yogyakarta"
+faculty: "Fakultas Teknologi Industri"
+department: "Informatika"
+year: "2026"
+preset: "jurnal-uajy"
+doc_type: "journal"
+citation_style: "ieee"
+csl: "ieee.csl"
+abstract_id: |
+  Penelitian ini merancang platform web edukasi robotika bervisualisasi 3D interaktif menggunakan metode Multimedia Development Life Cycle (MDLC). Platform ini mengintegrasikan rendering WebGL berbasis Three.js dengan arsitektur multi-role berbasis role-based access control (RBAC). Pengujian fungsional menunjukkan tingkat keberhasilan 100% dan rendering 3D berjalan stabil pada 60 FPS pada perangkat pengguna akhir.
+keywords_id: ["MDLC", "Web 3D", "Three.js", "Robotika", "Edukasi"]
+abstract_en: |
+  This study develops an interactive 3D robotics education web platform using the Multimedia Development Life Cycle (MDLC) method. The platform integrates Three.js WebGL rendering with role-based access control (RBAC). Functional testing shows a 100% success rate with consistent 60 FPS rendering across consumer hardware.
+keywords_en: ["MDLC", "Web 3D", "Three.js", "Robotics", "Education"]
+...

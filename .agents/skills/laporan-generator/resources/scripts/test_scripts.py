@@ -5,9 +5,9 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import unittest
 
-# Tambahkan direktori scripts ke sys.path
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPTS_DIR)
 sys.path.insert(0, SCRIPTS_DIR)
@@ -209,10 +209,8 @@ class TestFrontMatterOptIn(unittest.TestCase):
             meta_path = os.path.join(root, "metadata.yml")
         with open(meta_path, "r", encoding="utf-8") as f:
             content = f.read()
-        # Verify abstract is commented or empty by default
         self.assertNotIn("\nabstract_id: |", content, "abstract_id should not be active by default in metadata.yml")
         self.assertNotIn("\nabstract_en: |", content, "abstract_en should not be active by default in metadata.yml")
-        # Verify opt-in flags for daftar_gambar & daftar_tabel are explicitly false or commented
         has_dg = "daftar_gambar: false" in content
         has_dt = "daftar_tabel: false" in content
         self.assertTrue(has_dg, "metadata.yml must explicitly specify daftar_gambar: false by default")
@@ -225,12 +223,10 @@ class TestFrontMatterOptIn(unittest.TestCase):
             cover_path = os.path.join(root, "cover.md")
         with open(cover_path, "r", encoding="utf-8") as f:
             content = f.read()
-        # Unconditional outline queries must not exist
         self.assertNotIn("let imgs = query(figure.where(kind: image))\n  if imgs.len() > 0", content,
                          "cover.md must not unconditionally emit DAFTAR GAMBAR outline")
         self.assertNotIn("let tbls = query(figure.where(kind: table))\n  if tbls.len() > 0", content,
                          "cover.md must not unconditionally emit DAFTAR TABEL outline")
-        # Must be gated by opt-in check
         self.assertIn("opt-daftar-gambar", content, "cover.md must gate DAFTAR GAMBAR with opt-daftar-gambar")
         self.assertIn("opt-daftar-tabel", content, "cover.md must gate DAFTAR TABEL with opt-daftar-tabel")
 
@@ -318,6 +314,65 @@ class TestFrontMatterOptIn(unittest.TestCase):
             self.assertIn("daftar_tabel: false", meta_f)
             self.assertIn("daftar_gambar: true", meta_t)
             self.assertIn("daftar_tabel: true", meta_t)
+
+
+class TestAuditForensics(unittest.TestCase):
+    def test_audit_forensics_execution(self):
+        proc = subprocess.run(
+            [sys.executable, os.path.join(ROOT_DIR, "scripts/audit-forensics.py"), os.path.join(ROOT_DIR, "templates/default/chapters"), "--json"],
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(proc.returncode, 0, f"audit-forensics.py failed: {proc.stderr}")
+        data = json.loads(proc.stdout)
+        self.assertIn("summary", data)
+        self.assertEqual(data["summary"]["total_files"], 5)
+        self.assertIn("files", data)
+
+    def test_human_cadence_score(self):
+        sample_human = (
+            "Penelitian ini dilakukan secara sistematis melalui pengujian lapangan bertahap. "
+            "Hasil menunjukkan bahwa latensi menurun secara konsisten dari dua puluh milidetik menjadi lima milidetik. "
+            "Namun demikian, pengujian beban puncak masih memerlukan analisis lanjutan terhadap kestabilan memori sistem. "
+            "Secara umum arsitektur ini membuktikan keandalan tinggi."
+        )
+        with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as f:
+            f.write(sample_human)
+            tmp_path = f.name
+        try:
+            proc = subprocess.run(
+                [sys.executable, os.path.join(ROOT_DIR, "scripts/audit-forensics.py"), tmp_path, "--json"],
+                capture_output=True,
+                text=True
+            )
+            self.assertEqual(proc.returncode, 0)
+            data = json.loads(proc.stdout)
+            file_res = data["files"][tmp_path]
+            self.assertIn(file_res["verdict"], ["HUMAN CADENCE", "MODERATE SUSPICION"])
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
+
+class TestVerifyCitations(unittest.TestCase):
+    def test_verify_citations_offline(self):
+        proc = subprocess.run(
+            [
+                sys.executable,
+                os.path.join(ROOT_DIR, "scripts/verify-citations.py"),
+                "--bib",
+                os.path.join(ROOT_DIR, "templates/default/references.bib"),
+                "--offline",
+                "--json",
+            ],
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(proc.returncode, 0, f"verify-citations.py failed: {proc.stderr}")
+        data = json.loads(proc.stdout)
+        self.assertIn("total_entries", data)
+        self.assertEqual(data["total_entries"], 14)
+        self.assertEqual(data["non_doi_entries"], 13)
 
 
 if __name__ == "__main__":

@@ -30,7 +30,6 @@ async function runMcpTest() {
   });
 
   proc.stderr.on("data", (data) => {
-    // stderr is for logging
     process.stderr.write("  [MCP Server Log] " + data);
   });
 
@@ -50,7 +49,6 @@ async function runMcpTest() {
     throw new Error("Timeout waiting for response to id: " + id);
   }
 
-  // 1. Test initialize
   send({
     jsonrpc: "2.0",
     id: 1,
@@ -67,7 +65,6 @@ async function runMcpTest() {
   assert.strictEqual(initRes.result.serverInfo.name, "laporan-generator");
   console.log("  ✔ [OK] initialize response valid");
 
-  // 2. Test tools/list
   send({
     jsonrpc: "2.0",
     id: 2,
@@ -86,7 +83,6 @@ async function runMcpTest() {
   assert.ok(toolNames.includes("laporan_import"));
   console.log("  ✔ [OK] tools/list returns all 7 tools:", toolNames.join(", "));
 
-  // 3. Test tools/call: laporan_presets (list)
   send({
     jsonrpc: "2.0",
     id: 3,
@@ -103,7 +99,6 @@ async function runMcpTest() {
   assert.ok(parsedPresets.presets.length >= 6);
   console.log("  ✔ [OK] laporan_presets returned " + parsedPresets.presets.length + " presets");
 
-  // 4. Test tools/call: laporan_presets (get)
   send({
     jsonrpc: "2.0",
     id: 4,
@@ -117,7 +112,6 @@ async function runMcpTest() {
   assert.ok(getPresetRes.result.content[0].text.includes("itb"));
   console.log("  ✔ [OK] laporan_presets get itb-ta valid");
 
-  // 5. Test tools/call: laporan_stats
   send({
     jsonrpc: "2.0",
     id: 5,
@@ -132,7 +126,6 @@ async function runMcpTest() {
   assert.ok(statsData.total_words > 0);
   console.log("  ✔ [OK] laporan_stats returned total_words: " + statsData.total_words);
 
-  // 6. Test tools/call: laporan_doctor
   send({
     jsonrpc: "2.0",
     id: 6,
@@ -148,7 +141,6 @@ async function runMcpTest() {
   assert.ok(doctorData.dependencies);
   console.log("  ✔ [OK] laporan_doctor returned status: " + doctorData.status);
 
-  // 7. Test tools/call: laporan_citations (validate)
   send({
     jsonrpc: "2.0",
     id: 7,
@@ -164,7 +156,6 @@ async function runMcpTest() {
   assert.ok(citeData.totalEntries > 0);
   console.log("  ✔ [OK] laporan_citations validate returned " + citeData.totalEntries + " bib entries");
 
-  // 8. Test resources/list
   send({
     jsonrpc: "2.0",
     id: 8,
@@ -176,7 +167,6 @@ async function runMcpTest() {
   assert.ok(resList.result.resources.length >= 3);
   console.log("  ✔ [OK] resources/list returned " + resList.result.resources.length + " resources");
 
-  // 9. Test resources/read
   send({
     jsonrpc: "2.0",
     id: 9,
@@ -189,7 +179,6 @@ async function runMcpTest() {
   assert.ok(presetsJson.presets.length >= 10);
   console.log("  ✔ [OK] resources/read laporan://presets/all returned " + presetsJson.presets.length + " presets");
 
-  // 10. Test prompts/list & prompts/get
   send({
     jsonrpc: "2.0",
     id: 10,

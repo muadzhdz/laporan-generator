@@ -1,6 +1,6 @@
 {
   "name": "laporan-generator",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Universal Academic Report & Thesis Generator with Multi-Host AI Agent Skills & Native MCP Server",
   "main": "bin/laporan-generator.js",
   "bin": {
@@ -20,6 +20,7 @@
     "build-docx.sh",
     "laporan",
     "laporan.ps1",
+    "completions/",
     "docs/",
     "README.md",
     "LICENSE",
@@ -32,6 +33,8 @@
     "mcp": "node bin/mcp-server.js",
     "doctor": "node bin/laporan-generator.js doctor",
     "stats": "node bin/laporan-generator.js stats",
+    "audit": "node bin/laporan-generator.js audit",
+    "citations:verify": "node bin/laporan-generator.js citations verify",
     "sync-hosts": "node bin/laporan-generator.js sync-hosts",
     "setup": "node bin/laporan-generator.js setup",
     "prepack": "node -e \"require('./lib/sync-hosts').syncInternalResources(process.cwd())\""

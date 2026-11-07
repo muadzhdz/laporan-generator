@@ -103,3 +103,39 @@ Gunakan perintah `docker compose` yang sudah dikonfigurasi dengan variabel `UID/
 docker compose run --rm laporan-generator
 ```
 *(File `docker-compose.yml` pada project ini secara otomatis memetakan `user: "${UID:-1000}:${GID:-1000}"`)*.
+
+---
+
+## 6. Kegagalan Audit Forensik AI (Probabilitas AI Melebihi Batas)
+
+### Gejala Error:
+```text
+GAGAL: Probabilitas konten AI (32.4%) melebihi batas toleransi 15.0%
+```
+
+### Penyebab:
+Teks pada bab mengandung pola kalimat repetitif (*burstiness* rendah), variasi kosakata terbatas (*MATTR* rendah), atau memuat frasa klise RLHF (seperti *"Di era modern yang berkembang pesat...", "Hal ini tentu sangat krusial..."*).
+
+### Solusi:
+1. Jalankan `laporan audit` untuk melihat rincian metrik per bab dan frasa klise yang terdeteksi.
+2. Variasikan ritme kalimat: gabungkan kalimat pendek dan kalimat majemuk bertingkat secara alami.
+3. Hilangkan seluruh frasa pembuka klise; ganti dengan fakta empiris, data kuantitatif, atau observasi teknis langsung.
+
+---
+
+## 7. Verifikasi DOI CrossRef Timeout atau Gagal
+
+### Gejala Error:
+```text
+[WARN] DOI tidak valid atau server tidak merespons (HTTP 404 / Timeout)
+```
+
+### Penyebab:
+Koneksi internet bermasalah atau format DOI pada berkas `references.bib` salah (misalnya terdapat URL lengkap `https://doi.org/...` di dalam field `doi = { ... }`).
+
+### Solusi:
+1. Pastikan field `doi` hanya berisi identitas murni, contoh: `doi = {10.1109/CVPR.2016.90}` (tanpa prefix `https://doi.org/`).
+2. Untuk pengujian luring tanpa koneksi internet, gunakan flag `--offline`:
+   ```bash
+   ./laporan citations verify --offline
+   ```

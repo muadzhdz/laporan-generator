@@ -239,6 +239,11 @@ function Header(el)
     subsub = 0
     local bnum = format_chapter_number(bab)
     local full_bab = chapter_prefix .. bnum
+    local clean_title = title:gsub("^%d+%.%s*", "")
+    if clean_title ~= title and chapter_prefix == "" then
+      el.content = pandoc.List{ pandoc.Str(title) }
+      return el
+    end
     if chapter_prefix == "" then
       full_bab = bnum .. "."
       toc_entries[#toc_entries + 1] = {
@@ -386,7 +391,39 @@ function Pandoc(doc)
   local show_dg = (meta_bool(meta, "daftar_gambar") or meta_bool(meta, "list_of_figures"))
   local show_dt = (meta_bool(meta, "daftar_tabel") or meta_bool(meta, "list_of_tables"))
 
+  local is_journal = (meta_str(meta, "doc_type") == "journal" or meta_str(meta, "cover_show") == "false")
   local blocks = pandoc.List{}
+
+  if is_journal then
+    if title ~= "" then
+      blocks[#blocks + 1] = para({ pandoc.Strong(pandoc.Str(string.upper(title))) }, "CoverTitle")
+    end
+    local authors = {}
+    if meta.author and type(meta.author) == "table" then
+      for _, a in ipairs(meta.author) do
+        local name = type(a) == "table" and a.name and pandoc.utils.stringify(a.name) or pandoc.utils.stringify(a)
+        if name ~= "" then
+          authors[#authors + 1] = name
+        end
+      end
+    end
+    if #authors > 0 then
+      blocks[#blocks + 1] = para({ pandoc.Strong(pandoc.Str(table.concat(authors, ", "))) }, "CoverCourse")
+    end
+    if institution ~= "" then
+      blocks[#blocks + 1] = para({ pandoc.Str(institution) }, "CoverInstitution")
+    end
+    local abs_id = meta_str(meta, "abstract_id")
+    if abs_id ~= "" then
+      blocks[#blocks + 1] = para({ pandoc.Strong(pandoc.Str("Abstrak - ")), pandoc.Emph(pandoc.Str(abs_id)) }, "Normal")
+    end
+    local abs_en = meta_str(meta, "abstract_en")
+    if abs_en ~= "" then
+      blocks[#blocks + 1] = para({ pandoc.Strong(pandoc.Str("Abstract - ")), pandoc.Emph(pandoc.Str(abs_en)) }, "Normal")
+    end
+    doc.blocks = blocks .. doc.blocks
+    return doc
+  end
 
   if title ~= "" then
     local tlines = balance_title(string.upper(title))
@@ -587,6 +624,7 @@ function Pandoc(doc)
   for _, blk in ipairs(doc.blocks) do
     if
       not inserted
+      and not is_journal
       and blk.tag == "Header"
       and blk.level == 1
       and not is_unnumbered(blk)

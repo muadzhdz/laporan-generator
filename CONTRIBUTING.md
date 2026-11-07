@@ -42,7 +42,7 @@ Kami menyambut baik penambahan variasi preset format kampus resmi universitas/se
 Memperbaiki efisiensi `build.sh`, meningkatkan penanganan kesalahan, atau menambah pengujian baru pada `test.sh`.
 
 ### 3. Penyempurnaan AI Prompt
-Meningkatkan instruksi pada `prompt.md` agar AI Agent dapat menghasilkan laporan yang lebih presisi dan kaya akan analisis.
+Meningkatkan instruksi pada `docs/prompt.md` agar AI Agent dapat menghasilkan laporan yang lebih presisi dan kaya akan analisis.
 
 ---
 
@@ -54,13 +54,17 @@ Sebelum membuat Pull Request, Anda **wajib** memastikan pengujian lokal lulus 10
 make test
 ```
 
-`test.sh` akan memverifikasi 20 kategori tes (80+ assertions), termasuk:
+`test.sh` akan memverifikasi 30 kategori tes (137+ assertions), termasuk:
 - Ketersediaan sintaks dan file wajib
 - Validasi metadata dan BibTeX
 - Penomoran heading dan multi-engine Typst/DOCX
 - Pengujian kompilasi PDF dan ekstraksi teks (`pdftotext`)
 - Pengecekan kebersihan dari karakter ilegal (box-drawing)
 - Validasi skema preset kampus dan scanner PDF
+- Audit forensik stylometry AI (`scripts/audit-forensics.py`)
+- Verifikasi keaslian DOI sitasi (`scripts/verify-citations.py`)
+- Pengujian preset artikel jurnal UAJY & IEEE CSL
+- Validasi JSON Schema metadata, tab completions terminal, dan suite kompilasi contoh riil (`examples/build_examples.sh`)
 
 ---
 

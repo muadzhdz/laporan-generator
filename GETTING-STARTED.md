@@ -1,150 +1,188 @@
-# Panduan Memulai: Zero to PDF (Laporan Generator)
+# Panduan Memulai: Zero to Document (Laporan Generator v3.1.0)
 
-Selamat datang! Dokumen ini dirancang khusus untuk membantu Anda--baik pemula yang belum pernah mengetik kode maupun pengguna berpengalaman--untuk menghasilkan laporan akademik PDF berstandar profesional dalam waktu singkat.
-
----
-
-## Pilih Jalur yang Sesuai dengan Anda
-
-| Jalur | Persyaratan | Cocok Untuk |
-|---|---|---|
-| **[1. Opsi AI Agent](#1-opsi-ai-agent-paling-cepat--otomatis)** | AI Agent (OpenCode, Claude Code, Antigravity) | Pemula yang ingin laporan dibuatkan otomatis dari project |
-| **[2. Opsi Docker](#2-opsi-docker-tanpa-install-tools-lokal)** | Docker Desktop | Pengguna yang tidak mau install Pandoc/Typst di komputer |
-| **[3. Opsi Manual (CLI)](#3-opsi-manual-cli-kompilasi-lokal)** | Pandoc + Typst + ImageMagick | Pengguna Linux/Mac yang sudah biasa dengan CLI |
+Selamat datang di **Laporan Generator v3.1.0** — engine kompilasi dokumen akademik universal berbasis **Typst (PDF)** dan **Pandoc + OpenXML (Word DOCX)** untuk AI Agent, mahasiswa, dan software engineer.
 
 ---
 
-## 1. Opsi AI Agent (Paling Cepat & Otomatis)
+## 1. Pilihan Alur Kerja (Workflow)
 
-Jika Anda sudah memiliki folder project (misal: Web, Mobile App, Machine Learning, IoT, Game) dan ingin AI menulis isi laporan untuk Anda:
+Pilih jalur yang paling sesuai dengan kebutuhan Anda:
+
+| Jalur | Prasyarat | Skenario Penggunaan |
+| :--- | :--- | :--- |
+| **[A. npx / Global CLI](#opsi-a-npx--global-cli-direkomendasikan)** | Node.js v18+ | Membuat dokumen skripsi/jurnal baru di folder mana saja tanpa clone git |
+| **[B. Native MCP Server](#opsi-b-native-mcp-server-untuk-ai-agent)** | Antigravity / Claude Code / Cursor | AI Agent mengelola pembuatan, audit, sitasi, dan kompilasi secara otonom |
+| **[C. Nix Flake](#opsi-c-nix-flake-bebas-konflik-sistem)** | Nix (`nix develop`) | Lingkungan terisolasi otomatis dengan Pandoc, Typst, Python, dan CSL |
+| **[D. Docker Container](#opsi-d-docker-container)** | Docker Desktop | Kompilasi tanpa menginstall dependensi lokal di sistem operasi |
+
+---
+
+## Opsi A: npx / Global CLI (Direkomendasikan)
+
+Anda tidak perlu meng-clone repositori ini ke project skripsi Anda. Gunakan perintah `npx` langsung:
+
+### 1. Inisialisasi Proyek Baru
+```bash
+# Inisialisasi dokumen skripsi dengan preset kampus (misal: UI, ITB, UGM, ITS, Telkom)
+npx laporan-generator init skripsi-saya --preset ui-skripsi
+
+# Atau inisialisasi artikel jurnal ilmiah (format IMRaD, IEEE CSL, UAJY JBI)
+npx laporan-generator init paper-jurnal --preset jurnal-uajy
+
+cd skripsi-saya/
+```
+
+### 2. Struktur Proyek yang Dihasilkan
+```text
+skripsi-saya/
+├── metadata.yml       # Konfigurasi judul, penulis, institusi, preset, dan flag opt-in
+├── cover.md           # Halaman pengantar dan kata pengantar (dilewati pada mode jurnal)
+├── chapters/          # Bab-bab dokumen dalam format Markdown modular
+│   ├── bab1-pendahuluan.md
+│   ├── bab2-tinjauan-pustaka.md
+│   ├── bab3-metodologi.md
+│   ├── bab4-hasil-pembahasan.md
+│   └── bab5-penutup.md
+├── references.bib     # Database sitasi BibTeX
+├── logo.jpg           # Logo resmi institusi
+├── build.sh           # Runner kompilasi Typst PDF lokal
+├── build-docx.sh      # Runner kompilasi Word OpenXML DOCX lokal
+├── laporan            # CLI helper Bash (Linux / macOS)
+└── laporan.ps1        # CLI helper PowerShell (Windows native)
+```
+
+### 3. Audit Pra-Kompilasi (Health & Forensics)
+Sebelum kompilasi, verifikasi integritas data dan orisinalitas teks:
 
 ```bash
-# 1. Clone repositori ini ke direktori project Anda
-git clone https://github.com/muadzhdz/laporan-generator.git project-kamu
-cd project-kamu/
+# 1. Audit kesehatan dokumen (cek sitasi hilang, gambar rusak, heading manual, box-drawing)
+./laporan doctor
 
-# 2. Ganti logo.jpg dengan logo kampus/sekolah Anda
-# (Nama file HARUS tetap logo.jpg)
+# 2. Verifikasi keaslian DOI sitasi secara daring via CrossRef API
+./laporan citations verify
 
-# 3. Jalankan AI Agent pilihan Anda di terminal, lalu instruksikan:
-"Baca prompt.md dan bantu saya membuat laporan untuk project ini"
+# 3. Audit forensik stylometry (cek variansi ritme kalimat, MATTR, dan klise AI / anti-slop)
+./laporan audit --fail-on-ai
+```
 
-# 4. AI akan membaca struktur project Anda dan bertanya secara interaktif.
-# Cukup jawab pertanyaan AI satu per satu.
+### 4. Kompilasi PDF & Word DOCX
+```bash
+# Kompilasi langsung menjadi Laporan.pdf dan Laporan.docx
+./laporan build
 
-# 5. Setelah AI selesai, jalankan kompilasi PDF:
+# Atau buat hanya DOCX
+./laporan docx
+
+# Buka PDF di penampil dokumen bawaan
+./laporan view
+```
+
+---
+
+## Opsi B: Native MCP Server (Untuk AI Agent)
+
+Jika Anda menggunakan AI Assistant seperti **Antigravity**, **Claude Code**, **OpenCode**, atau **Cursor**:
+
+### 1. Daftarkan Server MCP
+Jalankan sinkronisasi otomatis ke host lokal:
+```bash
+npx laporan-generator sync-hosts
+```
+
+Atau tambahkan ke konfigurasi MCP client Anda (`claude_desktop_config.json` / `antigravity.json`):
+```json
+{
+  "mcpServers": {
+    "laporan": {
+      "command": "npx",
+      "args": ["-y", "laporan-generator", "mcp"]
+    }
+  }
+}
+```
+
+### 2. Tool MCP yang Siap Digunakan AI
+- `laporan_init`: Inisialisasi workspace dokumen dengan parameter preset kampus.
+- `laporan_presets`: Membaca konfigurasi margin dan aturan bab dari 14 preset resmi.
+- `laporan_citations`: Pencarian DOI nyata di CrossRef dan penambahan BibTeX ke `references.bib`.
+- `laporan_verify_citations`: Audit keabsahan tautan DOI secara daring atau luring.
+- `laporan_doctor`: Audit diagnostik kelengkapan berkas dan sintaks (skor 100/100).
+- `laporan_audit`: Analisis forensik AI, MATTR vocabulary richness, dan deteksi klise RLHF.
+- `laporan_stats`: Menghitung statistik kata, bab, dan estimasi tebal halaman.
+- `laporan_import`: Ekstraksi berkas `.docx`, `.pdf`, `.pptx`, `.xlsx` menjadi bab Markdown.
+- `laporan_build`: Kompilasi otonom menjadi `Laporan.pdf` dan `Laporan.docx`.
+
+---
+
+## Opsi C: Nix Flake (Bebas Konflik Sistem)
+
+Jika Anda menggunakan Linux atau macOS dengan Nix:
+
+```bash
+# Masuk ke shell dengan dependensi lengkap (Pandoc 3.7+, Typst 0.15+, Python 3.14, ImageMagick)
+nix develop
+
+# Jalankan perintah kompilasi di dalam shell terisolasi
+./laporan build
+```
+
+---
+
+## Opsi D: Docker Container
+
+Kompilasi dokumen tanpa menginstal package apa pun di OS host:
+
+```bash
+# Build PDF di dalam container
 docker compose run --rm laporan-generator
-# atau jika punya Pandoc/Typst lokal:
-./build.sh
+
+# Mode auto-rebuild saat berkas Markdown disimpan
+docker compose run --rm watch
 ```
 
 ---
 
-## 2. Opsi Docker (Tanpa Install Tools Lokal)
+## 2. Mode Dokumen: Skripsi vs Artikel Jurnal
 
-Tidak perlu menginstall Pandoc, Typst, atau ImageMagick di komputer Anda. Semua dependensi sudah terkemas dalam container Docker terisolasi.
+Laporan Generator mendukung dua paradigma dokumen:
 
-### Langkah-langkah:
-1. Pastikan **Docker Desktop** sudah terinstall dan berjalan di komputer Anda. ([Download Docker](https://www.docker.com/products/docker-desktop/))
-2. Buka terminal di dalam folder project ini.
-3. Edit isi laporan manual di folder `chapters/` dan data di `metadata.yml`.
-4. Jalankan perintah kompilasi:
-   ```bash
-   docker compose run --rm laporan-generator
-   ```
-5. File `Laporan.pdf` siap di folder project Anda!
+### A. Mode Skripsi / Tugas Akhir / Tesis (`doc_type: "thesis"`)
+- **Struktur**: Sampul Depan $\to$ Lembar Pengesahan (opt-in) $\to$ Kata Pengantar $\to$ Daftar Isi $\to$ Batang Tubuh (BAB I s.d. BAB V) $\to$ Daftar Pustaka.
+- **Penomoran**: Angka Romawi kecil (`i, ii, iii`) pada bagian depan dan Angka Arab (`1, 2, 3`) pada bab utama.
+- **Heading**: Awalan otomatis `BAB I PENDAHULUAN`, `1.1 Latar Belakang`.
+- **Gaya Sitasi Default**: APA 7th Edition (`apa.csl`).
 
-> **Tips:** Gunakan `make docker-watch` untuk auto-rebuild otomatis setiap kali Anda menyimpan perubahan file markdown.
-
----
-
-## 3. Opsi Manual CLI (Kompilasi Lokal)
-
-Jika Anda lebih menyukai kompilasi cepat di mesin lokal Linux/macOS:
-
-### Prasyarat System Packages:
-* **Ubuntu/Debian**:
-  ```bash
-  sudo apt install pandoc imagemagick xz-utils
-  wget -q https://github.com/typst/typst/releases/download/v0.15.1/typst-x86_64-unknown-linux-musl.tar.xz -O /tmp/typst.tar.xz
-  tar -xJf /tmp/typst.tar.xz -C /tmp
-  sudo mv /tmp/typst-x86_64-unknown-linux-musl/typst /usr/local/bin/
-  ```
-* **Arch Linux**:
-  ```bash
-  sudo pacman -S pandoc typst imagemagick
-  ```
-* **Nix / NixOS**:
-  ```bash
-  nix develop
-  ```
-* **Windows (PowerShell / Winget)**:
-  ```powershell
-  winget install JohnMacFarlane.Pandoc
-  winget install Typst.Typst
-  winget install ImageMagick.ImageMagick
-  ```
-
-### Jalankan Build:
-
-**Linux / macOS:**
-```bash
-# Inisialisasi git hooks (opsional)
-make init
-
-# Build PDF (atau ./laporan build)
-make build
-
-# Export Word (.docx)
-make docx
-
-# Buka PDF di viewer
-make view
-```
-
-**Windows (PowerShell):**
-```powershell
-# Cek dependensi & berkas
-.\laporan.ps1 check
-
-# Build PDF
-.\laporan.ps1 build
-
-# Buka PDF di viewer
-.\laporan.ps1 view
-```
+### B. Mode Artikel Jurnal Ilmiah (`doc_type: "journal"`)
+- **Preset Rekomendasi**: `jurnal-uajy` (JBI UAJY) atau `jurnal-standar` (IEEE/SINTA).
+- **Struktur**: Halaman 1 langsung memuat Judul Jurnal, Blok Penulis & Afiliasi, Email, Abstrak Indonesia & Inggris, Kata Kunci, dilanjutkan langsung Bab 1 (IMRaD).
+- **Heading**: Tanpa prefix kata "BAB", menggunakan nomor seksi `1. PENDAHULUAN`, `2. METODE PENELITIAN`.
+- **Gaya Sitasi Default**: IEEE Style (`ieee.csl`, sitasi numerik `[1]`, `[2]`).
 
 ---
 
-## Glosarium Istilah Teknis
+## 3. Aturan Penulisan Sintaks Markdown
 
-* **Pandoc**: Program pengubah format dokumen (mengonversi Markdown menjadi Typst/PDF/Word/HTML).
-* **Typst**: Engine typesetting dokumen modern, cepat, dan ringan berbasis bahasa penataan letak yang intuitif.
-* **BibTeX**: Format standar untuk menyimpan data referensi/daftar pustaka akademik (`references.bib`).
-* **CSL (Citation Style Language)**: Berkas aturan penulisan sitasi (pada project ini menggunakan standar APA Style `apa.csl`).
-* **PAGEREF DOCX**: Mekanisme penomoran halaman otomatis pada Daftar Isi dokumen Microsoft Word.
-
----
-
-## FAQ & Troubleshooting Singkat
-
-* **Q: Mengapa penomoran bab saya menjadi ganda seperti "BAB I: BAB 1"?**  
-  *A:* Di file Markdown `chapters/bab*.md`, gunakan heading `# Judul Bab` tanpa menyertakan kata "BAB 1". Template Typst akan menambahkan kata "BAB I" secara otomatis.
-
-* **Q: Bagaimana cara menambahkan gambar/screenshot?**  
-  *A:* Simpan file gambar di folder `gambar/` lalu panggil di Markdown menggunakan sintaks `![](gambar/nama-file.png)`.
-
-* **Q: Bagaimana format sitasi yang benar?**  
-  *A:* Masukkan entri BibTeX di `references.bib`, lalu panggil di Markdown menggunakan sintaks `[@citekey]`.
-
-* **Q: Bagaimana cara menyesuaikan format dengan kampus saya?**  
-  *A:* Gunakan `./laporan preset list` untuk memilih preset kampus bawaan (UI, ITB, UGM, ITS, UNPAD), atau pindai buku pedoman PDF kampus Anda dengan `./laporan preset scan /path/ke/pedoman.pdf`.
+1. **Heading**:
+   - Level 1: `# PENDAHULUAN` (Jangan tulis `# BAB I PENDAHULUAN`).
+   - Level 2: `## Latar Belakang` (Jangan tulis `## 1.1 Latar Belakang`).
+2. **Sitasi**:
+   - Format APA: `[@knuth1984]` $\to$ *(Knuth, 1984)*.
+   - Format IEEE: `[@knuth1984]` $\to$ *[1]*.
+3. **Gambar**:
+   - Letakkan di folder `gambar/` dan panggil via `![Keterangan Gambar](gambar/arsitektur.png)`.
+4. **Tabel**:
+   - Gunakan Pipe Table standar Markdown. Hindari karakter box-drawing Unicode (`┌`, `─`, `│`).
+5. **Rumus Matematika**:
+   - Inline: `$f(x) = wx + b$`.
+   - Display: `$$MSE = \frac{1}{n}\sum_{i=1}^n (y_i - \hat{y}_i)^2$$`.
 
 ---
 
-Untuk panduan lebih mendalam mengenai skema metadata, preset kampus, dan arsitektur template, silakan baca dokumentasi di folder `docs/`:
-- [docs/campus-guide.md](docs/campus-guide.md)
-- [docs/preset-schema.md](docs/preset-schema.md)
-- [docs/metadata-schema.md](docs/metadata-schema.md)
-- [docs/template-guide.md](docs/template-guide.md)
-- [docs/troubleshooting.md](docs/troubleshooting.md)
+## 4. Indeks Dokumentasi Lanjutan
+
+- [Direktori Preset Kampus](docs/campus-guide.md) — Panduan spesifikasi 14 format perguruan tinggi dan jurnal.
+- [Skema Metadata](docs/metadata-schema.md) — Konfigurasi lengkap atribut `metadata.yml`.
+- [Skema Preset](docs/preset-schema.md) — Cara membuat atau memodifikasi file konfigurasi preset `presets/*.yml`.
+- [Prompt AI Engineering](docs/prompt.md) — Panduan instruksi sistem untuk AI Agent.
+- [Lembar Contekan Sintaks](docs/syntax-cheatsheet.md) — Format tabel, gambar, rumus, dan sitasi.
+- [Pemecahan Masalah](docs/troubleshooting.md) — Solusi kesalahan dependensi, font, dan kompilasi.
