@@ -61,16 +61,21 @@ daftar_tabel: false
 | `author` | List of Objects | **Ya** | Daftar penulis. Setiap entri memiliki `name` dan `nim`. |
 | `author[].name` | String | **Ya** | Nama lengkap mahasiswa / penyusun. |
 | `author[].nim` | String | **Ya** | Nomor Induk Mahasiswa (NIM / NPM / NISN). |
-| `lecturer` | String | **Ya** | Nama lengkap dan gelar Dosen / Guru Pengampu / Pembimbing. |
+| `author[].affiliation` | String | Opsional | Afiliasi akademik atau departemen (wajib pada artikel jurnal). |
+| `author[].email` | String | Opsional | Alamat surel penulis (ditampilkan pada blok header jurnal). |
+| `lecturer` | String | **Ya** | Nama lengkap dan gelar Dosen / Guru Pengampu / Pembimbing (pada skripsi/laporan). |
 | `lecturer_label` | String | Opsional | Label peran dosen (default: `"Dosen Pengampu:"`, bisa `"Dosen Pembimbing:"`). |
-| `course` | String | **Ya** | Nama Mata Kuliah atau Jenis Karya Tulis. |
+| `course` | String | Opsional | Nama Mata Kuliah atau Jenis Karya Tulis (diwajibkan untuk laporan tugas). |
 | `institution` | String | **Ya** | Nama Universitas, Institut, Politeknik, atau Sekolah. |
 | `faculty` | String | **Ya** | Nama Fakultas, Sekolah, atau Departemen. |
 | `department` | String | Opsional | Nama Program Studi atau Jurusan. |
 | `city` | String | Opsional | Kota tempat institusi berada (digunakan pada lembar pengesahan). |
 | `year` | String | **Ya** | Tahun Ajaran atau Tahun Kelulusan (contoh: `2026` atau `2025/2026`). |
 | `date` | String | Opsional | Bulan dan Tahun pembuatan (contoh: `Juli 2026`). |
-| `preset` | String | Opsional | ID preset format kampus (`standard`, `skripsi-4433`, `ui-skripsi`, `itb-ta`, `ugm-skripsi`, `its-skripsi`, `unpad-skripsi`, `ub-skripsi`, `undip-skripsi`, `unair-skripsi`, `ipb-ppki`, `telkom-ta`). |
+| `preset` | String | Opsional | ID preset format kampus (`standard`, `skripsi-4433`, `ui-skripsi`, `itb-ta`, `ugm-skripsi`, `its-skripsi`, `unpad-skripsi`, `ub-skripsi`, `undip-skripsi`, `unair-skripsi`, `ipb-ppki`, `telkom-ta`, `jurnal-uajy`, `jurnal-standar`). |
+| `doc_type` | String | Opsional | Paradigma dokumen: `"thesis"` (default: ada sampul & TOC) atau `"journal"` (header langsung di halaman 1, tanpa sampul & TOC). |
+| `citation_style` | String | Opsional | Gaya sitasi: `"apa"` (default skripsi) atau `"ieee"` (default jurnal). |
+| `csl` | String | Opsional | Nama file CSL spesifik (`apa.csl` atau `ieee.csl`). |
 | `daftar_gambar` | Boolean | Opsional | Aktifkan halaman DAFTAR GAMBAR (`true`/`false`, default: `false`). |
 | `daftar_tabel` | Boolean | Opsional | Aktifkan halaman DAFTAR TABEL (`true`/`false`, default: `false`). |
 | `approval` | Object | Opsional | Konfigurasi Lembar Pengesahan (`city`, `date`, `supervisors[]`, `dean`). |

@@ -37,7 +37,8 @@ $else$
 $endif$
 #show bibliography: set par(hanging-indent: $if(first_line_indent)$$first_line_indent$$else$1.25cm$endif$, first-line-indent: 0cm)
 
-#let raw-prefix = "$if(heading_chapter_prefix)$$heading_chapter_prefix$$else$BAB $endif$"
+#let is-journal = ("$doc_type$" == "journal" or "$is_journal$" == "true" or "$cover_show$" == "false")
+#let raw-prefix = if is-journal { "" } else { "$if(heading_chapter_prefix)$$heading_chapter_prefix$$else$BAB $endif$" }
 #let chapter-prefix = if raw-prefix == "" {
   ""
 } else if raw-prefix.ends-with(" ") {
@@ -94,34 +95,43 @@ $endif$
 
 #set math.equation(numbering: it => "(" + str(counter(heading).get().at(0, default: 1)) + "." + str(it) + ")")
 
-#show heading.where(level: 1): it => {
-  counter(figure.where(kind: image)).update(0)
-  counter(figure.where(kind: table)).update(0)
-  counter(figure.where(kind: raw)).update(0)
-  counter(math.equation).update(0)
-  pagebreak(weak: true)
-  align(center)[
-    #block(inset: (top: 0.5em, bottom: 1.8em))[
-      #text(size: 14pt, weight: "bold")[
-        #if it.numbering != none [
-          #if chapter-prefix != "" [
-            #(chapter-prefix + format-chapter-num(counter(heading).get().at(0)))
-            #linebreak()
+#show heading.where(level: 1): it => [
+  #counter(figure.where(kind: image)).update(0)
+  #counter(figure.where(kind: table)).update(0)
+  #counter(figure.where(kind: raw)).update(0)
+  #counter(math.equation).update(0)
+  #if is-journal [
+    #v(0.6cm)
+    #block(inset: (bottom: 0.3em))[
+      #set text(size: 11pt, weight: "bold")
+      #set par(first-line-indent: 0cm)
+      #it.body
+    ]
+  ] else [
+    #pagebreak(weak: true)
+    #align(center)[
+      #block(inset: (top: 0.5em, bottom: 1.8em))[
+        #text(size: 14pt, weight: "bold")[
+          #if it.numbering != none [
+            #if chapter-prefix != "" [
+              #(chapter-prefix + format-chapter-num(counter(heading).get().at(0)))
+              #linebreak()
+            ] else [
+              #(format-chapter-num(counter(heading).get().at(0)) + ". ")
+            ]
+            #if it.body.has("text") [
+              #upper(it.body.text)
+            ] else [
+              #upper(it.body)
+            ]
           ] else [
-            #(format-chapter-num(counter(heading).get().at(0)) + ". ")
+            #it.body
           ]
-          #if it.body.has("text") [
-            #upper(it.body.text)
-          ] else [
-            #upper(it.body)
-          ]
-        ] else [
-          #it.body
         ]
       ]
     ]
   ]
-}
+]
 
 #show heading.where(level: 2): it => {
   block(above: 1.0em, below: 0.5em)[
@@ -240,9 +250,67 @@ $endif$
 
 #set table(stroke: 0.5pt + luma(140), inset: 4pt)
 #show table.header: set text(weight: "bold")
+#show figure.where(kind: table): set block(breakable: true)
+
 #set figure.caption(position: bottom)
 #show raw.where(block: true): set text(font: "DejaVu Sans Mono", size: 9pt)
 
+#let is-journal = ("$doc_type$" == "journal" or "$is_journal$" == "true" or "$cover_show$" == "false")
+
+#if is-journal [
+  #set page(numbering: "1")
+  #counter(page).update(1)
+
+  #v(0.4cm)
+  #align(center)[
+    #text(size: 14pt, weight: "bold")[#title-lines]
+    #v(0.5cm)
+    #text(size: 11pt, weight: "bold")[
+      $for(author)$$author.name$$sep$, $endfor$
+    ]
+    $if(institution)$
+    #v(0.15cm)
+    #text(size: 10pt)[$institution$]
+    $endif$
+    $if(email)$
+    #v(0.1cm)
+    #text(size: 9.5pt, font: "DejaVu Sans Mono")[$email$]
+    $endif$
+  ]
+
+  #v(0.5cm)
+  $if(abstract_id)$
+  #block(inset: (x: 0.8cm))[
+    #set par(justify: true, leading: 0.55em, first-line-indent: 0cm)
+    #text(size: 10pt)[
+      #strong[Abstrak] --- #emph[$abstract_id$]
+    ]
+    $if(keywords_id)$
+    #v(0.2cm)
+    #text(size: 9.5pt)[
+      #strong[Kata Kunci:] #emph[$for(keywords_id)$$keywords_id$$sep$, $endfor$]
+    ]
+    $endif$
+  ]
+  #v(0.3cm)
+  $endif$
+
+  $if(abstract_en)$
+  #block(inset: (x: 0.8cm))[
+    #set par(justify: true, leading: 0.55em, first-line-indent: 0cm)
+    #text(size: 10pt, style: "italic")[
+      #strong[Abstract] --- $abstract_en$
+    ]
+    $if(keywords_en)$
+    #v(0.2cm)
+    #text(size: 9.5pt)[
+      #strong[Keywords:] #emph[$for(keywords_en)$$keywords_en$$sep$, $endfor$]
+    ]
+    $endif$
+  ]
+  #v(0.5cm)
+  $endif$
+] else [
 #v(1cm)
 #align(center)[
   #text(size: 14pt, weight: "bold")[#title-lines]
@@ -390,6 +458,8 @@ $if(keywords_en)$
 $endif$
 #pagebreak()
 $endif$
+
+]
 
 #let opt-daftar-gambar = $if(daftar_gambar)$$daftar_gambar$$else$$if(list_of_figures)$$list_of_figures$$else$false$endif$$endif$
 #let opt-daftar-tabel = $if(daftar_tabel)$$daftar_tabel$$else$$if(list_of_tables)$$list_of_tables$$else$false$endif$$endif$

@@ -33,9 +33,12 @@ When available in your environment, **always prefer calling the native MCP tools
 | :--- | :--- | :--- |
 | **Initialize Project** | `laporan_init({ preset, title, author_name, author_id, institution, daftar_gambar, daftar_tabel })` | `npx laporan-generator init` |
 | **Audit & Health Check** | `laporan_doctor({ target_dir })` | `./laporan doctor` or `npx laporan-generator doctor --json` |
+| **Forensic AI & Anti-Slop** | `laporan_audit({ target_dir, fail_on_ai, threshold })` | `./laporan audit` or `npx laporan-generator audit` |
+| **Verify Citation DOIs** | `laporan_verify_citations({ bib_file, offline })` | `./laporan citations verify` or `npx laporan-generator citations verify` |
 | **Document Stats & Metrics** | `laporan_stats({ target_dir })` | `./laporan stats` or `npx laporan-generator stats --json` |
 | **Inspect Campus Presets** | `laporan_presets({ action: "list" \| "get", preset_name })` | `./laporan preset list` |
 | **Search & Add Citations** | `laporan_citations({ action: "search_doi" \| "get_bibtex" \| "add_citation" \| "validate", query, doi, bibtex })` | Manual edit `references.bib` |
+| **Ingest External Docs** | `laporan_import({ source_file, target_dir })` | `./laporan import <file>` |
 | **Compile PDF & DOCX** | `laporan_build({ target_dir, format: "all" \| "pdf" \| "docx" })` | `./laporan build` or `npx laporan-generator build` |
 
 --------------------------------------------------------------------------------
@@ -49,7 +52,8 @@ Identify the document type and target university:
 1. **Tugas Akhir / Skripsi / Tesis**: Formal 5-chapter structure (BAB I - BAB V), bilingual abstract, approval sheet, standard university margins.
 2. **Laporan Magang / PKL / KKN**: Company profile, department scope, implemented system/project, troubleshooting analysis, recommendations.
 3. **Makalah Kuliah / Paper Ilmiah**: Focus on research problem, methodology, findings, and discussion. (In Indonesia, course papers use standard Roman Bab headings: `BAB I`, `BAB II`, etc.).
-4. **Target University Preset**:
+4. **Artikel Jurnal Ilmiah / Paper Jurnal**: IMRaD format, single-page header, IEEE / APA citation, no standalone cover/TOC (`doc_type: "journal"`).
+5. **Target University & Journal Preset**:
    - `skripsi-4433`: National Standard (Top 4cm, Left 4cm, Bottom 3cm, Right 3cm).
    - `ui-skripsi`: Universitas Indonesia (Left 4cm, Top/Right/Bottom 3cm).
    - `itb-ta`: Institut Teknologi Bandung (Pedoman TA ITB 4-4-3-3, Minimalist Cover).
@@ -61,6 +65,8 @@ Identify the document type and target university:
    - `unair-skripsi`: Universitas Airlangga (4-4-3-3).
    - `ipb-ppki`: IPB University - Pedoman PPKI (Left 4cm, Top/Right/Bottom 3cm, 1cm indent).
    - `telkom-ta`: Telkom University (Left 4cm, Top/Right/Bottom 3cm).
+   - `jurnal-uajy`: Universitas Atma Jaya Yogyakarta - JBI (Margin 3-3-3-3, 11pt, IEEE CSL, IMRaD).
+   - `jurnal-standar`: National Journal Standard (Margin 3-3-3-3, IMRaD, IEEE/APA).
    - `standard`: General University (Top 2cm, Bottom 3cm, Left 2.5cm, Right 2.5cm).
 
 ### Stage 2: Document Structure Confirmation & Scaffolding
@@ -107,7 +113,10 @@ When authoring content into `chapters/bab*.md`, strictly enforce **Indonesian St
 1. Run pre-flight health audit:
    - Call MCP tool `laporan_doctor` or run `./laporan doctor`.
    - Ensure `missing_keys` is 0 and `broken_images` is 0.
-2. Compile both outputs:
+2. Run forensic stylometry & citation verification:
+   - Call MCP tool `laporan_verify_citations` or run `./laporan citations verify` to ensure DOI reachability.
+   - Call MCP tool `laporan_audit` or run `./laporan audit --fail-on-ai` to ensure natural cadence and AI probability $\le 15\%$.
+3. Compile both outputs:
    - Call MCP tool `laporan_build` or run `./laporan build`.
    - Produces:
      - `Laporan.pdf`: Pixel-perfect publication PDF rendered by Typst.

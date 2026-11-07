@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Laporan Generator CLI Helper (./laporan)
-# ==============================================================================
 set -e
 
 GREEN='\033[0;32m'
@@ -12,10 +9,15 @@ RED='\033[0;31m'
 BOLD='\033[1m'
 NC='\033[0m'
 
+CURRENT_DIR="$(pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+TARGET_DIR="$CURRENT_DIR"
+if [ ! -f "$TARGET_DIR/metadata.yml" ] && [ ! -d "$TARGET_DIR/chapters" ]; then
+  if [ -f "$SCRIPT_DIR/templates/default/metadata.yml" ] && [ "$CURRENT_DIR" = "$SCRIPT_DIR" ]; then
+    TARGET_DIR="$SCRIPT_DIR/templates/default"
+  fi
+fi
 
-# Resolve Python (handle WindowsApps stub redirector on Windows)
 if ! command -v python3 >/dev/null 2>&1 || ! python3 -V >/dev/null 2>&1; then
   if command -v python >/dev/null 2>&1 && python -V >/dev/null 2>&1; then
     python3() { python "$@"; }
@@ -27,7 +29,7 @@ export PYTHONUTF8=1
 show_banner() {
     echo -e "${CYAN}${BOLD}"
     echo "  ========================================================"
-    echo "                 LAPORAN GENERATOR CLI v3.0.0             "
+    echo "                 LAPORAN GENERATOR CLI v3.1.0             "
     echo "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   "
     echo "  ========================================================"
     echo -e "${NC}"
@@ -35,33 +37,52 @@ show_banner() {
 
 show_help() {
     show_banner
-    echo -e "${BOLD}Penggunaan:${NC} ./laporan <perintah>"
+    echo -e "${BOLD}Penggunaan:${NC}"
+    echo -e "  ./laporan <perintah> [opsi]"
+    echo -e "  laporan <perintah> [opsi]"
     echo ""
-    echo -e "${BOLD}Perintah yang Tersedia:${NC}"
-    echo -e "  ${GREEN}mcp${NC}          Jalankan Model Context Protocol (MCP) Server untuk AI Agent"
-    echo -e "  ${GREEN}build${NC}        Kompilasi PDF dan DOCX sekaligus"
-    echo -e "  ${GREEN}pdf${NC}          Kompilasi dokumen PDF (via Typst)"
-    echo -e "  ${GREEN}docx${NC}         Kompilasi dokumen Microsoft Word (.docx)"
-    echo -e "  ${GREEN}init${NC}         Wizard interaktif untuk konfigurasi awal metadata"
-    echo -e "  ${GREEN}import${NC}       Konversi berkas eksternal (DOCX, PDF, PPTX, XLSX) ke Markdown"
-    echo -e "  ${GREEN}preset${NC}       Kelola preset format kampus (list/show/apply/diff/validate)"
-    echo -e "  ${GREEN}stats${NC}        Analisis statistik kata, halaman, gambar, dan durasi baca"
-    echo -e "  ${GREEN}doctor${NC}       Audit kesehatan proyek (broken images, sitasi hilang, dll.)"
-    echo -e "  ${GREEN}bundle${NC}       Kemas seluruh laporan (PDF, DOCX, MD) menjadi arsip zip"
-    echo -e "  ${GREEN}setup${NC}        Pasang dependensi sistem otomatis (Linux, macOS, Nix, Docker)"
-    echo -e "  ${GREEN}sync-skills${NC}  Sinkronkan skill AI agent & MCP ke Antigravity, Claude, OpenCode"
-    echo -e "  ${GREEN}uninstall${NC}    Hapus integrasi skill dan perintah AI agent dari seluruh sistem"
-    echo -e "  ${GREEN}check${NC}        Audit dependensi sistem dan struktur proyek"
-    echo -e "  ${GREEN}test${NC}         Jalankan suite pengujian otomatis (test.sh)"
-    echo -e "  ${GREEN}view${NC}         Buka dokumen Laporan.pdf di viewer"
-    echo -e "  ${GREEN}watch${NC}        Pantau perubahan berkas dan auto-rebuild (live)"
-    echo -e "  ${GREEN}clean${NC}        Bersihkan berkas output dan direktori sementara"
-    echo -e "  ${GREEN}help${NC}         Tampilkan panduan bantuan ini"
+    echo -e "${BOLD}${CYAN}1. KOMPILASI & PRATINJAU:${NC}"
+    echo -e "  ${GREEN}build${NC}               Kompilasi PDF dan DOCX sekaligus"
+    echo -e "  ${GREEN}pdf${NC}                 Kompilasi dokumen PDF via Typst engine"
+    echo -e "  ${GREEN}docx${NC}                Kompilasi dokumen Microsoft Word (.docx)"
+    echo -e "  ${GREEN}view${NC}                Buka dokumen Laporan.pdf pada viewer sistem"
+    echo -e "  ${GREEN}watch${NC}               Pantau perubahan berkas dan auto-rebuild live"
+    echo -e "  ${GREEN}clean${NC}               Bersihkan berkas keluaran dan direktori temporer"
     echo ""
-    echo -e "${YELLOW}Contoh:${NC}"
-    echo -e "  ./laporan build"
-    echo -e "  ./laporan preset list"
-    echo -e "  ./laporan preset apply itb-ta"
+    echo -e "${BOLD}${CYAN}2. DIAGNOSTIK & KUALITAS AKADEMIK:${NC}"
+    echo -e "  ${GREEN}doctor${NC} | ${GREEN}check${NC}      Audit kesehatan dokumen (gambar, sitasi, sintaks)"
+    echo -e "  ${GREEN}audit${NC}               Audit forensik stylometri naskah dan anti-AI-slop"
+    echo -e "  ${GREEN}citations verify${NC}    Verifikasi keabsahan tautan DOI via Crossref API"
+    echo -e "  ${GREEN}stats${NC}               Analisis statistik kata, bab, dan estimasi halaman"
+    echo -e "  ${GREEN}test${NC}                Jalankan automated test suite (test.sh)"
+    echo ""
+    echo -e "${BOLD}${CYAN}3. MANAJEMEN PROYEK & PRESET:${NC}"
+    echo -e "  ${GREEN}init${NC}                Inisialisasi template dokumen laporan di folder aktif"
+    echo -e "  ${GREEN}import${NC}              Konversi berkas (DOCX, PDF, PPTX, XLSX) ke Markdown"
+    echo -e "  ${GREEN}preset list${NC}         Tampilkan seluruh 14 preset kampus & jurnal"
+    echo -e "  ${GREEN}preset show <id>${NC}    Tampilkan rincian konfigurasi preset kampus"
+    echo -e "  ${GREEN}preset apply <id>${NC}   Terapkan konfigurasi preset ke metadata.yml lokal"
+    echo -e "  ${GREEN}preset diff <id>${NC}    Bandingkan konfigurasi metadata lokal dengan preset"
+    echo -e "  ${GREEN}bundle${NC}              Kemas laporan (PDF, DOCX, MD) menjadi arsip zip rilis"
+    echo ""
+    echo -e "${BOLD}${CYAN}4. INTEGRASI AI AGENT & LINGKUNGAN:${NC}"
+    echo -e "  ${GREEN}mcp${NC}                 Jalankan native MCP Server untuk AI Agent"
+    echo -e "  ${GREEN}sync-skills${NC}         Sinkronkan MCP & skills ke Antigravity, Claude, OpenCode"
+    echo -e "  ${GREEN}setup${NC}               Pasang dependensi otomatis (Linux, macOS, Nix, Docker)"
+    echo -e "  ${GREEN}uninstall${NC}           Hapus integrasi skills & symlinks dari sistem"
+    echo ""
+    echo -e "${BOLD}${YELLOW}Opsi Tambahan:${NC}"
+    echo -e "  ${YELLOW}--preset <id>${NC}       Tentukan preset saat init/build"
+    echo -e "  ${YELLOW}--strict${NC}            Gagal jika probabilitas AI melebihi 15 persen"
+    echo -e "  ${YELLOW}--json${NC}              Keluarkan output dalam format JSON terstruktur"
+    echo -e "  ${YELLOW}--all${NC}               Audit seluruh berkas Markdown di dalam proyek"
+    echo ""
+    echo -e "${BOLD}${YELLOW}Contoh:${NC}"
+    echo -e "  laporan init skripsi-ku --preset ui-skripsi"
+    echo -e "  laporan preset apply itb-ta"
+    echo -e "  laporan doctor"
+    echo -e "  laporan audit --strict"
+    echo -e "  laporan build"
 }
 
 cmd_check() {
@@ -117,16 +138,20 @@ cmd_check() {
         fi
     }
 
-    local tpl_prefix=""
-    if [ ! -f "metadata.yml" ] && [ -f "templates/default/metadata.yml" ]; then
-        tpl_prefix="templates/default/"
+    local tpl_prefix="$TARGET_DIR/"
+    if [ ! -f "${tpl_prefix}metadata.yml" ] && [ -f "${tpl_prefix}templates/default/metadata.yml" ]; then
+        tpl_prefix="${tpl_prefix}templates/default/"
     fi
     check_file "${tpl_prefix}metadata.yml" "Metadata laporan"
     check_file "${tpl_prefix}cover.md" "Kata pengantar & outline"
     check_file "${tpl_prefix}template.typ" "Template Typst"
     check_file "${tpl_prefix}reference.docx" "Template Word"
     check_file "${tpl_prefix}references.bib" "Daftar pustaka"
-    check_dir  "presets" "Direktori preset kampus"
+    if [ -d "$TARGET_DIR/presets" ]; then
+        check_dir "$TARGET_DIR/presets" "Direktori preset kampus"
+    else
+        check_dir "$SCRIPT_DIR/presets" "Direktori preset kampus"
+    fi
     check_dir  "${tpl_prefix}chapters" "Direktori bab laporan"
 
     echo ""
@@ -138,6 +163,15 @@ cmd_check() {
     fi
 }
 
+find_preset_file() {
+    local name="$1"
+    if [ -f "$TARGET_DIR/presets/${name}.yml" ]; then
+        echo "$TARGET_DIR/presets/${name}.yml"
+    elif [ -f "$SCRIPT_DIR/presets/${name}.yml" ]; then
+        echo "$SCRIPT_DIR/presets/${name}.yml"
+    fi
+}
+
 cmd_preset() {
     local subcmd="${1:-list}"
     case "$subcmd" in
@@ -145,25 +179,31 @@ cmd_preset() {
             show_banner
             echo -e "${BLUE}${BOLD}Daftar Preset Format Kampus Tersedia:${NC}"
             echo ""
-            if [ -d presets ]; then
-                for p in presets/*.yml; do
-                    if [ -f "$p" ]; then
-                        local pid
-                        pid=$(basename "$p" .yml)
-                        local pname
-                        pname=$(grep -E '^[[:space:]]*name:' "$p" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-                        local pdesc
-                        pdesc=$(grep -E '^[[:space:]]*description:' "$p" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-                        echo -e "  * ${GREEN}${BOLD}$pid${NC} - ${BOLD}${pname:-$pid}${NC}"
-                        if [ -n "$pdesc" ]; then
-                            echo -e "    ${pdesc}"
+            local seen_presets=()
+            local p_dirs=("$TARGET_DIR/presets" "$SCRIPT_DIR/presets")
+            for pdir in "${p_dirs[@]}"; do
+                if [ -d "$pdir" ]; then
+                    for p in "$pdir"/*.yml; do
+                        if [ -f "$p" ]; then
+                            local pid
+                            pid=$(basename "$p" .yml)
+                            if [[ " ${seen_presets[*]} " =~ " ${pid} " ]]; then
+                                continue
+                            fi
+                            seen_presets+=("$pid")
+                            local pname
+                            pname=$(grep -E '^[[:space:]]*name:' "$p" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+                            local pdesc
+                            pdesc=$(grep -E '^[[:space:]]*description:' "$p" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"\r\n' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+                            echo -e "  * ${GREEN}${BOLD}$pid${NC} - ${BOLD}${pname:-$pid}${NC}"
+                            if [ -n "$pdesc" ]; then
+                                echo -e "    ${pdesc}"
+                            fi
+                            echo ""
                         fi
-                        echo ""
-                    fi
-                done
-            else
-                echo -e "${RED}Direktori presets/ tidak ditemukan.${NC}"
-            fi
+                    done
+                fi
+            done
             echo -e "${YELLOW}Perintah Terkait:${NC}"
             echo -e "  Pindai pedoman PDF : ${CYAN}./laporan preset scan <pedoman.pdf>${NC}"
             echo -e "  Lihat detail preset: ${CYAN}./laporan preset show <preset-id>${NC}"
@@ -183,16 +223,18 @@ cmd_preset() {
                 exit 1
             fi
             shift
-            python3 scripts/scan-preset.py "$@"
+            python3 "$SCRIPT_DIR/scripts/scan-preset.py" "$@"
             ;;
         validate)
             shift
             if [ -n "$1" ]; then
                 local t="$1"
-                [ -f "presets/${t}.yml" ] && t="presets/${t}.yml"
-                python3 scripts/validate-preset.py "$t"
+                local p_file
+                p_file=$(find_preset_file "$t")
+                [ -n "$p_file" ] && t="$p_file"
+                python3 "$SCRIPT_DIR/scripts/validate-preset.py" "$t"
             else
-                python3 scripts/validate-preset.py --all
+                python3 "$SCRIPT_DIR/scripts/validate-preset.py" --all
             fi
             ;;
         diff)
@@ -203,26 +245,36 @@ cmd_preset() {
                 echo "Contoh: ./laporan preset diff itb-ta ui-skripsi"
                 exit 1
             fi
-            if [ ! -f "presets/${p1}.yml" ]; then
+            local p1_file
+            p1_file=$(find_preset_file "$p1")
+            if [ -z "$p1_file" ] || [ ! -f "$p1_file" ]; then
                 echo -e "${RED}Preset '${p1}' tidak ditemukan di folder presets/${NC}"
                 exit 1
             fi
             show_banner
             if [ -n "$p2" ]; then
-                if [ ! -f "presets/${p2}.yml" ]; then
+                local p2_file
+                p2_file=$(find_preset_file "$p2")
+                if [ -z "$p2_file" ] || [ ! -f "$p2_file" ]; then
                     echo -e "${RED}Preset '${p2}' tidak ditemukan di folder presets/${NC}"
                     exit 1
                 fi
                 echo -e "${CYAN}${BOLD}Perbandingan Preset: ${p1}  VS  ${p2}${NC}"
                 echo "========================================================"
-                diff -u "presets/${p1}.yml" "presets/${p2}.yml" || true
+                diff -u "$p1_file" "$p2_file" || true
             else
+                local curr_meta="$TARGET_DIR/metadata.yml"
+                [ ! -f "$curr_meta" ] && [ -f "$TARGET_DIR/templates/default/metadata.yml" ] && curr_meta="$TARGET_DIR/templates/default/metadata.yml"
                 local curr
-                curr=$(grep -E '^[[:space:]]*(preset|margin_preset):' metadata.yml 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '\"'\''\r\n ')
+                curr=$(grep -E '^[[:space:]]*(preset|margin_preset):' "$curr_meta" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '\"'\''\r\n ')
                 curr=${curr:-"standard"}
+                local curr_file
+                curr_file=$(find_preset_file "$curr")
                 echo -e "${CYAN}${BOLD}Perbandingan: Aktif (${curr})  VS  Target (${p1})${NC}"
                 echo "========================================================"
-                diff -u "presets/${curr}.yml" "presets/${p1}.yml" 2>/dev/null || true
+                if [ -n "$curr_file" ] && [ -f "$curr_file" ]; then
+                    diff -u "$curr_file" "$p1_file" || true
+                fi
             fi
             echo "========================================================"
             ;;
@@ -232,11 +284,13 @@ cmd_preset() {
                 echo -e "${RED}Error: Sebutkan ID preset. Contoh: ./laporan preset show itb-ta${NC}"
                 exit 1
             fi
-            if [ -f "presets/${target}.yml" ]; then
+            local p_file
+            p_file=$(find_preset_file "$target")
+            if [ -n "$p_file" ] && [ -f "$p_file" ]; then
                 show_banner
                 echo -e "${CYAN}${BOLD}Konfigurasi Preset: ${target}${NC}"
                 echo "--------------------------------------------------------"
-                cat "presets/${target}.yml"
+                cat "$p_file"
                 echo "--------------------------------------------------------"
             else
                 echo -e "${RED}Preset '${target}' tidak ditemukan di folder presets/${NC}"
@@ -249,13 +303,15 @@ cmd_preset() {
                 echo -e "${RED}Error: Sebutkan ID preset. Contoh: ./laporan preset apply itb-ta${NC}"
                 exit 1
             fi
-            if [ ! -f "presets/${target}.yml" ]; then
+            local p_file
+            p_file=$(find_preset_file "$target")
+            if [ -z "$p_file" ] || [ ! -f "$p_file" ]; then
                 echo -e "${RED}Preset '${target}' tidak ditemukan di presets/${NC}"
                 exit 1
             fi
-            local meta_target="metadata.yml"
-            if [ ! -f "$meta_target" ] && [ -f "templates/default/metadata.yml" ]; then
-                meta_target="templates/default/metadata.yml"
+            local meta_target="$TARGET_DIR/metadata.yml"
+            if [ ! -f "$meta_target" ] && [ -f "$TARGET_DIR/templates/default/metadata.yml" ]; then
+                meta_target="$TARGET_DIR/templates/default/metadata.yml"
             fi
             if [ ! -f "$meta_target" ]; then
                 echo -e "${RED}metadata.yml tidak ditemukan. Jalankan './laporan init' terlebih dahulu.${NC}"
@@ -351,64 +407,97 @@ YAML_EOF
 cmd_build() {
     show_banner
     echo -e "${BLUE}${BOLD}1. Membangun Dokumen PDF (Typst Engine)...${NC}"
-    ./build.sh
+    "$SCRIPT_DIR/build.sh" "$TARGET_DIR"
     echo ""
     echo -e "${BLUE}${BOLD}2. Membangun Dokumen Microsoft Word (DOCX Multi-Pass)...${NC}"
-    ./build-docx.sh
+    "$SCRIPT_DIR/build-docx.sh" "$TARGET_DIR"
     echo ""
     echo -e "${GREEN}${BOLD}Dokumen PDF dan DOCX berhasil dibuat!${NC}"
-    echo -e "  - ${CYAN}Laporan.pdf${NC}"
-    echo -e "  - ${CYAN}Laporan.docx${NC}"
+    echo -e "  - ${CYAN}${TARGET_DIR}/Laporan.pdf${NC}"
+    echo -e "  - ${CYAN}${TARGET_DIR}/Laporan.docx${NC}"
 }
 
 cmd_pdf() {
     show_banner
     echo -e "${BLUE}${BOLD}Membangun Dokumen PDF...${NC}"
-    ./build.sh
+    "$SCRIPT_DIR/build.sh" "$TARGET_DIR"
 }
 
 cmd_docx() {
     show_banner
     echo -e "${BLUE}${BOLD}Membangun Dokumen DOCX...${NC}"
-    ./build-docx.sh
+    "$SCRIPT_DIR/build-docx.sh" "$TARGET_DIR"
 }
 
 cmd_test() {
     show_banner
     echo -e "${BLUE}${BOLD}Menjalankan Test Suite...${NC}"
-    ./test.sh
+    (cd "$SCRIPT_DIR" && ./test.sh)
 }
 
 cmd_view() {
-    make view
+    local pdf_target="$TARGET_DIR/Laporan.pdf"
+    if [ ! -f "$pdf_target" ] && [ -f "$TARGET_DIR/templates/default/Laporan.pdf" ]; then
+        pdf_target="$TARGET_DIR/templates/default/Laporan.pdf"
+    fi
+    if [ -f "$pdf_target" ]; then
+        command -v xdg-open >/dev/null 2>&1 && xdg-open "$pdf_target" || open "$pdf_target" || echo "Laporan.pdf ada di: $pdf_target"
+    else
+        echo -e "${RED}ERROR: Laporan.pdf belum dibuat. Jalankan 'laporan build' terlebih dahulu.${NC}"
+        exit 1
+    fi
 }
 
 cmd_clean() {
-    make clean
+    rm -f "$TARGET_DIR/Laporan.pdf" "$TARGET_DIR/Laporan.docx" "$TARGET_DIR/Laporan.html"
+    rm -f "$TARGET_DIR/templates/default/Laporan.pdf" "$TARGET_DIR/templates/default/Laporan.docx" "$TARGET_DIR/templates/default/Laporan.html"
+    rm -rf "$TARGET_DIR/tmp/"
     echo -e "${GREEN}Berkas temporary berhasil dibersihkan.${NC}"
 }
 
 cmd_watch() {
-    make watch
+    command -v inotifywait >/dev/null 2>&1 || { echo "ERROR: inotifywait not found. Install inotify-tools."; exit 1; }
+    echo "Watching for changes in $TARGET_DIR... (Ctrl+C to stop)"
+    while true; do
+        inotifywait -r -e modify -e create -e delete "$TARGET_DIR" \
+            --exclude '(Laporan\.pdf|Laporan\.docx|tmp/|\.git/|\.pdf)' 2>/dev/null
+        "$SCRIPT_DIR/build.sh" "$TARGET_DIR"
+    done
 }
 
 cmd_stats() {
-    python3 scripts/report-stats.py
+    python3 "$SCRIPT_DIR/scripts/report-stats.py" "$TARGET_DIR"
 }
 
 cmd_doctor() {
-    python3 scripts/report-doctor.py
+    python3 "$SCRIPT_DIR/scripts/report-doctor.py" "$TARGET_DIR"
 }
 
 cmd_bundle() {
-    python3 scripts/bundle.py
+    python3 "$SCRIPT_DIR/scripts/bundle.py" "$TARGET_DIR"
 }
 
-cmd_import() {
-    python3 scripts/ingest.py "$@"
+cmd_audit() {
+    local py_bin="python3"
+    command -v python3 >/dev/null 2>&1 || py_bin="python"
+    "$py_bin" "$SCRIPT_DIR/scripts/audit-forensics.py" --dir "$TARGET_DIR" "$@"
 }
 
-# Main routing
+cmd_citations() {
+    if [ "$1" = "verify" ]; then
+        shift
+        local py_bin="python3"
+        command -v python3 >/dev/null 2>&1 || py_bin="python"
+        local bib_target="$TARGET_DIR/references.bib"
+        if [ ! -f "$bib_target" ] && [ -f "$TARGET_DIR/templates/default/references.bib" ]; then
+            bib_target="$TARGET_DIR/templates/default/references.bib"
+        fi
+        "$py_bin" "$SCRIPT_DIR/scripts/verify-citations.py" --bib "$bib_target" "$@"
+    else
+        echo "Penggunaan: ./laporan citations verify [--bib path/to/references.bib]"
+    fi
+}
+
 case "${1:-help}" in
     build)
         cmd_build
@@ -433,6 +522,14 @@ case "${1:-help}" in
     stats)
         cmd_stats
         ;;
+    audit|forensics)
+        shift
+        cmd_audit "$@"
+        ;;
+    citations)
+        shift
+        cmd_citations "$@"
+        ;;
     doctor)
         cmd_doctor
         ;;
@@ -440,7 +537,7 @@ case "${1:-help}" in
         cmd_bundle
         ;;
     setup)
-        bash scripts/setup-deps.sh
+        bash "$SCRIPT_DIR/scripts/setup-deps.sh"
         ;;
     mcp|server)
         shift

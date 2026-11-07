@@ -45,6 +45,7 @@ cover_logo_width: 4.5cm          # Lebar logo di sampul depan
 | **Identitas** | `preset_id` | String | *Nama file tanpa .yml* | ID unik preset (contoh: `ui-skripsi`). |
 | | `name` | String | - | Nama lengkap format / institusi. |
 | | `description` | String | - | Penjelasan singkat karakteristik preset. |
+| | `doc_type` | String | `thesis` | Tipe dokumen (`thesis` atau `journal`). |
 | **Margin** | `margin_top` | String / Satuan | `2cm` | Jarak batas atas halaman. |
 | | `margin_bottom` | String / Satuan | `3cm` | Jarak batas bawah halaman. |
 | | `margin_left` | String / Satuan | `2.5cm` | Jarak batas kiri halaman (misal: `4cm` untuk jilid). |
@@ -53,10 +54,14 @@ cover_logo_width: 4.5cm          # Lebar logo di sampul depan
 | | `font_size` | String / pt | `12pt` | Ukuran font teks isi. |
 | | `line_spacing` | String / em | `0.75em` | Jarak leading baris (0.75em = setara 1.5 line). |
 | | `first_line_indent` | String / cm | `1.25cm` | Lebar indentasi baris pertama paragraf. |
-| **Heading** | `heading_chapter_prefix` | String | `BAB ` | Awalan judul bab level 1. |
+| **Heading** | `heading_chapter_prefix` | String | `BAB ` | Awalan judul bab level 1 (bisa kosong untuk jurnal). |
+| | `heading_chapter_num_format` | String | `roman` | Format angka bab (`roman` atau `arabic`). |
 | | `heading_sub_dot` | Boolean | `true` | Apakah nomor sub-bab diakhiri titik (`1.1.` vs `1.1`). |
 | | `heading_subsub_dot` | Boolean | `false` | Apakah nomor sub-sub-bab diakhiri titik (`1.1.1`). |
-| **Cover** | `cover_show_lecturer` | Boolean | `true` | Tampilkan blok Dosen Pengampu di cover depan. |
+| **Sitasi** | `citation_style` | String | `apa` | Gaya sitasi bawaan (`apa` atau `ieee`). |
+| | `csl` | String | `apa.csl` | Berkas format CSL (`apa.csl` atau `ieee.csl`). |
+| **Cover** | `cover_show` | Boolean | `true` | Apakah cover jilid ditampilkan (set `false` untuk jurnal). |
+| | `cover_show_lecturer` | Boolean | `true` | Tampilkan blok Dosen Pengampu di cover depan. |
 | | `cover_logo_width` | String / cm | `4cm` | Lebar visual gambar logo di halaman cover. |
 
 ---

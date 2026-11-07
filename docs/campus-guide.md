@@ -39,6 +39,8 @@ Atau gunakan bantuan CLI interaktif:
 | `unair-skripsi` | Universitas Airlangga (UNAIR) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Pedoman penulisan karya ilmiah UNAIR |
 | `ipb-ppki` | IPB University (PPKI) | 3.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Pedoman PPKI IPB (Indent 1cm, sub-bab tanpa titik akhir) |
 | `telkom-ta` | Telkom University (Tel-U) | 3.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Pedoman Buku Tugas Akhir Telkom University |
+| `jurnal-uajy` | Univ. Atma Jaya Yogyakarta (UAJY) | 3.0 cm - 3.0 cm - 3.0 cm - 3.0 cm | Format Jurnal Berita Informatika (JBI), 11pt, spasi 1, IEEE CSL, IMRaD |
+| `jurnal-standar` | Jurnal Nasional / SINTA | 3.0 cm - 3.0 cm - 3.0 cm - 3.0 cm | Format artikel jurnal nasional standar (IEEE/APA, tanpa cover/TOC) |
 
 ---
 
@@ -88,6 +90,28 @@ institution: "UNIVERSITAS GADJAH MADA"
 faculty: "FAKULTAS TEKNIK"
 year: "2026"
 preset: "ugm-skripsi"
+```
+
+### D. Format Artikel Jurnal UAJY (Jurnal Berita Informatika)
+```yaml
+title: "RANCANG BANGUN PLATFORM INTERAKTIF BERBASIS WEB DENGAN METODE MULTIMEDIA DEVELOPMENT LIFE CYCLE"
+author:
+  - name: "Mu'adz Hudzaifah"
+    nim: "24903460014"
+    affiliation: "Program Studi Informatika, Universitas Atma Jaya Yogyakarta"
+    email: "muadz@students.uajy.ac.id"
+institution: "Universitas Atma Jaya Yogyakarta"
+faculty: "Fakultas Teknologi Industri"
+department: "Informatika"
+year: "2026"
+preset: "jurnal-uajy"
+doc_type: "journal"
+abstract_id: |
+  Penelitian ini merancang platform web interaktif menggunakan metode MDLC...
+keywords_id: ["MDLC", "Web Platform", "Robotika"]
+abstract_en: |
+  This study designs an interactive web platform using MDLC method...
+keywords_en: ["MDLC", "Web Platform", "Robotics"]
 ```
 
 ---

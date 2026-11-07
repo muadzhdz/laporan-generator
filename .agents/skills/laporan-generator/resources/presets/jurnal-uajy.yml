@@ -1,0 +1,20 @@
+preset_id: "jurnal-uajy"
+name: "Jurnal Buana Informatika (UAJY)"
+description: "Format artikel jurnal ilmiah Jurnal Buana Informatika (JBI) Universitas Atma Jaya Yogyakarta."
+doc_type: "journal"
+margin_top: 3cm
+margin_bottom: 3cm
+margin_left: 3cm
+margin_right: 3cm
+font_family: "Liberation Serif"
+font_size: 11pt
+line_spacing: 0.55em
+first_line_indent: 0.75cm
+heading_chapter_prefix: ""
+heading_chapter_num_format: "arabic"
+heading_sub_dot: true
+heading_subsub_dot: false
+citation_style: "ieee"
+csl: "ieee.csl"
+cover_show: false
+cover_show_lecturer: false

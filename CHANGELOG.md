@@ -4,6 +4,28 @@ Semua perubahan penting pada project **Laporan Generator** akan didokumentasikan
 
 Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/1.0.0/) dan mematuhi [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-11-07
+
+### Added
+- **Preset Artikel Jurnal Ilmiah UAJY & Standar Nasional**: Penambahan `presets/jurnal-uajy.yml` (Jurnal Buana Informatika UAJY) dan `presets/jurnal-standar.yml` untuk format publikasi artikel jurnal dan open access SINTA (margin 3-3-3-3 cm, single column, spasi tunggal, penomoran numerik murni tanpa prefix `BAB`, header artikel langsung pada halaman pertama tanpa halaman sampul jilid).
+- **Integrasi Format Sitasi IEEE (`templates/default/ieee.csl`)**: Dukungan sitasi berbasis nomor kurung siku `[1]`, `[2]–[4]` otomatis via `--csl=ieee.csl` untuk publikasi bidang informatika, sistem informasi, dan teknik elektro.
+- **Engine Forensik Stylometri & Anti-AI-Slop (`scripts/audit-forensics.py`)**: Audit metrik burstiness kalimat ($CV \ge 0.42$), selisih rata-rata panjang kalimat bersebelahan ($\Delta \ge 12.0$), kekayaan leksikal (MATTR $\ge 0.70$), deteksi kata klise RLHF dwibahasa (ID/EN), deteksi anomali em-dash, dan estimasi probabilitas AI berbasis benchmark HC3.
+- **Verifikator DOI Sitasi CrossRef Real-time (`scripts/verify-citations.py`)**: Pengecekan keabsahan setiap DOI pada `references.bib` langsung ke CrossRef API (`HTTP 200 OK`) dilengkapi cache lokal `.cache/doi_cache.json` untuk mendeteksi sitasi fiktif / halusinasi AI.
+- **JSON Schema IntelliSense (`docs/metadata.schema.json`)**: Spesifikasi skema Draft-07 resmi untuk autocompletion dan validasi *real-time* field `metadata.yml` pada Neovim (`yamlls`) dan VS Code.
+- **Tab Autocompletions Terminal**: Berkas autokomplesi bawaan untuk Bash (`completions/laporan.bash`), Zsh (`completions/laporan.zsh`), dan Fish (`completions/laporan.fish`).
+- **Showcase Contoh Riil Dokumen (`examples/`)**: Tiga proyek dokumen nyata yang siap kompilasi: `01-Skripsi-Nasional` (UI 4-4-3-3), `02-Makalah-Kuliah` (ITB standard), dan `03-Jurnal-UAJY-IEEE` (JBI IMRaD), divalidasi via `examples/build_examples.sh`.
+- **Sub-command CLI Baru**: Penambahan `./laporan audit [target]` dan `./laporan citations verify` pada CLI Node.js (`bin/laporan-generator.js`), Bash (`laporan`), dan PowerShell (`laporan.ps1`).
+- **Native MCP 2.0 Tools Baru**: Penambahan tools `laporan_audit` dan `laporan_verify_citations` untuk eksekusi audit forensik dan verifikasi sitasi langsung oleh AI agent.
+- **Ekspansi Test Suite Otomatis**: Penambahan pengujian kategori `[T27]`, `[T28]`, `[T29]`, dan `[T30]` pada `test.sh` (meningkat dari 119 menjadi 137 assertions passed) dan 27 tests pada `scripts/test_scripts.py`.
+
+### Changed
+- **Kedaulatan Direktori Kerja Global (CLI Working Directory)**: `laporan` dan `laporan.ps1` kini sepenuhnya *context-aware*, mempertahankan direktori pemanggilan pengguna (`CURRENT_DIR`), sehingga perintah `build`, `doctor`, `audit`, dan `preset apply` dapat dijalankan dari folder mana saja secara global.
+- **Paritas Multi-Engine Jurnal (Typst & DOCX)**: `template.typ` dan `docx.lua` kini mendukung `doc_type: "journal"` dengan perenderan otomatis header artikel langsung pada halaman 1 tanpa menyisipkan cover skripsi tebal atau lembar pengesahan.
+- **Perbaikan Table Breaking**: Penambahan `#show figure.where(kind: table): set block(breakable: true)` pada `template.typ` untuk pemutusan tabel multi-halaman yang rapi tanpa penumpukan baris.
+- **Sinkronisasi Versi Global ke v3.1.0**: Memperbarui versi pada `package.json`, `bin/laporan-generator.js`, `lib/mcp.js`, `laporan`, dan `laporan.ps1`.
+
+---
+
 ## [3.0.0] - 2026-10-25
 
 ### Added

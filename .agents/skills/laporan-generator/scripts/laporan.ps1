@@ -40,7 +40,7 @@ function Get-PythonCommand {
 
 function Show-Banner {
     Write-Host "  ========================================================" -ForegroundColor Cyan
-    Write-Host "                 LAPORAN GENERATOR CLI v3.0.0             " -ForegroundColor Cyan
+    Write-Host "                 LAPORAN GENERATOR CLI v3.1.0             " -ForegroundColor Cyan
     Write-Host "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   " -ForegroundColor Cyan
     Write-Host "  ========================================================" -ForegroundColor Cyan
     Write-Host ""
@@ -48,29 +48,52 @@ function Show-Banner {
 
 function Show-Help {
     Show-Banner
-    Write-Host "Penggunaan: .\laporan.ps1 <perintah>" -ForegroundColor White
+    Write-Host "Penggunaan:" -ForegroundColor White
+    Write-Host "  .\laporan.ps1 <perintah> [opsi]" -ForegroundColor White
     Write-Host ""
-    Write-Host "Perintah yang Tersedia:" -ForegroundColor White
-    Write-Host "  build        Kompilasi PDF dan DOCX sekaligus" -ForegroundColor Green
-    Write-Host "  pdf          Kompilasi dokumen PDF (via Typst)" -ForegroundColor Green
-    Write-Host "  docx         Kompilasi dokumen Microsoft Word (.docx)" -ForegroundColor Green
-    Write-Host "  init         Wizard interaktif untuk konfigurasi awal metadata" -ForegroundColor Green
-    Write-Host "  preset       Kelola preset format kampus (list/show/apply/validate/diff/scan)" -ForegroundColor Green
-    Write-Host "  stats        Analisis statistik kata, halaman, gambar, dan durasi baca" -ForegroundColor Green
-    Write-Host "  doctor       Audit kesehatan proyek (broken images, sitasi hilang, dll.)" -ForegroundColor Green
-    Write-Host "  bundle       Kemas seluruh laporan (PDF, DOCX, MD) menjadi arsip zip" -ForegroundColor Green
-    Write-Host "  setup        Pasang dependensi sistem otomatis Windows (Typst, Pandoc, Magick)" -ForegroundColor Green
-    Write-Host "  mcp          Jalankan Model Context Protocol (MCP) Server untuk AI Agent" -ForegroundColor Green
-    Write-Host "  sync-skills  Sinkronkan skill AI agent & MCP ke Antigravity, Claude, OpenCode" -ForegroundColor Green
-    Write-Host "  uninstall    Hapus integrasi skill dan perintah AI agent dari seluruh sistem" -ForegroundColor Green
-    Write-Host "  check        Audit dependensi sistem dan struktur proyek" -ForegroundColor Green
-    Write-Host "  test         Jalankan suite pengujian otomatis" -ForegroundColor Green
-    Write-Host "  view         Buka dokumen Laporan.pdf di PDF viewer" -ForegroundColor Green
-    Write-Host "  watch        Pantau perubahan berkas dan auto-rebuild" -ForegroundColor Green
-    Write-Host "  clean        Bersihkan berkas output dan direktori sementara" -ForegroundColor Green
-    Write-Host "  help         Tampilkan panduan bantuan ini" -ForegroundColor Green
+    Write-Host "1. KOMPILASI & PRATINJAU:" -ForegroundColor Cyan
+    Write-Host "  build               Kompilasi PDF dan DOCX sekaligus" -ForegroundColor Green
+    Write-Host "  pdf                 Kompilasi dokumen PDF via Typst engine" -ForegroundColor Green
+    Write-Host "  docx                Kompilasi dokumen Microsoft Word (.docx)" -ForegroundColor Green
+    Write-Host "  view                Buka dokumen Laporan.pdf pada viewer sistem" -ForegroundColor Green
+    Write-Host "  watch               Pantau perubahan berkas dan auto-rebuild live" -ForegroundColor Green
+    Write-Host "  clean               Bersihkan berkas keluaran dan direktori temporer" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "2. DIAGNOSTIK & KUALITAS AKADEMIK:" -ForegroundColor Cyan
+    Write-Host "  doctor | check      Audit kesehatan dokumen (gambar, sitasi, sintaks)" -ForegroundColor Green
+    Write-Host "  audit               Audit forensik stylometri naskah dan anti-AI-slop" -ForegroundColor Green
+    Write-Host "  citations verify    Verifikasi keabsahan tautan DOI via Crossref API" -ForegroundColor Green
+    Write-Host "  stats               Analisis statistik kata, bab, dan estimasi halaman" -ForegroundColor Green
+    Write-Host "  test                Jalankan automated test suite" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "3. MANAJEMEN PROYEK & PRESET:" -ForegroundColor Cyan
+    Write-Host "  init                Inisialisasi template dokumen laporan di folder aktif" -ForegroundColor Green
+    Write-Host "  import              Konversi berkas (DOCX, PDF, PPTX, XLSX) ke Markdown" -ForegroundColor Green
+    Write-Host "  preset list         Tampilkan seluruh 14 preset kampus & jurnal" -ForegroundColor Green
+    Write-Host "  preset show <id>    Tampilkan rincian konfigurasi preset kampus" -ForegroundColor Green
+    Write-Host "  preset apply <id>   Terapkan konfigurasi preset ke metadata.yml lokal" -ForegroundColor Green
+    Write-Host "  preset diff <id>    Bandingkan konfigurasi metadata lokal dengan preset" -ForegroundColor Green
+    Write-Host "  bundle              Kemas laporan (PDF, DOCX, MD) menjadi arsip zip rilis" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "4. INTEGRASI AI AGENT & LINGKUNGAN:" -ForegroundColor Cyan
+    Write-Host "  mcp                 Jalankan native MCP Server untuk AI Agent" -ForegroundColor Green
+    Write-Host "  sync-skills         Sinkronkan MCP & skills ke Antigravity, Claude, OpenCode" -ForegroundColor Green
+    Write-Host "  setup               Pasang dependensi otomatis Windows (Typst, Pandoc, Magick)" -ForegroundColor Green
+    Write-Host "  uninstall           Hapus integrasi skills & symlinks dari sistem" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Opsi Tambahan:" -ForegroundColor Yellow
+    Write-Host "  --preset <id>       Tentukan preset saat init/build" -ForegroundColor Yellow
+    Write-Host "  --strict            Gagal jika probabilitas AI melebihi 15 persen" -ForegroundColor Yellow
+    Write-Host "  --json              Keluarkan output dalam format JSON terstruktur" -ForegroundColor Yellow
+    Write-Host "  --all               Audit seluruh berkas Markdown di dalam proyek" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Contoh:" -ForegroundColor Yellow
+    Write-Host "  .\laporan.ps1 init skripsi-ku --preset ui-skripsi" -ForegroundColor White
+    Write-Host "  .\laporan.ps1 preset apply itb-ta" -ForegroundColor White
+    Write-Host "  .\laporan.ps1 doctor" -ForegroundColor White
+    Write-Host "  .\laporan.ps1 audit --strict" -ForegroundColor White
+    Write-Host "  .\laporan.ps1 build" -ForegroundColor White
+}
     Write-Host "  .\laporan.ps1 build"
     Write-Host "  .\laporan.ps1 stats"
     Write-Host "  .\laporan.ps1 preset list"
@@ -471,6 +494,31 @@ function Cmd-Stats {
     }
 }
 
+function Cmd-Audit {
+    param([string[]]$ArgsList)
+    $pyCmd = Get-PythonCommand
+    if ($pyCmd) {
+        & $pyCmd (Join-Path $PSScriptRoot "scripts\audit-forensics.py") @ArgsList
+    } else {
+        Write-Host "Error: Python 3 tidak ditemukan." -ForegroundColor Red
+    }
+}
+
+function Cmd-Citations {
+    param([string[]]$ArgsList)
+    $pyCmd = Get-PythonCommand
+    if ($pyCmd) {
+        if ($ArgsList -contains "verify") {
+            $filtered = $ArgsList | Where-Object { $_ -ne "verify" }
+            & $pyCmd (Join-Path $PSScriptRoot "scripts\verify-citations.py") @filtered
+        } else {
+            Write-Host "Penggunaan: .\laporan.ps1 citations verify [--bib path\to\references.bib]" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "Error: Python 3 tidak ditemukan." -ForegroundColor Red
+    }
+}
+
 function Cmd-Doctor {
     param([string[]]$ArgsList)
     $pyCmd = Get-PythonCommand
@@ -551,7 +599,9 @@ switch ($Command.ToLower()) {
     "import" { & (Get-Python-Command) (Join-Path $PSScriptRoot "scripts\ingest.py") @extraArgs }
     "ingest" { & (Get-Python-Command) (Join-Path $PSScriptRoot "scripts\ingest.py") @extraArgs }
     "stats"  { Cmd-Stats $extraArgs }
-    "doctor" { Cmd-Doctor $extraArgs }
+    "audit"     { Cmd-Audit $extraArgs }
+    "citations" { Cmd-Citations $extraArgs }
+    "doctor"    { Cmd-Doctor $extraArgs }
     "bundle" { Cmd-Bundle $extraArgs }
     "setup"  { & powershell -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "scripts\setup-deps.ps1") }
     "mcp"    {

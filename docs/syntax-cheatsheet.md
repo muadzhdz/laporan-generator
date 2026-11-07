@@ -4,17 +4,17 @@ Panduan referensi cepat sintaks Markdown yang kompatibel dan teruji untuk pipeli
 
 ---
 
-## 1. Sitasi & Bibliografi (BibTeX APA)
+## 1. Sitasi & Bibliografi (BibTeX APA & IEEE)
 
-Daftar pustaka dikelola melalui `references.bib` dan format APA melalui `apa.csl`.
+Daftar pustaka dikelola melalui `references.bib`. Format sitasi dipilih otomatis berdasarkan preset atau opsi `csl` (`apa.csl` untuk skripsi, `ieee.csl` untuk jurnal):
 
-| Sintaks Markdown | Hasil Tipografi | Keterangan |
-|---|---|---|
-| `[@knuth1984texbook]` | (Knuth, 1984) | Sitasi tanda kurung standar |
-| `@knuth1984texbook menyatakan bahwa...` | Knuth (1984) menyatakan bahwa... | Sitasi naratif dalam kalimat |
-| `[-@knuth1984texbook]` | (1984) | Hanya tahun penerbitan |
-| `[@apa2020manual, hal. 45]` | (American Psychological Association, 2020, hal. 45) | Sitasi dengan nomor halaman |
-| `[@apa2020manual; @pandoc2024]` | (American Psychological Association, 2020; Pandoc, 2024) | Multi-sitasi sekaligus |
+| Sintaks Markdown | Hasil Tipografi (APA) | Hasil Tipografi (IEEE) | Keterangan |
+|---|---|---|---|
+| `[@knuth1984texbook]` | (Knuth, 1984) | [1] | Sitasi tanda kurung / numerik standar |
+| `@knuth1984texbook menyatakan bahwa...` | Knuth (1984) menyatakan... | [1] menyatakan bahwa... | Sitasi naratif dalam kalimat |
+| `[-@knuth1984texbook]` | (1984) | [1] | Hanya tahun penerbitan |
+| `[@apa2020manual, hal. 45]` | (APA, 2020, hal. 45) | [2, p. 45] | Sitasi dengan nomor halaman |
+| `[@apa2020manual; @pandoc2024]` | (APA, 2020; Pandoc, 2024) | [2], [3] | Multi-sitasi sekaligus |
 
 ---
 

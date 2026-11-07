@@ -41,22 +41,56 @@ copy_asset "logo.jpg" "$TMPDIR" || true
 copy_asset "metadata.yml" "$TMPDIR" || true
 copy_asset "references.bib" "$TMPDIR" || true
 copy_asset "apa.csl" "$TMPDIR" || true
+copy_asset "ieee.csl" "$TMPDIR" || true
 copy_asset "presets" "$TMPDIR" || true
+
+PRESET_NAME=$(grep -E '^[[:space:]]*(preset|margin_preset):' "$TMPDIR/metadata.yml" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"'\''\r\n ')
+PRESET_OPTS=()
+if [ -n "$PRESET_NAME" ] && [ -f "$TMPDIR/presets/${PRESET_NAME}.yml" ]; then
+  PRESET_OPTS=("--metadata-file=$TMPDIR/presets/${PRESET_NAME}.yml")
+elif [ -f "$TMPDIR/presets/standard.yml" ]; then
+  PRESET_OPTS=("--metadata-file=$TMPDIR/presets/standard.yml")
+fi
+
+DOC_TYPE=$(grep -E '^[[:space:]]*doc_type:' "$TMPDIR/metadata.yml" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"'\''\r\n ')
+if [ -z "$DOC_TYPE" ] && [ -n "$PRESET_NAME" ] && [ -f "$TMPDIR/presets/${PRESET_NAME}.yml" ]; then
+  DOC_TYPE=$(grep -E '^[[:space:]]*doc_type:' "$TMPDIR/presets/${PRESET_NAME}.yml" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"'\''\r\n ')
+fi
+
+CSL_FILE="apa.csl"
+REQ_CSL=$(grep -E '^[[:space:]]*(csl|citation_style):' "$TMPDIR/metadata.yml" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"'\''\r\n ')
+if [ -z "$REQ_CSL" ] && [ -n "$PRESET_NAME" ] && [ -f "$TMPDIR/presets/${PRESET_NAME}.yml" ]; then
+  REQ_CSL=$(grep -E '^[[:space:]]*(csl|citation_style):' "$TMPDIR/presets/${PRESET_NAME}.yml" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"'\''\r\n ')
+fi
+if [ "$REQ_CSL" = "ieee" ] || [ "$REQ_CSL" = "ieee.csl" ]; then
+  CSL_FILE="ieee.csl"
+fi
+
+TOP_DIV="chapter"
+if [ "$DOC_TYPE" = "journal" ]; then
+  TOP_DIV="section"
+fi
 
 if [ -d "$OUTDIR/chapters" ]; then
   cp "$OUTDIR/chapters"/*.md "$TMPDIR/" 2>/dev/null || true
-  CHAPTER_FILES=$(find "$TMPDIR" -maxdepth 1 -name "bab*.md" | sort -V)
-  if [ -z "$CHAPTER_FILES" ]; then
-    echo "ERROR: Tidak ada berkas bab*.md di direktori chapters/."
-    exit 1
+  if [ "$DOC_TYPE" = "journal" ]; then
+    INPUT_FILES=()
+    while IFS= read -r f; do
+      [ -n "$f" ] && INPUT_FILES+=("$f")
+    done < <(find "$TMPDIR" -maxdepth 1 -name "*.md" ! -name "cover.md" | sort -V)
+  else
+    CHAPTER_FILES=$(find "$TMPDIR" -maxdepth 1 -name "bab*.md" | sort -V)
+    if [ -z "$CHAPTER_FILES" ]; then
+      echo "ERROR: Tidak ada berkas bab*.md di direktori chapters/."
+      exit 1
+    fi
+    INPUT_FILES=("$TMPDIR/cover.md")
+    while IFS= read -r f; do
+      [ -n "$f" ] && INPUT_FILES+=("$f")
+    done < <(find "$TMPDIR" -maxdepth 1 -name "bab*.md" | sort -V)
   fi
-  INPUT_FILES=("$TMPDIR/cover.md")
-  while IFS= read -r f; do
-    [ -n "$f" ] && INPUT_FILES+=("$f")
-  done < <(find "$TMPDIR" -maxdepth 1 -name "bab*.md" | sort -V)
 else
   echo "ERROR: Direktori chapters/ tidak ditemukan."
-  echo "Buat folder chapters/ dengan file bab laporan (contoh: bab1-pendahuluan.md dst)."
   exit 1
 fi
 
@@ -69,14 +103,6 @@ fi
 
 cd "$TMPDIR"
 
-PRESET_NAME=$(grep -E '^[[:space:]]*(preset|margin_preset):' "$TMPDIR/metadata.yml" 2>/dev/null | head -n 1 | cut -d: -f2- | tr -d '"'\''\r\n ')
-PRESET_OPTS=()
-if [ -n "$PRESET_NAME" ] && [ -f "$TMPDIR/presets/${PRESET_NAME}.yml" ]; then
-  PRESET_OPTS=("--metadata-file=$TMPDIR/presets/${PRESET_NAME}.yml")
-elif [ -f "$TMPDIR/presets/standard.yml" ]; then
-  PRESET_OPTS=("--metadata-file=$TMPDIR/presets/standard.yml")
-fi
-
 if ! pandoc \
   "${INPUT_FILES[@]}" \
   --template="template.typ" \
@@ -84,19 +110,14 @@ if ! pandoc \
   --metadata-file="metadata.yml" \
   --citeproc \
   --bibliography="references.bib" \
-  --csl="apa.csl" \
+  --csl="$CSL_FILE" \
   --metadata=reference-section-title="DAFTAR PUSTAKA" \
-  --top-level-division=chapter \
+  --top-level-division="$TOP_DIV" \
   --pdf-engine=typst \
   --no-highlight \
   -o "$REPORT" 2>&1; then
   echo ""
   echo "[ERROR] BUILD GAGAL: Terjadi kesalahan saat kompilasi Pandoc/Typst."
-  echo "Kemungkinan penyebab & solusi:"
-  echo "  1. Sintaks YAML di metadata.yml tidak valid -> Cek docs/metadata-schema.md"
-  echo "  2. Berkas gambar tidak ditemukan atau rusak -> Cek path gambar di chapters/"
-  echo "  3. Sintaks Markdown tidak didukung -> Cek docs/troubleshooting.md"
-  echo "  4. Gunakan Docker jika ada masalah dependensi lokal: docker compose run --rm laporan-generator"
   exit 1
 fi
 

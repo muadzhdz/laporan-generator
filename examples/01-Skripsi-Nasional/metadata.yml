@@ -1,0 +1,37 @@
+---
+title: "RANCANG BANGUN SISTEM MONITORING DAN OTOMASI SISTEM AKADEMIK BERBASIS ARSITEKTUR MIKROSERVIS"
+subtitle: "SKRIPSI"
+author:
+  - name: "Ahmad Dahlan"
+    nim: "101234567"
+lecturer: "Dr. Ir. Hendra Wijaya, M.T."
+lecturer_label: "Dosen Pembimbing:"
+course: "Tugas Akhir / Skripsi"
+institution: "Universitas Indonesia"
+faculty: "Fakultas Ilmu Komputer"
+department: "Ilmu Komputer"
+city: "Depok"
+year: "2026"
+date: "Juli 2026"
+preset: "ui-skripsi"
+doc_type: "thesis"
+daftar_gambar: false
+daftar_tabel: false
+approval:
+  city: "Depok"
+  date: "20 Juli 2026"
+  supervisors:
+    - name: "Dr. Ir. Hendra Wijaya, M.T."
+      nip: "197501012000031001"
+      role: "Pembimbing Utama"
+  dean:
+    name: "Prof. Dr. Dekan Fakultas, M.Sc."
+    nip: "196803031992031003"
+    role: "Dekan Fakultas Ilmu Komputer"
+abstract_id: |
+  Penelitian ini merancang arsitektur sistem monitoring akademik terdistribusi berbasis mikroservis. Implementasi dievaluasi menggunakan metrik latensi p95 dan ketersediaan layanan tinggi.
+keywords_id: ["Mikroservis", "Monitoring", "Sistem Akademik"]
+abstract_en: |
+  This research designs a distributed academic monitoring system based on microservices. The implementation is evaluated using p95 latency and high availability metrics.
+keywords_en: ["Microservices", "Monitoring", "Academic System"]
+...

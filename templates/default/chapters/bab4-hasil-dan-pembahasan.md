@@ -45,7 +45,7 @@ Dokumen Microsoft Word (`Laporan.docx`) yang dihasilkan melalui proses multi-pas
 
 ## Analisis Komparasi Kinerja dan Efisiensi
 
-Tabel berikut menyajikan perbandingan komprehensif antara pipeline **Laporan Generator (Typst Engine)**, pipeline berbasis **LaTeX Tradisional**, dan penyusunan manual menggunakan **Microsoft Word**:
+Tabel berikut menyajikan perbandingan terperinci antara pipeline **Laporan Generator (Typst Engine)**, pipeline berbasis **LaTeX Tradisional**, dan penyusunan manual menggunakan **Microsoft Word**:
 
 | Parameter Evaluasi | Laporan Generator (Typst) | LaTeX Tradisional | Microsoft Word Manual |
 |:---|:---|:---|:---|
@@ -59,7 +59,7 @@ Tabel berikut menyajikan perbandingan komprehensif antara pipeline **Laporan Gen
 
 ## Hasil Pengujian Otomatis (Automated Test Suite)
 
-Pengujian menyeluruh menggunakan skrip `test.sh` dilakukan untuk memverifikasi fungsionalitas seluruh komponen. Hasil eksekusi pengujian pada lingkungan terisolasi menghasilkan status lulus 100%:
+Rangkaian pengujian terstruktur menggunakan skrip `test.sh` dilakukan untuk memverifikasi fungsionalitas seluruh komponen. Hasil eksekusi pengujian pada lingkungan terisolasi menghasilkan status lulus 100%:
 
 ```
 === Test Suite: Laporan Generator ===

@@ -15,10 +15,13 @@ Generator ini bersifat **universal** dan mendukung berbagai jenis dokumen akadem
 
 1. **Prioritaskan Native MCP Tools** (jika tersedia di lingkungan agen AI seperti Antigravity, Claude Code, OpenCode, Cursor):
    - `laporan_init`: Inisialisasi proyek baru & konfigurasi `metadata.yml`.
-   - `laporan_presets`: Melihat daftar dan detail 12 preset kampus resmi.
+   - `laporan_presets`: Melihat daftar dan detail 14 preset kampus & jurnal resmi.
    - `laporan_citations`: Mencari DOI/paper asli di Crossref API & menambahkan BibTeX ke `references.bib`.
+   - `laporan_verify_citations`: Memverifikasi keabsahan tautan DOI di `references.bib`.
    - `laporan_doctor`: Mengaudit integritas berkas, sitasi, gambar, dan sintaks.
+   - `laporan_audit`: Menganalisis metrik forensik stylometry (variansi panjang kalimat, MATTR, deteksi klise AI / anti-slop).
    - `laporan_stats`: Menghitung statistik kata, bab, dan estimasi halaman.
+   - `laporan_import`: Mengonversi materi `.docx`, `.pdf`, `.pptx`, `.xlsx` menjadi bab Markdown.
    - `laporan_build`: Mengompilasi dokumen menjadi `Laporan.pdf` dan `Laporan.docx`.
 2. **Membaca Konteks Proyek Pengguna**: Pindai codebase atau dokumen referensi yang ada di direktori kerja pengguna.
 3. **Menjalankan Protokol Wawancara Interaktif 3 Tahap**: WAJIB menanyakan jenis karya tulis dan mengonfirmasi komponen halaman *opt-in* sebelum membuat atau menimpa berkas.
@@ -109,8 +112,20 @@ Setelah pengguna memilih jenis dokumen, tampilkan rancangan susunan babnya:
   - BAB V: Penutup (Kesimpulan & Saran)
 - **Halaman Akhir**: Daftar Pustaka
 
+#### E. [5] Artikel Ilmiah / Paper Jurnal (Format IMRaD Ringkas):
+- **Halaman Depan (Single-Header, Tanpa Cover Terpisah)**:
+  - Judul Artikel Ilmiah, Baris Nama Penulis, Afiliasi Institusi, Alamat Surel, serta Abstrak Indonesia & Inggris beserta Kata Kunci langsung berada di **bagian atas Halaman 1**.
+  - **TIDAK ADA**: Sampul luar terpisah, Lembar Pengesahan, Kata Pengantar, maupun Daftar Isi.
+  - Berkas `cover.md` dikosongkan atau dilewati.
+- **Batang Tubuh (IMRaD 4 Bagian)**:
+  - BAB I: Pendahuluan (`# PENDAHULUAN` -> otomatis bernomor seksi `1. PENDAHULUAN`)
+  - BAB II: Metode Penelitian (`# METODE PENELITIAN` -> otomatis bernomor seksi `2. METODE PENELITIAN`)
+  - BAB III: Hasil dan Pembahasan (`# HASIL DAN PEMBAHASAN` -> otomatis bernomor seksi `3. HASIL DAN PEMBAHASAN`)
+  - BAB IV: Kesimpulan (`# KESIMPULAN` -> otomatis bernomor seksi `4. KESIMPULAN`)
+- **Halaman Akhir**: Daftar Pustaka (Format Sitasi Numerik IEEE `[1]`, `[2]`)
+
 **PERTANYAAN WAJIB KE PENGGUNA SEBELUM GENERATE FILE:**
-> *"Struktur default dokumen Anda saat ini adalah minimalis: **Cover -> Kata Pengantar -> Daftar Isi -> Bab Batang Tubuh -> Daftar Pustaka** (tanpa Daftar Gambar, Daftar Tabel, Lembar Pengesahan, maupun Abstrak). Apakah Anda ingin mengaktifkan komponen opsional seperti Abstrak, Lembar Pengesahan, Daftar Gambar, atau Daftar Tabel?"*
+> *"Struktur default dokumen Anda saat ini adalah minimalis: **Cover -> Kata Pengantar -> Daftar Isi -> Bab Batang Tubuh -> Daftar Pustaka** (tanpa Daftar Gambar, Daftar Tabel, Lembar Pengesahan, maupun Abstrak). Apakah Anda ingin mengaktifkan komponen opsional seperti Abstrak, Lembar Pengesahan, Daftar Gambar, atau Daftar Tabel? (Catatan: Untuk format Artikel Jurnal, halaman sampul, kata pengantar, dan daftar isi otomatis ditiadakan sesuai kaidah IMRaD)."*
 
 ---
 
@@ -134,6 +149,8 @@ Setelah struktur halaman disepakati, tanyakan informasi identitas dokumen:
    - `unair-skripsi`: Universitas Airlangga (Atas 4cm, Kiri 4cm, Bawah 3cm, Kanan 3cm)
    - `ipb-ppki`: IPB University - Pedoman PPKI (Kiri 4cm, Atas 3cm, Kanan 3cm, Bawah 3cm, Sub-bab tanpa titik akhir)
    - `telkom-ta`: Telkom University (Kiri 4cm, Atas 3cm, Kanan 3cm, Bawah 3cm)
+   - `jurnal-uajy`: Universitas Atma Jaya Yogyakarta - JBI (Margin 3-3-3-3, 11pt, IEEE CSL, IMRaD)
+   - `jurnal-standar`: Standar Publikasi Jurnal Nasional (Margin 3-3-3-3, IMRaD, IEEE/APA)
 
 ================================================================================
 ## STEP 3 — MATRIKS STRUKTUR BAB BERDASARKAN DOMAIN TEKNIS
@@ -222,6 +239,39 @@ daftar_tabel: false
 ...
 ```
 
+#### Contoh Konfigurasi metadata.yml untuk Mode Artikel Jurnal (IMRaD / UAJY / SINTA):
+```yaml
+---
+title: "Perancangan Simulasi 3D Web Interaktif Edukasi Robotika Menggunakan Luther-Sutopo MDLC"
+doc_type: "journal"
+preset: "jurnal-uajy"
+citation_style: "ieee"
+csl: "ieee.csl"
+author:
+  - name: "Muadz"
+    nim: "220711854"
+    affiliation: "Program Studi Informatika, Universitas Atma Jaya Yogyakarta"
+    email: "muadz@mail.uajy.ac.id"
+  - name: "Dosen Pembimbing, M.T."
+    nim: "0512038001"
+    affiliation: "Program Studi Informatika, Universitas Atma Jaya Yogyakarta"
+    email: "pembimbing@mail.uajy.ac.id"
+institution: "Universitas Atma Jaya Yogyakarta"
+faculty: "Fakultas Teknologi Industri"
+department: "Informatika"
+year: "2026"
+date: "November 2026"
+daftar_gambar: false
+daftar_tabel: false
+abstract_id: |
+  Edukasi robotika memerlukan visualisasi interaktif tiga dimensi untuk memfasilitasi pemahaman kinematika...
+keywords_id: ["Robotika", "Three.js", "MDLC", "WebGL"]
+abstract_en: |
+  Robotics education requires interactive three-dimensional visualization to facilitate kinematic understanding...
+keywords_en: ["Robotics", "Three.js", "MDLC", "WebGL"]
+...
+```
+
 ### 2. Format `cover.md` (Wajib Menyertakan Gate `opt-daftar-gambar` & `opt-daftar-tabel`)
 Halaman sampul luar, Lembar Pengesahan, dan Abstrak dirender otomatis oleh `template.typ` dan `docx.lua` dari `metadata.yml`. Berkas `cover.md` berisi **Kata Pengantar** serta blok transisi *front-matter* ke *main-body*:
 
@@ -286,6 +336,29 @@ Buat berkas terpisah per bab (`bab1-pendahuluan.md`, `bab2-tinjauan-pustaka.md`,
 - **Gaya Bahasa Akademik Indonesia (PUEBI / EYD V)**:
   - Gunakan kalimat pasif-objektif (*"Sistem dirancang menggunakan..."*, *"Data dianalisis melalui..."*, **"Penulis"**). **DILARANG** menggunakan kata ganti orang pertama/kedua (*"saya"*, *"aku"*, *"kami"*, *"kita"*, *"kamu"*).
   - **Bebas Klise AI (*Zero AI-Slop*)**: Hindari pembuka klise seperti *"Di era globalisasi / revolusi industri 4.0 yang berkembang pesat saat ini..."* atau *"Tidak dapat dipungkiri lagi bahwa..."*. Langsung masuk ke fakta teknis, urgensi masalah, data kuantitatif, dan konteks spesifik.
+
+- **Protokol Forensik Stylometri & Rekayasa Human Cadence (Anti-AI-Slop)**:
+  Naskah yang disusun **WAJIB** lolos uji `./laporan audit --strict` dengan vonis **HUMAN CADENCE** (skor probabilitas AI $\le 15\%$). Patuhi 4 aturan metrik matematis berikut:
+  1. **Variansi Panjang Kalimat ($CV \ge 0.42$)**: Rasio deviasi standar terhadap rata-rata panjang kalimat harus di atas 0.42. Hindari kalimat dengan panjang monoton (misal: 18–22 kata di semua kalimat).
+  2. **Selisih Kalimat Berdekatan ($\Delta \ge 12.0$)**: Terapkan teknik *Sentence Burstiness*. Selingi kalimat pendek padat (5–10 kata) yang menyatakan fakta/kesimpulan dengan kalimat majemuk bertingkat (25–35 kata) yang membedah metodologi atau sebab-akibat.
+  3. **Kekayaan Leksikal ($MATTR \ge 0.70$)**: Gunakan variasi istilah teknis yang kaya. Moving-Average Type-Token Ratio wajib di atas 0.70.
+  4. **Batas Transisi Formulaik ($< 25\%$)**: Batasi kata transisi penghubung di awal kalimat (*selain itu*, *namun demikian*, *oleh karena itu*, *di sisi lain*, *dengan demikian*). Maksimal hanya 25% dari total kalimat dalam satu bab.
+
+- **Daftar Hitam 38 Klise RLHF Terlarang & Alternatif Penggantinya**:
+  | Kata / Frasa Terlarang | Alasan Larangan | Alternatif Pengganti Alami |
+  |:---|:---|:---|
+  | *komprehensif* | Klise RLHF umum | *terperinci*, *lengkap*, *mendalam*, *mencakup seluruh variabel* |
+  | *menyeluruh* | Klise frekuensi tinggi | *secara sistematis*, *luas*, *pada seluruh aspek* |
+  | *secara signifikan* | Sering dipakai tanpa uji statistik | *secara terukur*, *substansial*, *dengan kenaikan nyata* |
+  | *krusial / pivotal* | Adjektiva hiperbolis | *penting*, *menentukan*, *fundamental* |
+  | *lanskap / landscape* | Metafora abstrak | *ranah*, *bidang*, *domain*, *ekosistem teknis* |
+  | *memainkan peran penting* | Kalimat pasif klise | *berkontribusi langsung*, *menjadi fondasi*, *menopang* |
+  | *tidak dapat dipungkiri* | Retorika tanpa data | *data menunjukkan*, *bukti empiris membuktikan* |
+  | *patut dicatat* | Filler pengisi ruang | *hasil observasi mencatat*, *temuan mengindikasikan* |
+  | *selaras dengan* | Klise penghubung | *sesuai dengan*, *konsisten terhadap*, *mengikuti kaidah* |
+  | *dalam era / di era* | Pembuka klise | Sebutkan tahun, standar protokol, atau kondisi teknis spesifik |
+  | *delve / tapestry / testament* | Klise bahasa Inggris khas LLM | Tulis fakta teknis langsung tanpa majas berlebihan |
+
 - **Aturan Heading (Sangat Penting)**:
   - Level 1 (Judul Bab): `# PENDAHULUAN` (Jangan tulis `# BAB I PENDAHULUAN` karena engine otomatis menambahkan `BAB I`).
   - Level 2 (Sub-Bab): `## Latar Belakang` (Jangan tulis `## 1.1 Latar Belakang` karena engine otomatis menambahkan nomor `1.1.` atau `1.1`).
@@ -303,16 +376,19 @@ Buat berkas terpisah per bab (`bab1-pendahuluan.md`, `bab2-tinjauan-pustaka.md`,
 - Gunakan sintaks sitasi Pandoc di dalam teks bab: `[@citekey]` atau naratif `@citekey`. Pastikan setiap `@citekey` di dalam teks terdaftar di `references.bib`, dan setiap entri di `references.bib` disitir di dalam teks (sehingga 0 *missing keys* dan 0 *orphan keys*).
 
 ================================================================================
-## STEP 5 — AUDIT PRA-KOMPILASI (`DOCTOR`) & BUILD DOKUMEN
+## STEP 5 — AUDIT PRA-KOMPILASI (`DOCTOR` & `AUDIT`) & BUILD DOKUMEN
 
 Setelah seluruh berkas selesai ditulis, jalankan verifikasi dan kompilasi:
 
 1. **Jalankan Audit Kesehatan Dokumen**:
    - Panggil MCP tool `laporan_doctor` atau jalankan `./laporan doctor` (Linux/macOS) / `.\laporan.ps1 doctor` (Windows).
    - Pastikan **0 Error** dan **0 Warning** (tidak ada sitasi hilang, tidak ada gambar rusak, tidak ada penomoran heading manual, tidak ada karakter box-drawing).
-2. **Kompilasi Dokumen PDF & Word (DOCX)**:
+2. **Jalankan Verifikasi Sitasi & Forensik Stylometry**:
+   - Panggil MCP tool `laporan_verify_citations` atau jalankan `./laporan citations verify` untuk memastikan seluruh DOI dapat dijangkau dan valid.
+   - Panggil MCP tool `laporan_audit` atau jalankan `./laporan audit --fail-on-ai` untuk memverifikasi variansi panjang kalimat, Moving-Average Type-Token Ratio (MATTR), dan memastikan skor AI di bawah ambang batas toleransi (maksimal 15%).
+3. **Kompilasi Dokumen PDF & Word (DOCX)**:
    - Panggil MCP tool `laporan_build({ format: "all" })` atau jalankan `./laporan build` / `.\laporan.ps1 build`.
-3. **Laporkan Hasil kepada Pengguna**:
+4. **Laporkan Hasil kepada Pengguna**:
    Tampilkan ringkasan akhir:
    - Lokasi berkas hasil kompilasi: `Laporan.pdf` dan `Laporan.docx`
    - Ringkasan metrik dokumen dari `./laporan stats` (total kata, jumlah bab, jumlah sitasi, estimasi halaman)

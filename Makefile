@@ -1,4 +1,16 @@
-.PHONY: build clean lint-deps watch docx html crossref test docker-build init view reference-docx
+.PHONY: build clean lint-deps watch docx html crossref test docker-build init view reference-docx doctor audit stats citations
+
+doctor:
+	./laporan doctor
+
+audit:
+	./laporan audit
+
+stats:
+	./laporan stats
+
+citations:
+	./laporan citations verify
 
 build:
 	./build.sh

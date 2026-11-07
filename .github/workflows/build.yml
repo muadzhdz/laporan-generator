@@ -27,6 +27,15 @@ jobs:
       - name: Run Test Suite
         run: ./test.sh
 
+      - name: Run Python Unit Tests
+        run: python3 scripts/test_scripts.py
+
+      - name: Run MCP Server Integration Tests
+        run: node tests/test_mcp.js
+
+      - name: Build and Verify Examples
+        run: ./examples/build_examples.sh
+
       - name: Build PDF and DOCX
         run: |
           ./build.sh templates/default
@@ -41,3 +50,13 @@ jobs:
           path: |
             Laporan.pdf
             Laporan.docx
+
+  windows-parity:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test PowerShell CLI Parity
+        shell: pwsh
+        run: |
+          .\laporan.ps1 help
+          .\laporan.ps1 preset list

@@ -1,0 +1,22 @@
+---
+title: "ANALISIS PERBANDINGAN PROTOKOL KEAMANAN JARINGAN PADA LINGKUNGAN CLOUD"
+subtitle: "MAKALAH KULIAH"
+author:
+  - name: "Budi Santoso"
+    nim: "10234001"
+  - name: "Citra Lestari"
+    nim: "10234002"
+lecturer: "Dr. Ir. Hendra Wijaya, M.T."
+lecturer_label: "Dosen Pengampu:"
+course: "Keamanan Jaringan dan Cloud Computing"
+institution: "Institut Teknologi Bandung"
+faculty: "Sekolah Teknik Elektro dan Informatika"
+department: "Teknik Informatika"
+city: "Bandung"
+year: "2026"
+date: "Oktober 2026"
+preset: "itb-ta"
+doc_type: "thesis"
+daftar_gambar: false
+daftar_tabel: false
+...
