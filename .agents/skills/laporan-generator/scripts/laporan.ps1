@@ -94,11 +94,6 @@ function Show-Help {
     Write-Host "  .\laporan.ps1 audit --strict" -ForegroundColor White
     Write-Host "  .\laporan.ps1 build" -ForegroundColor White
 }
-    Write-Host "  .\laporan.ps1 build"
-    Write-Host "  .\laporan.ps1 stats"
-    Write-Host "  .\laporan.ps1 preset list"
-    Write-Host "  .\laporan.ps1 preset apply itb-ta"
-}
 
 function Cmd-Check {
     Show-Banner
