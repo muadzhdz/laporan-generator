@@ -14,6 +14,9 @@ $localBin = Join-Path $env:LOCALAPPDATA "laporan-generator\bin"
 if ((Test-Path $localBin) -and ($env:Path -notlike "*$localBin*")) {
     $env:Path = "$localBin;$env:Path"
 }
+if ($env:GITHUB_PATH) {
+    Add-Content -Path $env:GITHUB_PATH -Value $localBin
+}
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "   LAPORAN GENERATOR - WINDOWS DEPENDENCY SETUP           " -ForegroundColor Cyan
