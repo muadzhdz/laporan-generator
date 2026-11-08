@@ -25,10 +25,11 @@ NC = "\033[0m"
 
 
 def check_dependencies():
+    python_command = os.path.basename(sys.executable)
     tools = [
         ("pandoc", "Pandoc Document Engine", True),
         ("typst", "Typst Typesetting Engine", True),
-        ("python3", "Python 3 Runtime", True),
+        (python_command, "Python 3 Runtime", True),
         ("magick", "ImageMagick 7", False),
         ("convert", "ImageMagick 6", False),
         ("pdftotext", "Poppler PDF Utils", False),
@@ -38,7 +39,7 @@ def check_dependencies():
     results = []
     has_im = False
     for cmd, name, req in tools:
-        found = shutil.which(cmd) is not None
+        found = sys.version_info.major == 3 if name == "Python 3 Runtime" else shutil.which(cmd) is not None
         if "ImageMagick" in name and found:
             has_im = True
         results.append((cmd, name, req, found))

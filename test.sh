@@ -244,7 +244,7 @@ if command -v unzip &>/dev/null; then
       else
         fail "title block bawaan pandoc masih muncul"
       fi
-      COVER_BR=$(echo "$DOCXML" | grep -oE 'w:val="CoverTitle".{0,500}' | grep -o '<w:br />' | wc -l)
+      COVER_BR=$(python3 -c 'import re,sys; match=re.search(r"w:val=\"CoverTitle\".{0,500}",sys.stdin.read()); print(match.group(0).count("<w:br />") if match else 0)' <<< "$DOCXML")
       if [ "$COVER_BR" -eq 1 ]; then
         pass "judul cover docx 2 baris"
       else

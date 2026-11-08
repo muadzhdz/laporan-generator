@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPTS_DIR)
@@ -16,6 +17,7 @@ scan_preset = __import__("scan-preset")
 validate_preset = __import__("validate-preset")
 docx_pagenum = __import__("docx-pagenum")
 finalize_docx = __import__("finalize-docx")
+report_doctor = __import__("report-doctor")
 
 
 class TestScanPreset(unittest.TestCase):
@@ -190,10 +192,17 @@ class TestReportStats(unittest.TestCase):
 
 
 class TestReportDoctor(unittest.TestCase):
+    def test_running_python_runtime_is_detected_without_python3_command(self):
+        with mock.patch.object(report_doctor.shutil, "which", return_value=None):
+            dependencies, _ = report_doctor.check_dependencies()
+        python_runtime = next(item for item in dependencies if item[1] == "Python 3 Runtime")
+        self.assertTrue(python_runtime[3])
+
     def test_json_doctor_execution(self):
         proj_root = get_project_root()
         cmd = [sys.executable, os.path.join(SCRIPTS_DIR, "report-doctor.py"), proj_root, "--json"]
         proc = subprocess.run(cmd, capture_output=True, text=True, cwd=proj_root)
+        self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
         data = json.loads(proc.stdout)
         self.assertIn("status", data)
         self.assertIn("dependencies", data)

@@ -1,8 +1,19 @@
-# Laporan Generator
+<p align="center">
+  <img src="templates/default/logo.jpg" alt="Laporan Generator" width="140" />
+</p>
 
-[![npm](https://img.shields.io/npm/v/laporan-generator)](https://www.npmjs.com/package/laporan-generator)
-[![Build](https://github.com/muadzhdz/laporan-generator/actions/workflows/build.yml/badge.svg)](https://github.com/muadzhdz/laporan-generator/actions/workflows/build.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+<h1 align="center">Laporan Generator</h1>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/laporan-generator"><img src="https://img.shields.io/npm/v/laporan-generator?style=flat-square&color=cb3837&logo=npm" alt="Versi npm" /></a>
+  <a href="https://github.com/muadzhdz/laporan-generator/actions/workflows/build.yml?query=branch%3Amain"><img src="https://img.shields.io/github/actions/workflow/status/muadzhdz/laporan-generator/build.yml?branch=main&style=flat-square&logo=github&label=Build%20(main)" alt="Build branch main" /></a>
+  <a href="https://www.npmjs.com/package/laporan-generator"><img src="https://img.shields.io/npm/dw/laporan-generator?style=flat-square&label=unduhan%2Fminggu" alt="Unduhan npm per minggu" /></a>
+  <a href="https://github.com/muadzhdz/laporan-generator/releases"><img src="https://img.shields.io/github/v/release/muadzhdz/laporan-generator?style=flat-square&label=rilis" alt="Rilis GitHub terbaru" /></a>
+  <a href="https://github.com/muadzhdz/laporan-generator"><img src="https://img.shields.io/github/stars/muadzhdz/laporan-generator?style=flat-square" alt="GitHub stars" /></a>
+  <a href="#integrasi-mcp"><img src="https://img.shields.io/badge/MCP-Native%202.0-8A2BE2?style=flat-square&logo=anthropic" alt="MCP server" /></a>
+  <a href="https://typst.app/"><img src="https://img.shields.io/badge/Typst-0.15%2B-239DAD?style=flat-square&logo=typst&logoColor=white" alt="Typst 0.15+" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/muadzhdz/laporan-generator?style=flat-square" alt="Lisensi MIT" /></a>
+</p>
 
 CLI untuk menyusun laporan akademik dari Markdown menjadi PDF (Typst) dan DOCX. Tersedia preset format, pemeriksaan dokumen, ekspor materi, dan integrasi MCP untuk AI agent.
 
@@ -63,8 +74,6 @@ Tambahkan server berikut ke konfigurasi MCP host yang digunakan:
 - [Pemecahan masalah](docs/troubleshooting.md) · [catatan rilis](CHANGELOG.md)
 - [Rilis ke npm](docs/npm-publishing.md)
 - [Kontribusi](CONTRIBUTING.md)
-
-Perubahan JSON audit pada v4.0.0 dijelaskan di [panduan migrasi](docs/migrations/v4.0.0.md). Skor audit adalah heuristik pola tulisan, bukan probabilitas penggunaan AI atau bukti kepengarangan.
 
 ## Lisensi
 

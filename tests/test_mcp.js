@@ -161,6 +161,8 @@ async function runMcpTest() {
     }
   });
   const doctorRes = await waitForResponse(6);
+  assert.ok(doctorRes.result, JSON.stringify(doctorRes));
+  assert.ok(!doctorRes.result.isError, doctorRes.result.content && doctorRes.result.content[0].text);
   const doctorData = JSON.parse(doctorRes.result.content[0].text);
   assert.ok(doctorData.status);
   assert.ok(doctorData.dependencies);
