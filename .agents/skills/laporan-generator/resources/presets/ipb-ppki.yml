@@ -1,9 +1,9 @@
 # Preset: IPB University (Institut Pertanian Bogor)
 preset_id: "ipb-ppki"
 name: "IPB University (PPKI)"
-description: "Format Tugas Akhir sesuai Pedoman Penulisan Karya Ilmiah (PPKI) IPB University (Margin Kiri 4cm, Atas/Kanan/Bawah 3cm)."
+description: "Preset awal PPKI IPB edisi 4; mahasiswa perlu memeriksa ketentuan transisi dan PPTA terbaru."
 
-# 1. Geometri & Margin Halaman (Standar Resmi PPKI IPB: Kiri 4cm, Atas 3cm, Bawah 3cm, Kanan 3cm)
+# 1. Geometri & Margin Halaman pada PPKI edisi 4
 margin_top: 3cm
 margin_bottom: 3cm
 margin_left: 4cm

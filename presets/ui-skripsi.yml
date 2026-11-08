@@ -1,9 +1,9 @@
 # Preset: Universitas Indonesia (UI)
 preset_id: "ui-skripsi"
 name: "Universitas Indonesia (UI)"
-description: "Format Tugas Akhir & Skripsi sesuai Keputusan Rektor UI (Margin Kiri 4cm, Atas/Kanan/Bawah 3cm, TNR 12pt)."
+description: "Preset awal untuk format tugas akhir UI; periksa kecocokan dengan pedoman UI terbaru dan aturan fakultas/prodi."
 
-# Margin halaman (Standar Resmi Pedoman Teknis TA UI: Kiri 4cm, Atas 3cm, Bawah 3cm, Kanan 3cm)
+# Margin halaman pada konfigurasi preset ini
 margin_top: 3cm
 margin_bottom: 3cm
 margin_left: 4cm

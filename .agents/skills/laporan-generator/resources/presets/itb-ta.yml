@@ -1,9 +1,9 @@
 # Preset: Institut Teknologi Bandung (ITB)
 preset_id: "itb-ta"
 name: "Institut Teknologi Bandung (ITB)"
-description: "Format Tugas Akhir / Tesis sesuai Pedoman Penulisan Karya Ilmiah ITB (Margin 4-4-3-3, Cover Minimalis)."
+description: "Preset awal untuk dokumen tugas akhir ITB; cakupan dan nilai format perlu diperiksa terhadap pedoman unit akademik."
 
-# Margin halaman (Standar ITB: Kiri 4cm, Atas 4cm, Bawah 3cm, Kanan 3cm)
+# Margin halaman pada konfigurasi preset ini
 margin_top: 4cm
 margin_bottom: 3cm
 margin_left: 4cm

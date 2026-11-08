@@ -91,7 +91,7 @@ def convert_document(file_path):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Convert DOCX, PDF, PPTX, or XLSX to Markdown for Laporan Generator (v3.0.0)"
+        description="Convert DOCX, PDF, PPTX, or XLSX to Markdown for Laporan Generator (v4.0.0)"
     )
     parser.add_argument("input_file", help="Path to input document (.docx, .pdf, .pptx, .xlsx, .txt)")
     parser.add_argument("-o", "--output", help="Output Markdown file path (prints to stdout if omitted)")
@@ -110,7 +110,7 @@ def main():
             mode = "a" if args.append else "w"
             with open(args.output, mode, encoding="utf-8") as f:
                 f.write(markdown_content)
-            print(f"✔ Successfully converted '{args.input_file}' -> '{args.output}'")
+            print(f"Successfully converted '{args.input_file}' -> '{args.output}'")
         else:
             sys.stdout.write(markdown_content)
     except Exception as err:

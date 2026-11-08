@@ -298,11 +298,14 @@ class TestFrontMatterOptIn(unittest.TestCase):
             self.skipTest("Node.js runtime not found in PATH")
 
         with tempfile.TemporaryDirectory() as tmpdir:
+            init_module = json.dumps(os.path.join(ROOT_DIR, "lib", "init.js"))
+            temp_root = json.dumps(tmpdir)
             node_code = f"""
             const path = require('path');
-            const {{ initProject }} = require('{os.path.join(ROOT_DIR, "lib/init.js")}');
-            initProject({{ targetDir: '{tmpdir}/test_f', daftar_gambar: 'false', daftar_tabel: false, silent: true }});
-            initProject({{ targetDir: '{tmpdir}/test_t', daftar_gambar: 'true', daftar_tabel: true, silent: true }});
+            const {{ initProject }} = require({init_module});
+            const tempRoot = {temp_root};
+            initProject({{ targetDir: path.join(tempRoot, 'test_f'), daftar_gambar: 'false', daftar_tabel: false, silent: true }});
+            initProject({{ targetDir: path.join(tempRoot, 'test_t'), daftar_gambar: 'true', daftar_tabel: true, silent: true }});
             """
             proc = subprocess.run(["node", "-e", node_code], capture_output=True, text=True)
             self.assertEqual(proc.returncode, 0, f"Node initProject failed: {proc.stderr}")
@@ -329,7 +332,7 @@ class TestAuditForensics(unittest.TestCase):
         self.assertEqual(data["summary"]["total_files"], 5)
         self.assertIn("files", data)
 
-    def test_human_cadence_score(self):
+    def test_writing_pattern_score(self):
         sample_human = (
             "Penelitian ini dilakukan secara sistematis melalui pengujian lapangan bertahap. "
             "Hasil menunjukkan bahwa latensi menurun secara konsisten dari dua puluh milidetik menjadi lima milidetik. "
@@ -348,7 +351,9 @@ class TestAuditForensics(unittest.TestCase):
             self.assertEqual(proc.returncode, 0)
             data = json.loads(proc.stdout)
             file_res = data["files"][tmp_path]
-            self.assertIn(file_res["verdict"], ["HUMAN CADENCE", "MODERATE SUSPICION"])
+            self.assertIn(file_res["verdict"], ["FEW PATTERN FLAGS", "SOME PATTERN FLAGS"])
+            self.assertIn("pattern_score", file_res)
+            self.assertEqual(data["summary"]["score_interpretation"], "Heuristic writing-pattern score; not an estimate of authorship or AI use.")
         finally:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)

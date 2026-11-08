@@ -1,6 +1,6 @@
 # Panduan Preset & Kustomisasi Format Kampus
 
-Dokumen ini berisi panduan untuk menyesuaikan format laporan akademik sesuai dengan pedoman penulisan di berbagai perguruan tinggi di Indonesia menggunakan sistem **Preset Declarative** (`presets/*.yml`).
+Dokumen ini menjelaskan preset awal (`presets/*.yml`) untuk membantu menata laporan akademik. Pedoman dapat berbeda antar fakultas, program studi, dan tahun akademik. Anggap setiap preset sebagai titik awal; cocokkan dengan pedoman resmi program Anda sebelum mengumpulkan dokumen.
 
 ---
 
@@ -25,22 +25,24 @@ Atau gunakan bantuan CLI interaktif:
 
 ## 2. Daftar Preset Kampus Bawaan
 
-| ID Preset | Institusi / Format | Margin (Atas - Bawah - Kiri - Kanan) | Catatan Khusus |
+| ID Preset | Institusi / Format | Margin (Atas - Bawah - Kiri - Kanan) | Catatan |
 |---|---|---|---|
 | `standard` | Standar Modern | 2.0 cm - 3.0 cm - 2.5 cm - 2.5 cm | Format default tugas akhir, magang, praktikum |
 | `skripsi-4433` | Skripsi Tradisional | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Hardcover jilid tebal margin kiri 4cm |
-| `ui-skripsi` | Universitas Indonesia (UI) | 3.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Sesuai Pedoman Teknis Tugas Akhir UI |
-| `itb-ta` | Institut Teknologi Bandung (ITB) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Cover minimalis (tanpa dosen pembimbing di cover luar) |
-| `ugm-skripsi` | Universitas Gadjah Mada (UGM) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Full academic cover |
-| `its-skripsi` | Institut Teknologi Sepuluh Nopember (ITS) | 3.0 cm - 2.5 cm - 3.0 cm - 2.0 cm | Sesuai Buku Pedoman TA & Tesis ITS |
-| `unpad-skripsi` | Universitas Padjadjaran (UNPAD) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Format skripsi & karya ilmiah UNPAD |
-| `ub-skripsi` | Universitas Brawijaya (UB) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Pedoman penulisan skripsi UB |
-| `undip-skripsi` | Universitas Diponegoro (UNDIP) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Pedoman akademik skripsi UNDIP |
-| `unair-skripsi` | Universitas Airlangga (UNAIR) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Pedoman penulisan karya ilmiah UNAIR |
-| `ipb-ppki` | IPB University (PPKI) | 3.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Pedoman PPKI IPB (Indent 1cm, sub-bab tanpa titik akhir) |
-| `telkom-ta` | Telkom University (Tel-U) | 3.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Pedoman Buku Tugas Akhir Telkom University |
-| `jurnal-uajy` | Univ. Atma Jaya Yogyakarta (UAJY) | 3.0 cm - 3.0 cm - 3.0 cm - 3.0 cm | Format Jurnal Berita Informatika (JBI), 11pt, spasi 1, IEEE CSL, IMRaD |
+| `ui-skripsi` | Universitas Indonesia (UI) | 3.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Preset awal; cek pedoman fakultas/prodi dan tahun berlaku |
+| `itb-ta` | Institut Teknologi Bandung (ITB) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Preset awal; ketentuan dapat berbeda per unit akademik |
+| `ugm-skripsi` | Universitas Gadjah Mada (UGM) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Preset awal; cek pedoman fakultas/prodi |
+| `its-skripsi` | Institut Teknologi Sepuluh Nopember (ITS) | 3.0 cm - 2.5 cm - 3.0 cm - 2.0 cm | Preset awal; cek pedoman departemen dan tahun berlaku |
+| `unpad-skripsi` | Universitas Padjadjaran (UNPAD) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Preset awal; cek pedoman fakultas/prodi |
+| `ub-skripsi` | Universitas Brawijaya (UB) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Preset awal; cek pedoman fakultas/prodi |
+| `undip-skripsi` | Universitas Diponegoro (UNDIP) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Preset awal; cek pedoman fakultas/prodi |
+| `unair-skripsi` | Universitas Airlangga (UNAIR) | 4.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Preset awal; cek pedoman fakultas/prodi |
+| `ipb-ppki` | IPB University (PPKI) | 3.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | PPKI edisi 4; mahasiswa baru perlu cek PPTA yang berlaku |
+| `telkom-ta` | Telkom University (Tel-U) | 3.0 cm - 3.0 cm - 4.0 cm - 3.0 cm | Preset awal; cek pedoman program studi |
+| `jurnal-uajy` | Univ. Atma Jaya Yogyakarta (UAJY) | 3.0 cm - 3.0 cm - 3.0 cm - 3.0 cm | Titik awal; ikuti template author guideline jurnal terbaru |
 | `jurnal-standar` | Jurnal Nasional / SINTA | 3.0 cm - 3.0 cm - 3.0 cm - 3.0 cm | Format artikel jurnal nasional standar (IEEE/APA, tanpa cover/TOC) |
+
+Preset kampus tidak menjamin kepatuhan pada pedoman tertentu. Variasi tingkat fakultas terlihat pada pedoman resmi [UI](https://pascakomunikasi.fisip.ui.ac.id/pedoman-teknis-penulisan-tugas-akhir-mahasiswa/), [ITS](https://www.its.ac.id/pendidikan/2022/03/24/pedoman-penyusunan-laporan-tugas-proyek-akhir-program-sarjana-dan-sarjana-terapan/), [UNAIR FST](https://fst.unair.ac.id/wp-content/uploads/2024/05/Panduan-Skripsi-FST-UNAIR_2022-REVISI.pdf), dan [UB FIA](https://fia.ub.ac.id/wp-content/uploads/2025/01/Pedoman-Tugas-Akhir-FIA-UB-2024.pdf). [IPB mengumumkan PPTA baru berlaku mulai semester ganjil 2026/2027](https://panduan.ipb.ac.id/panduan-ppta/); preset `ipb-ppki` mewakili PPKI edisi 4 dan bukan klaim kepatuhan terhadap pedoman baru itu.
 
 ---
 

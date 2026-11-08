@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/muadzhdz/laporan-generator/main/docs/metadata.schema.json",
   "title": "Laporan Generator Metadata Schema",
-  "description": "JSON Schema untuk validasi dan autocompletion metadata.yml pada Laporan Generator (v3.1.0)",
+  "description": "JSON Schema untuk validasi dan autocompletion metadata.yml pada Laporan Generator (v4.0.0)",
   "type": "object",
   "required": [
     "title",

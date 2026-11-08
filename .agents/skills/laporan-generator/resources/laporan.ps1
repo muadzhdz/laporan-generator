@@ -40,7 +40,7 @@ function Get-PythonCommand {
 
 function Show-Banner {
     Write-Host "  ========================================================" -ForegroundColor Cyan
-    Write-Host "                 LAPORAN GENERATOR CLI v3.1.0             " -ForegroundColor Cyan
+    Write-Host "                 LAPORAN GENERATOR CLI v4.0.0             " -ForegroundColor Cyan
     Write-Host "     Otomatisasi Dokumen Akademik (Typst + DOCX Engine)   " -ForegroundColor Cyan
     Write-Host "  ========================================================" -ForegroundColor Cyan
     Write-Host ""
@@ -61,7 +61,7 @@ function Show-Help {
     Write-Host ""
     Write-Host "2. DIAGNOSTIK & KUALITAS AKADEMIK:" -ForegroundColor Cyan
     Write-Host "  doctor | check      Audit kesehatan dokumen (gambar, sitasi, sintaks)" -ForegroundColor Green
-    Write-Host "  audit               Audit forensik stylometri naskah dan anti-AI-slop" -ForegroundColor Green
+    Write-Host "  audit               Tinjau heuristik variasi dan pola tulisan" -ForegroundColor Green
     Write-Host "  citations verify    Verifikasi keabsahan tautan DOI via Crossref API" -ForegroundColor Green
     Write-Host "  stats               Analisis statistik kata, bab, dan estimasi halaman" -ForegroundColor Green
     Write-Host "  test                Jalankan automated test suite" -ForegroundColor Green
@@ -83,7 +83,7 @@ function Show-Help {
     Write-Host ""
     Write-Host "Opsi Tambahan:" -ForegroundColor Yellow
     Write-Host "  --preset <id>       Tentukan preset saat init/build" -ForegroundColor Yellow
-    Write-Host "  --strict            Gagal jika probabilitas AI melebihi 15 persen" -ForegroundColor Yellow
+    Write-Host "  --strict            Gagal jika skor pola tulisan heuristik > 15 (bukan detektor AI)" -ForegroundColor Yellow
     Write-Host "  --json              Keluarkan output dalam format JSON terstruktur" -ForegroundColor Yellow
     Write-Host "  --all               Audit seluruh berkas Markdown di dalam proyek" -ForegroundColor Yellow
     Write-Host ""
@@ -168,6 +168,13 @@ function Cmd-Build-PDF {
     Show-Banner
     Write-Host "Membangun Dokumen PDF (Typst Engine)..." -ForegroundColor Blue
 
+    if (-not (Get-Command "pandoc" -ErrorAction SilentlyContinue)) {
+        throw "Pandoc tidak ditemukan di PATH. Jalankan '.\laporan.ps1 setup' atau pasang Pandoc terlebih dahulu."
+    }
+    if (-not (Get-Command "typst" -ErrorAction SilentlyContinue)) {
+        throw "Typst tidak ditemukan di PATH. Jalankan '.\laporan.ps1 setup' atau pasang Typst terlebih dahulu."
+    }
+
     $inputFiles = @("cover.md") + (Get-ChildItem -Path "chapters" -Filter "bab*.md" | Sort-Object Name | ForEach-Object { $_.FullName })
     $presetOpt = ""
     if (Test-Path "metadata.yml") {
@@ -200,7 +207,7 @@ function Cmd-Build-PDF {
         Write-Host "=== PDF BERHASIL DIBUAT ===" -ForegroundColor Green
         Write-Host "Lokasi: $(Get-Location)\Laporan.pdf" -ForegroundColor Cyan
     } else {
-        Write-Host "[ERROR] Kompilasi PDF gagal." -ForegroundColor Red
+        throw "Kompilasi PDF gagal (exit code $LASTEXITCODE)."
     }
 }
 
@@ -208,15 +215,17 @@ function Cmd-Build-DOCX {
     Show-Banner
     Write-Host "Membangun Dokumen Microsoft Word (DOCX Multi-Pass)..." -ForegroundColor Blue
 
+    if (-not (Get-Command "pandoc" -ErrorAction SilentlyContinue)) {
+        throw "Pandoc tidak ditemukan di PATH. Jalankan '.\laporan.ps1 setup' atau pasang Pandoc terlebih dahulu."
+    }
+
     if (-not (Test-Path "chapters")) {
-        Write-Host "[ERROR] Direktori chapters/ tidak ditemukan." -ForegroundColor Red
-        return
+        throw "Direktori chapters/ tidak ditemukan."
     }
 
     $pyCmd = Get-PythonCommand
     if (-not $pyCmd) {
-        Write-Host "[ERROR] Python 3 dibutuhkan untuk memproses DOCX." -ForegroundColor Red
-        return
+        throw "Python 3 dibutuhkan untuk memproses DOCX."
     }
 
     $inputFiles = @("cover.md") + (Get-ChildItem -Path "chapters" -Filter "bab*.md" | Sort-Object Name | ForEach-Object { $_.FullName })
@@ -250,17 +259,24 @@ function Cmd-Build-DOCX {
 
         & pandoc $pandocArgs
         if ($LASTEXITCODE -ne 0) {
-            Write-Host "[ERROR] Kompilasi Pandoc ke DOCX gagal." -ForegroundColor Red
-            return
+            throw "Kompilasi Pandoc ke DOCX gagal (exit code $LASTEXITCODE)."
         }
 
         & $pyCmd scripts/finalize-docx.py $tmpDocx $sectDocx
+        if ($LASTEXITCODE -ne 0) {
+            throw "Pemrosesan struktur DOCX gagal (exit code $LASTEXITCODE)."
+        }
         & $pyCmd scripts/docx-pagenum.py $sectDocx Laporan.docx
+        if ($LASTEXITCODE -ne 0) {
+            throw "Finalisasi nomor halaman DOCX gagal (exit code $LASTEXITCODE)."
+        }
 
         if (Test-Path "Laporan.docx") {
             Write-Host ""
             Write-Host "=== DOCX BERHASIL DIBUAT ===" -ForegroundColor Green
             Write-Host "Lokasi: $(Get-Location)\Laporan.docx" -ForegroundColor Cyan
+        } else {
+            throw "Build DOCX berakhir tanpa menghasilkan Laporan.docx."
         }
     } finally {
         Remove-Item -Force -ErrorAction SilentlyContinue $tmpDocx, $sectDocx
@@ -274,6 +290,9 @@ function Cmd-Build {
     Write-Host ""
     Write-Host "[2/2] Membangun Dokumen Microsoft Word (DOCX Multi-Pass)..." -ForegroundColor Blue
     Cmd-Build-DOCX
+    if (-not (Test-Path "Laporan.pdf") -or -not (Test-Path "Laporan.docx")) {
+        throw "Build belum menghasilkan PDF dan DOCX yang diperlukan."
+    }
     Write-Host ""
     Write-Host "Dokumen PDF dan DOCX berhasil diproses!" -ForegroundColor Green
 }

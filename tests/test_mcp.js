@@ -1,14 +1,23 @@
 "use strict";
 
 const { spawn } = require("child_process");
+const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const assert = require("assert");
+const { runProcess, httpsGet, TOOLS } = require("../lib/mcp");
 
 async function runMcpTest() {
   console.log("Starting MCP Server automated test...");
   const serverPath = path.join(__dirname, "../bin/mcp-server.js");
   const proc = spawn("node", [serverPath], {
     stdio: ["pipe", "pipe", "pipe"]
+  });
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "laporan-mcp-test-"));
+  const testProject = path.join(tempRoot, "project");
+  process.on("exit", () => {
+    proc.kill();
+    fs.rmSync(tempRoot, { recursive: true, force: true });
   });
 
   let buffer = "";
@@ -74,14 +83,16 @@ async function runMcpTest() {
   const listRes = await waitForResponse(2);
   assert.ok(Array.isArray(listRes.result.tools));
   const toolNames = listRes.result.tools.map((t) => t.name);
-  assert.ok(toolNames.includes("laporan_init"));
-  assert.ok(toolNames.includes("laporan_doctor"));
-  assert.ok(toolNames.includes("laporan_stats"));
-  assert.ok(toolNames.includes("laporan_presets"));
-  assert.ok(toolNames.includes("laporan_citations"));
-  assert.ok(toolNames.includes("laporan_build"));
-  assert.ok(toolNames.includes("laporan_import"));
-  console.log("  ✔ [OK] tools/list returns all 7 tools:", toolNames.join(", "));
+  assert.deepStrictEqual(toolNames, TOOLS.map((tool) => tool.name));
+  const initTool = listRes.result.tools.find((tool) => tool.name === "laporan_init");
+  const expectedPresets = fs.readdirSync(path.join(__dirname, "../presets"))
+    .filter((file) => file.endsWith(".yml"))
+    .map((file) => file.slice(0, -4))
+    .sort();
+  assert.deepStrictEqual(initTool.inputSchema.properties.preset.enum, expectedPresets);
+  assert.ok(expectedPresets.includes("jurnal-uajy"));
+  assert.ok(expectedPresets.includes("jurnal-standar"));
+  console.log("  ✔ [OK] tools/list returns all " + toolNames.length + " tools and current preset schema");
 
   send({
     jsonrpc: "2.0",
@@ -111,6 +122,20 @@ async function runMcpTest() {
   const getPresetRes = await waitForResponse(4);
   assert.ok(getPresetRes.result.content[0].text.includes("itb"));
   console.log("  ✔ [OK] laporan_presets get itb-ta valid");
+
+  send({
+    jsonrpc: "2.0",
+    id: 12,
+    method: "tools/call",
+    params: {
+      name: "laporan_presets",
+      arguments: { action: "get", preset_name: "../../README" }
+    }
+  });
+  const traversalRes = await waitForResponse(12);
+  assert.strictEqual(traversalRes.result.isError, true);
+  assert.match(traversalRes.result.content[0].text, /Unknown preset/);
+  console.log("  ✔ [OK] preset lookup rejects path traversal");
 
   send({
     jsonrpc: "2.0",
@@ -164,7 +189,7 @@ async function runMcpTest() {
   });
   const resList = await waitForResponse(8);
   assert.ok(Array.isArray(resList.result.resources));
-  assert.ok(resList.result.resources.length >= 3);
+  assert.ok(resList.result.resources.length >= 4);
   console.log("  ✔ [OK] resources/list returned " + resList.result.resources.length + " resources");
 
   send({
@@ -178,6 +203,27 @@ async function runMcpTest() {
   const presetsJson = JSON.parse(resRead.result.contents[0].text);
   assert.ok(presetsJson.presets.length >= 10);
   console.log("  ✔ [OK] resources/read laporan://presets/all returned " + presetsJson.presets.length + " presets");
+
+  send({
+    jsonrpc: "2.0",
+    id: 19,
+    method: "resources/read",
+    params: { uri: "laporan://docs/preset-sources" }
+  });
+  const presetSourcesRes = await waitForResponse(19);
+  assert.match(presetSourcesRes.result.contents[0].text, /Status pemetaan nilai preset/);
+  assert.match(presetSourcesRes.result.contents[0].text, /ipb-ppki/);
+  console.log("  ✔ [OK] resources/read preset sources returned scope and verification status");
+
+  send({
+    jsonrpc: "2.0",
+    id: 13,
+    method: "resources/read",
+    params: { uri: "laporan://presets/../../README" }
+  });
+  const unsafeResourceRes = await waitForResponse(13);
+  assert.strictEqual(unsafeResourceRes.error.code, -32602);
+  console.log("  ✔ [OK] preset resources reject path traversal");
 
   send({
     jsonrpc: "2.0",
@@ -198,6 +244,114 @@ async function runMcpTest() {
   const promptGet = await waitForResponse(11);
   assert.ok(promptGet.result.messages);
   console.log("  ✔ [OK] prompts/get academic_interview returned valid prompt");
+
+  const failedProcess = await runProcess("laporan-command-that-does-not-exist", []);
+  assert.ok(failedProcess.error);
+  const nonzeroProcess = await runProcess(process.execPath, ["-e", "process.exit(7)"]);
+  assert.strictEqual(nonzeroProcess.status, 7);
+  const timedOutProcess = await runProcess(process.execPath, ["-e", "setTimeout(() => {}, 5000)"], { timeoutMs: 100 });
+  assert.strictEqual(timedOutProcess.timedOut, true);
+  assert.strictEqual(timedOutProcess.status, 124);
+  await assert.rejects(httpsGet("http://127.0.0.1"), /Only HTTPS requests are allowed/);
+  console.log("  ✔ [OK] subprocess missing-command, exit-code, and timeout cases");
+
+  send({
+    jsonrpc: "2.0",
+    id: 14,
+    method: "tools/call",
+    params: {
+      name: "laporan_init",
+      arguments: { target_dir: testProject, preset: "standard" }
+    }
+  });
+  const initProjectRes = await waitForResponse(14);
+  assert.strictEqual(JSON.parse(initProjectRes.result.content[0].text).success, true);
+
+  send({
+    jsonrpc: "2.0",
+    id: 15,
+    method: "tools/call",
+    params: {
+      name: "laporan_build",
+      arguments: { target_dir: testProject, format: "all" }
+    }
+  });
+  const buildRes = await waitForResponse(15, 180000);
+  const buildData = JSON.parse(buildRes.result.content[0].text);
+  assert.strictEqual(buildData.status, "SUCCESS");
+  assert.strictEqual(buildData.pdfGenerated, true);
+  assert.strictEqual(buildData.docxGenerated, true);
+
+  send({
+    jsonrpc: "2.0",
+    id: 16,
+    method: "tools/call",
+    params: {
+      name: "laporan_import",
+      arguments: {
+        source_file: path.join(testProject, "Laporan.docx"),
+        target_dir: testProject,
+        target_file: "chapters/imported.md"
+      }
+    }
+  });
+  const importRes = await waitForResponse(16);
+  assert.strictEqual(importRes.result.isError, undefined, JSON.stringify(importRes.result));
+  assert.ok(fs.existsSync(path.join(testProject, "chapters/imported.md")));
+
+  const outsideImport = path.join(tempRoot, "outside.md");
+  const symlinkImport = path.join(testProject, "chapters/outside.md");
+  try {
+    fs.symlinkSync(outsideImport, symlinkImport);
+    send({
+      jsonrpc: "2.0",
+      id: 18,
+      method: "tools/call",
+      params: {
+        name: "laporan_import",
+        arguments: {
+          source_file: path.join(testProject, "Laporan.docx"),
+          target_dir: testProject,
+          target_file: "chapters/outside.md"
+        }
+      }
+    });
+    const symlinkRes = await waitForResponse(18);
+    assert.strictEqual(symlinkRes.result.isError, true);
+    assert.match(symlinkRes.result.content[0].text, /symbolic links/);
+    assert.strictEqual(fs.existsSync(outsideImport), false);
+    console.log("  ✔ [OK] import destination rejects symlink escape");
+  } catch (error) {
+    if (error.code !== "EPERM" && error.code !== "EACCES" && error.code !== "ENOSYS") throw error;
+    console.log("  - [SKIP] symlink protection test unsupported on this platform");
+  } finally {
+    try { fs.unlinkSync(symlinkImport); } catch (_) {}
+  }
+
+  send({
+    jsonrpc: "2.0",
+    id: 17,
+    method: "tools/call",
+    params: {
+      name: "laporan_audit",
+      arguments: { target_dir: testProject }
+    }
+  });
+  const auditRes = await waitForResponse(17);
+  assert.ok(JSON.parse(auditRes.result.content[0].text).summary);
+
+  send({
+    jsonrpc: "2.0",
+    id: 18,
+    method: "tools/call",
+    params: {
+      name: "laporan_verify_citations",
+      arguments: { bib_file: path.join(testProject, "references.bib"), offline: true }
+    }
+  });
+  const verifyRes = await waitForResponse(18);
+  assert.ok(JSON.parse(verifyRes.result.content[0].text).total_entries >= 0);
+  console.log("  ✔ [OK] MCP init, PDF/DOCX build, import, audit, and offline citation verification");
 
   proc.kill();
   console.log("\nAll MCP integration tests PASSED successfully!");

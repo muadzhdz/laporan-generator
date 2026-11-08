@@ -17,6 +17,7 @@
             pkgs.pandoc
             pkgs.typst
             pkgs.python3
+            pkgs.nodejs
             pkgs.imagemagick_light
             pkgs.poppler-utils
             pkgs.unzip

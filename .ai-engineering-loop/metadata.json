@@ -1,13 +1,13 @@
 {
-  "contextVersion": "2.3.0",
-  "generatedAt": "2026-10-25T13:56:22.325Z",
-  "repositoryRevision": "23806f8cdbf20fb1b10effb4ee34a7011aab8cbb",
-  "projectProfile": "backend-api",
+  "contextVersion": "2.5.0",
+  "generatedAt": "2026-11-08T07:29:40.633Z",
+  "repositoryRevision": "1f943c3ee11022474045bad552f06ffd7c1ac306",
+  "projectProfile": "library",
   "manifestChecksums": {
-    "package.json": "2ca05cccc05f7c6d"
+    "package.json": "b4acce40e04e2853"
   },
   "lastReconciliation": {
-    "timestamp": "2026-10-25T13:56:22.325Z",
+    "timestamp": "2026-11-08T07:29:40.634Z",
     "trigger": "refresh",
     "impact": "DRIFT_RECONCILIATION"
   }

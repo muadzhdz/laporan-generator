@@ -2,7 +2,7 @@
 # Dihasilkan secara otomatis oleh scan-preset.py
 preset_id: "unpad-skripsi"
 name: "UNIVERSITAS PADJADJARAN"
-description: "Format otomatis hasil pemindaian pedoman akademik UNIVERSITAS PADJADJARAN."
+description: "Preset awal hasil pemindaian dokumen Unpad; periksa prodi, edisi, dan seluruh nilai format sebelum digunakan."
 
 # 1. Geometri & Margin Halaman
 margin_top: 4cm

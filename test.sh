@@ -634,7 +634,7 @@ else
 fi
 echo ""
 
-echo "[T27] Forensic Stylometry Engine check (scripts/audit-forensics.py)"
+echo "[T27] Writing Pattern Audit check (scripts/audit-forensics.py)"
 if [ -x "scripts/audit-forensics.py" ]; then
   pass "scripts/audit-forensics.py dapat dieksekusi"
 else

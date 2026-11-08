@@ -4,6 +4,37 @@ Semua perubahan penting pada project **Laporan Generator** akan didokumentasikan
 
 Format dokumen ini mengacu pada [Keep a Changelog](https://keepachangelog.com/id/1.0.0/) dan mematuhi [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [4.0.0] - 2026-11-08
+
+### Breaking Changes
+- **Audit pola tulisan menggantikan klaim deteksi AI**: `scripts/audit-forensics.py` kini melaporkan `pattern_score` dan `max_pattern_score`, bukan `ai_probability` dan `max_ai_probability`. Nilai heuristik ini bukan probabilitas penggunaan AI atau bukti kepengarangan. Skrip dan integrasi yang membaca JSON audit perlu memperbarui nama field.
+
+### Security
+- **Batas proses MCP**: Proses Python/build memiliki timeout; keluaran subprocess dibatasi agar proses gagal atau bising tidak menahan memori tanpa batas.
+- **Validasi preset dan jalur keluaran import**: ID preset memakai allowlist dari preset yang tersedia, dan jalur `target_file` import wajib berada di dalam direktori dokumen.
+- **Batas permintaan eksternal**: Permintaan Crossref/DOI hanya memakai HTTPS, batas waktu, ukuran respons, dan jumlah redirect. Build melaporkan kegagalan langsung ketika salah satu format tidak berhasil.
+- **Status gagal PowerShell build**: Build PDF/DOCX kini menghentikan alur dan mengembalikan error saat Pandoc atau tahap finalisasi gagal.
+- **Output import kompatibel Windows**: Pesan sukses ingestion memakai teks ASCII agar tidak gagal pada code page terminal Windows.
+
+### Changed
+- **Penyelarasan versi CLI/MCP**: Paket, CLI Node/Bash/PowerShell, dan server MCP kini menampilkan versi `4.0.0`.
+- **Klaim preset kampus diperjelas**: Preset didokumentasikan sebagai titik awal yang perlu diverifikasi terhadap pedoman fakultas/program studi yang berlaku.
+- **Nix devShell**: Node.js ditambahkan ke lingkungan pengembangan.
+- **Register sumber preset dan akses MCP**: Tambah dokumentasi cakupan/status sumber tiap preset dan resource `laporan://docs/preset-sources`.
+- **Matriks CI lintas platform**: Tambah verifikasi macOS hosted runner dan perluas pemeriksaan PowerShell/Node/Python/MCP pada Windows runner.
+- **Gerbang rilis lintas platform**: Alur tag rilis kini menunggu validasi Windows, macOS, dan Nix sebelum menerbitkan paket npm atau GitHub Release.
+- **Dokumentasi pengguna diringkas**: README menjadi halaman awal ringkas dengan instalasi, build, Nix, MCP, serta tautan ke panduan rinci. Panduan migrasi mencatat perubahan JSON audit v4.0.0.
+- **Publikasi npm dengan Trusted Publishing**: Rilis tag memakai OIDC, validasi tag terhadap versi paket, dan provenance otomatis; secret token jangka panjang tidak lagi dibutuhkan.
+
+### Tests
+- Suite penuh: 137 passed, 0 failed.
+- Unit Python: 27 passed.
+- MCP integration tests dan pemeriksaan sintaks JavaScript lulus.
+
+---
+
 ## [3.1.0] - 2026-11-07
 
 ### Added

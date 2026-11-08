@@ -1,9 +1,9 @@
 # Preset: Universitas Brawijaya (UB)
 preset_id: "ub-skripsi"
 name: "Universitas Brawijaya (UB)"
-description: "Format Skripsi & Tugas Akhir sesuai Pedoman Penulisan Karya Ilmiah Universitas Brawijaya (Margin 4-4-3-3)."
+description: "Preset awal untuk tugas akhir UB; periksa aturan fakultas/prodi dan nilai format sebelum digunakan."
 
-# 1. Geometri & Margin Halaman (Standar UB: Atas 4cm, Kiri 4cm, Bawah 3cm, Kanan 3cm)
+# 1. Geometri & Margin Halaman pada konfigurasi preset ini
 margin_top: 4cm
 margin_bottom: 3cm
 margin_left: 4cm

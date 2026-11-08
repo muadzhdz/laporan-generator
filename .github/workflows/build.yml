@@ -51,12 +51,80 @@ jobs:
             Laporan.pdf
             Laporan.docx
 
+  nix-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: Run full suite in the flake environment
+        run: nix develop --command bash -lc './test.sh'
+
   windows-parity:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Test PowerShell CLI Parity
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install document dependencies
+        shell: pwsh
+        run: .\scripts\setup-deps.ps1 -Force
+      - name: Check JavaScript syntax and Python unit tests
+        shell: pwsh
+        run: |
+          node --check bin/laporan-generator.js
+          node --check lib/mcp.js
+          node --check tests/test_mcp.js
+          python scripts/test_scripts.py
+      - name: Test native PowerShell commands
         shell: pwsh
         run: |
           .\laporan.ps1 help
           .\laporan.ps1 preset list
+          .\laporan.ps1 preset validate
+          if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw "Preset validation failed: $LASTEXITCODE" }
+      - name: Build PDF and DOCX through native PowerShell
+        shell: pwsh
+        run: |
+          $project = Join-Path $env:TEMP ("laporan-ci-" + [guid]::NewGuid())
+          node bin/laporan-generator.js init $project --preset standard
+          if ($LASTEXITCODE -ne 0) { throw "Project initialization failed: $LASTEXITCODE" }
+          Push-Location $project
+          try {
+            .\laporan.ps1 build
+            if ($LASTEXITCODE -ne 0) { throw "PDF/DOCX build failed: $LASTEXITCODE" }
+            if (-not (Test-Path Laporan.pdf) -or -not (Test-Path Laporan.docx)) { throw "Build outputs are missing" }
+          } finally {
+            Pop-Location
+            Remove-Item $project -Recurse -Force -ErrorAction SilentlyContinue
+          }
+      - name: Test MCP integration on Windows
+        shell: pwsh
+        run: node tests/test_mcp.js
+
+  macos-validation:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install document dependencies
+        run: brew install pandoc typst imagemagick poppler lua
+      - name: Run full test suite
+        run: ./test.sh
+      - name: Run Python unit tests
+        run: python3 scripts/test_scripts.py
+      - name: Run MCP integration tests
+        run: node tests/test_mcp.js
+      - name: Build example documents
+        run: ./examples/build_examples.sh

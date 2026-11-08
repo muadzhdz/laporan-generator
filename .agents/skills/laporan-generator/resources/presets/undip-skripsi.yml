@@ -1,9 +1,9 @@
 # Preset: Universitas Diponegoro (UNDIP)
 preset_id: "undip-skripsi"
 name: "Universitas Diponegoro (UNDIP)"
-description: "Format Skripsi & Tugas Akhir sesuai Pedoman Akademik Universitas Diponegoro (Margin 4-4-3-3)."
+description: "Preset awal untuk tugas akhir UNDIP; aturan dapat berbeda antarfakultas dan program studi."
 
-# 1. Geometri & Margin Halaman (Standar UNDIP: Atas 4cm, Kiri 4cm, Bawah 3cm, Kanan 3cm)
+# 1. Geometri & Margin Halaman pada konfigurasi preset ini
 margin_top: 4cm
 margin_bottom: 3cm
 margin_left: 4cm
