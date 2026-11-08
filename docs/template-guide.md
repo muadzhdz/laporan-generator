@@ -1,6 +1,6 @@
 # Panduan Arsitektur Template Typst (template.typ)
 
-File `template.typ` merupakan jantung dari pemformatan visual PDF pada **Laporan Generator**. Template ini dirancang untuk memenuhi standar penyusunan laporan akademik resmi di Indonesia, dan dikompilasi dengan **Typst** sebagai engine typesetting.
+File `template.typ` mengatur pemformatan visual PDF pada **Laporan Generator** dan dikompilasi dengan **Typst**. Hasilnya adalah format dasar yang bisa disesuaikan; aturan resmi tetap perlu dicocokkan dengan pedoman fakultas atau program studi yang berlaku.
 
 > **Catatan**: Pipeline utama sepenuhnya menggunakan **Typst** (`template.typ`). Template LaTeX lama diarsipkan pada branch `legacy/latex-engine`.
 

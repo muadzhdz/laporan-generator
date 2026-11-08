@@ -1,6 +1,6 @@
 preset_id: "jurnal-uajy"
 name: "Jurnal Buana Informatika (UAJY)"
-description: "Format artikel jurnal ilmiah Jurnal Buana Informatika (JBI) Universitas Atma Jaya Yogyakarta."
+description: "Preset awal artikel JBI; gunakan template dan author guidelines terbaru dari jurnal untuk pengiriman."
 doc_type: "journal"
 margin_top: 3cm
 margin_bottom: 3cm

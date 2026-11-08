@@ -1,9 +1,9 @@
 # Preset: Universitas Gadjah Mada (UGM)
 preset_id: "ugm-skripsi"
 name: "Universitas Gadjah Mada (UGM)"
-description: "Format Skripsi / Laporan Tugas Akhir Universitas Gadjah Mada (Margin 4-4-3-3, Full Academic Cover)."
+description: "Preset awal untuk dokumen UGM; verifikasi aturan fakultas/prodi dan kecocokan nilai sebelum digunakan."
 
-# Margin halaman (Standar UGM: Kiri 4cm, Atas 4cm, Bawah 3cm, Kanan 3cm)
+# Margin halaman pada konfigurasi preset ini
 margin_top: 4cm
 margin_bottom: 3cm
 margin_left: 4cm

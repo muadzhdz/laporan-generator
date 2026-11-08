@@ -15,18 +15,18 @@ Generator ini bersifat **universal** dan mendukung berbagai jenis dokumen akadem
 
 1. **Prioritaskan Native MCP Tools** (jika tersedia di lingkungan agen AI seperti Antigravity, Claude Code, OpenCode, Cursor):
    - `laporan_init`: Inisialisasi proyek baru & konfigurasi `metadata.yml`.
-   - `laporan_presets`: Melihat daftar dan detail 14 preset kampus & jurnal resmi.
+   - `laporan_presets`: Melihat daftar dan detail 14 preset awal kampus & jurnal; verifikasi aturan dengan pedoman fakultas/prodi.
    - `laporan_citations`: Mencari DOI/paper asli di Crossref API & menambahkan BibTeX ke `references.bib`.
    - `laporan_verify_citations`: Memverifikasi keabsahan tautan DOI di `references.bib`.
    - `laporan_doctor`: Mengaudit integritas berkas, sitasi, gambar, dan sintaks.
-   - `laporan_audit`: Menganalisis metrik forensik stylometry (variansi panjang kalimat, MATTR, deteksi klise AI / anti-slop).
+   - `laporan_audit`: Meninjau heuristik pola tulisan seperti variasi panjang kalimat dan frasa berulang; bukan detektor AI.
    - `laporan_stats`: Menghitung statistik kata, bab, dan estimasi halaman.
    - `laporan_import`: Mengonversi materi `.docx`, `.pdf`, `.pptx`, `.xlsx` menjadi bab Markdown.
    - `laporan_build`: Mengompilasi dokumen menjadi `Laporan.pdf` dan `Laporan.docx`.
 2. **Membaca Konteks Proyek Pengguna**: Pindai codebase atau dokumen referensi yang ada di direktori kerja pengguna.
 3. **Menjalankan Protokol Wawancara Interaktif 3 Tahap**: WAJIB menanyakan jenis karya tulis dan mengonfirmasi komponen halaman *opt-in* sebelum membuat atau menimpa berkas.
 4. **Menyusun Konten Akademik Berstandar Tinggi**: Menulis `metadata.yml`, `cover.md`, `references.bib`, dan `chapters/bab*.md` dengan bahasa Indonesia ilmiah baku (objektif, pasif, bebas klise AI).
-5. **Menjalankan Audit Pra-Kompilasi & Build Ganda**: Memastikan skor kesehatan `doctor` 100/100 dan menghasilkan `Laporan.pdf` serta `Laporan.docx`.
+5. **Menjalankan Audit Pra-Kompilasi & Build Ganda**: Meninjau hasil `doctor`, menangani masalah yang relevan, lalu menghasilkan `Laporan.pdf` serta `Laporan.docx`.
 
 ================================================================================
 ## STEP 1 — IDENTIFIKASI AWAL & PEMINDAIAN KONTEKS PROYEK
@@ -151,6 +151,8 @@ Setelah struktur halaman disepakati, tanyakan informasi identitas dokumen:
    - `telkom-ta`: Telkom University (Kiri 4cm, Atas 3cm, Kanan 3cm, Bawah 3cm)
    - `jurnal-uajy`: Universitas Atma Jaya Yogyakarta - JBI (Margin 3-3-3-3, 11pt, IEEE CSL, IMRaD)
    - `jurnal-standar`: Standar Publikasi Jurnal Nasional (Margin 3-3-3-3, IMRaD, IEEE/APA)
+
+   Daftar tersebut adalah preset awal, bukan pernyataan kepatuhan resmi. Tanyakan apakah pengguna memiliki pedoman fakultas/program studi yang harus diikuti, lalu sesuaikan nilai preset berdasarkan dokumen itu.
 
 ================================================================================
 ## STEP 3 — MATRIKS STRUKTUR BAB BERDASARKAN DOMAIN TEKNIS
@@ -335,19 +337,17 @@ Puji syukur ke hadirat Tuhan Yang Maha Esa atas segala rahmat dan karunia-Nya se
 Buat berkas terpisah per bab (`bab1-pendahuluan.md`, `bab2-tinjauan-pustaka.md`, dst.):
 - **Gaya Bahasa Akademik Indonesia (PUEBI / EYD V)**:
   - Gunakan kalimat pasif-objektif (*"Sistem dirancang menggunakan..."*, *"Data dianalisis melalui..."*, **"Penulis"**). **DILARANG** menggunakan kata ganti orang pertama/kedua (*"saya"*, *"aku"*, *"kami"*, *"kita"*, *"kamu"*).
-  - **Bebas Klise AI (*Zero AI-Slop*)**: Hindari pembuka klise seperti *"Di era globalisasi / revolusi industri 4.0 yang berkembang pesat saat ini..."* atau *"Tidak dapat dipungkiri lagi bahwa..."*. Langsung masuk ke fakta teknis, urgensi masalah, data kuantitatif, dan konteks spesifik.
+  - **Hindari Pembuka Generik**: Hindari pembuka seperti *"Di era globalisasi..."* jika tidak menambah konteks. Mulai dari masalah, bukti, atau kondisi spesifik yang relevan.
 
-- **Protokol Forensik Stylometri & Rekayasa Human Cadence (Anti-AI-Slop)**:
-  Naskah yang disusun **WAJIB** lolos uji `./laporan audit --strict` dengan vonis **HUMAN CADENCE** (skor probabilitas AI $\le 15\%$). Patuhi 4 aturan metrik matematis berikut:
-  1. **Variansi Panjang Kalimat ($CV \ge 0.42$)**: Rasio deviasi standar terhadap rata-rata panjang kalimat harus di atas 0.42. Hindari kalimat dengan panjang monoton (misal: 18–22 kata di semua kalimat).
-  2. **Selisih Kalimat Berdekatan ($\Delta \ge 12.0$)**: Terapkan teknik *Sentence Burstiness*. Selingi kalimat pendek padat (5–10 kata) yang menyatakan fakta/kesimpulan dengan kalimat majemuk bertingkat (25–35 kata) yang membedah metodologi atau sebab-akibat.
-  3. **Kekayaan Leksikal ($MATTR \ge 0.70$)**: Gunakan variasi istilah teknis yang kaya. Moving-Average Type-Token Ratio wajib di atas 0.70.
-  4. **Batas Transisi Formulaik ($< 25\%$)**: Batasi kata transisi penghubung di awal kalimat (*selain itu*, *namun demikian*, *oleh karena itu*, *di sisi lain*, *dengan demikian*). Maksimal hanya 25% dari total kalimat dalam satu bab.
+- **Tinjauan Heuristik Pola Tulisan (Opsional)**:
+  `./laporan audit` menampilkan variasi panjang kalimat, keragaman leksikal, frasa berulang, dan pembuka formulaik. Skor di bawah ambang hanya menunjukkan bahwa naskah tidak memicu banyak aturan heuristik. Skor ini bukan detektor AI, probabilitas kepengarangan, atau standar mutu akademik; jangan mengubah isi ilmiah hanya untuk mengejar skor.
+  Metrik yang ditampilkan bersifat deskriptif. Tidak ada nilai CV, MATTR, atau variasi kalimat yang wajib untuk menghasilkan tulisan akademik yang baik.
 
-- **Daftar Hitam 38 Klise RLHF Terlarang & Alternatif Penggantinya**:
-  | Kata / Frasa Terlarang | Alasan Larangan | Alternatif Pengganti Alami |
+- **Frasa Formulaik yang Perlu Ditinjau Berdasarkan Konteks**:
+  Hindari mengganti kata secara mekanis. Nilai apakah frasa berikut memang kabur atau berulang dalam konteks naskah; pertahankan jika istilah tersebut tepat dan didukung isi.
+  | Frasa yang Sering Terasa Generik | Catatan | Alternatif jika sesuai konteks |
   |:---|:---|:---|
-  | *komprehensif* | Klise RLHF umum | *terperinci*, *lengkap*, *mendalam*, *mencakup seluruh variabel* |
+  | *komprehensif* | Dapat terasa umum jika tanpa cakupan jelas | *terperinci*, *lengkap*, *mendalam*, *mencakup seluruh variabel* |
   | *menyeluruh* | Klise frekuensi tinggi | *secara sistematis*, *luas*, *pada seluruh aspek* |
   | *secara signifikan* | Sering dipakai tanpa uji statistik | *secara terukur*, *substansial*, *dengan kenaikan nyata* |
   | *krusial / pivotal* | Adjektiva hiperbolis | *penting*, *menentukan*, *fundamental* |
@@ -372,7 +372,7 @@ Buat berkas terpisah per bab (`bab1-pendahuluan.md`, `bab2-tinjauan-pustaka.md`,
 
 ### 4. Integritas Daftar Pustaka (`references.bib`) — Anti-Halusinasi
 - **DILARANG MENGARANG SITASI PALSU**: Jangan pernah membuat judul jurnal, nama penulis, atau DOI fiktif.
-- Jika tool MCP `laporan_citations` tersedia, gunakan `action: "search_doi"` untuk mencari literatur nyata di Crossref dan `action: "add_citation"` untuk mengambil BibTeX resmi.
+- Jika tool MCP `laporan_citations` tersedia, gunakan `action: "search_doi"` untuk mencari rekaman di Crossref dan `action: "add_citation"` untuk mengambil metadata BibTeX. Cocokkan DOI, judul, penulis, tahun, dan relevansi terhadap sumber aslinya.
 - Gunakan sintaks sitasi Pandoc di dalam teks bab: `[@citekey]` atau naratif `@citekey`. Pastikan setiap `@citekey` di dalam teks terdaftar di `references.bib`, dan setiap entri di `references.bib` disitir di dalam teks (sehingga 0 *missing keys* dan 0 *orphan keys*).
 
 ================================================================================
@@ -383,9 +383,9 @@ Setelah seluruh berkas selesai ditulis, jalankan verifikasi dan kompilasi:
 1. **Jalankan Audit Kesehatan Dokumen**:
    - Panggil MCP tool `laporan_doctor` atau jalankan `./laporan doctor` (Linux/macOS) / `.\laporan.ps1 doctor` (Windows).
    - Pastikan **0 Error** dan **0 Warning** (tidak ada sitasi hilang, tidak ada gambar rusak, tidak ada penomoran heading manual, tidak ada karakter box-drawing).
-2. **Jalankan Verifikasi Sitasi & Forensik Stylometry**:
+2. **Jalankan Verifikasi Sitasi & Tinjauan Pola Tulisan**:
    - Panggil MCP tool `laporan_verify_citations` atau jalankan `./laporan citations verify` untuk memastikan seluruh DOI dapat dijangkau dan valid.
-   - Panggil MCP tool `laporan_audit` atau jalankan `./laporan audit --fail-on-ai` untuk memverifikasi variansi panjang kalimat, Moving-Average Type-Token Ratio (MATTR), dan memastikan skor AI di bawah ambang batas toleransi (maksimal 15%).
+   - Panggil MCP tool `laporan_audit` atau jalankan `./laporan audit` untuk melihat metrik gaya tulisan. Jangan menafsirkannya sebagai estimasi penggunaan AI atau bukti kepengarangan.
 3. **Kompilasi Dokumen PDF & Word (DOCX)**:
    - Panggil MCP tool `laporan_build({ format: "all" })` atau jalankan `./laporan build` / `.\laporan.ps1 build`.
 4. **Laporkan Hasil kepada Pengguna**:

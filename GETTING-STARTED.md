@@ -1,6 +1,6 @@
-# Panduan Memulai: Zero to Document (Laporan Generator v3.1.0)
+# Panduan Memulai: Zero to Document (Laporan Generator v4.0.0)
 
-Selamat datang di **Laporan Generator v3.1.0** — engine kompilasi dokumen akademik universal berbasis **Typst (PDF)** dan **Pandoc + OpenXML (Word DOCX)** untuk AI Agent, mahasiswa, dan software engineer.
+Selamat datang di **Laporan Generator v4.0.0** — engine kompilasi dokumen akademik universal berbasis **Typst (PDF)** dan **Pandoc + OpenXML (Word DOCX)** untuk AI Agent, mahasiswa, dan software engineer.
 
 ---
 
@@ -51,18 +51,18 @@ skripsi-saya/
 └── laporan.ps1        # CLI helper PowerShell (Windows native)
 ```
 
-### 3. Audit Pra-Kompilasi (Health & Forensics)
-Sebelum kompilasi, verifikasi integritas data dan orisinalitas teks:
+### 3. Audit Pra-Kompilasi (Health & Writing Patterns)
+Sebelum kompilasi, verifikasi integritas dokumen dan tinjau pola tulisan:
 
 ```bash
 # 1. Audit kesehatan dokumen (cek sitasi hilang, gambar rusak, heading manual, box-drawing)
 ./laporan doctor
 
-# 2. Verifikasi keaslian DOI sitasi secara daring via CrossRef API
+# 2. Periksa resolusi DOI dan metadata sitasi via Crossref
 ./laporan citations verify
 
-# 3. Audit forensik stylometry (cek variansi ritme kalimat, MATTR, dan klise AI / anti-slop)
-./laporan audit --fail-on-ai
+# 3. Tinjau pola tulisan (heuristik; bukan detektor AI atau pemeriksa orisinalitas)
+./laporan audit
 ```
 
 ### 4. Kompilasi PDF & Word DOCX
@@ -103,11 +103,11 @@ Atau tambahkan ke konfigurasi MCP client Anda (`claude_desktop_config.json` / `a
 
 ### 2. Tool MCP yang Siap Digunakan AI
 - `laporan_init`: Inisialisasi workspace dokumen dengan parameter preset kampus.
-- `laporan_presets`: Membaca konfigurasi margin dan aturan bab dari 14 preset resmi.
+- `laporan_presets`: Membaca konfigurasi awal margin dan aturan bab dari 14 preset kampus/jurnal.
 - `laporan_citations`: Pencarian DOI nyata di CrossRef dan penambahan BibTeX ke `references.bib`.
 - `laporan_verify_citations`: Audit keabsahan tautan DOI secara daring atau luring.
-- `laporan_doctor`: Audit diagnostik kelengkapan berkas dan sintaks (skor 100/100).
-- `laporan_audit`: Analisis forensik AI, MATTR vocabulary richness, dan deteksi klise RLHF.
+- `laporan_doctor`: Audit diagnostik kelengkapan berkas dan sintaks.
+- `laporan_audit`: Tinjauan heuristik variasi kalimat dan pola tulisan; bukan detektor AI.
 - `laporan_stats`: Menghitung statistik kata, bab, dan estimasi tebal halaman.
 - `laporan_import`: Ekstraksi berkas `.docx`, `.pdf`, `.pptx`, `.xlsx` menjadi bab Markdown.
 - `laporan_build`: Kompilasi otonom menjadi `Laporan.pdf` dan `Laporan.docx`.

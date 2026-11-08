@@ -106,18 +106,18 @@ docker compose run --rm laporan-generator
 
 ---
 
-## 6. Kegagalan Audit Forensik AI (Probabilitas AI Melebihi Batas)
+## 6. Skor Heuristik Pola Tulisan Melebihi Ambang
 
 ### Gejala Error:
 ```text
-GAGAL: Probabilitas konten AI (32.4%) melebihi batas toleransi 15.0%
+GAGAL: Skor pola tulisan (32) melebihi ambang 15
 ```
 
 ### Penyebab:
-Teks pada bab mengandung pola kalimat repetitif (*burstiness* rendah), variasi kosakata terbatas (*MATTR* rendah), atau memuat frasa klise RLHF (seperti *"Di era modern yang berkembang pesat...", "Hal ini tentu sangat krusial..."*).
+Heuristik menemukan variasi panjang kalimat yang rendah, keragaman kosakata terbatas, atau frasa yang berulang. Skor ini bukan probabilitas penggunaan AI dan tidak dapat menentukan siapa yang menulis teks.
 
 ### Solusi:
-1. Jalankan `laporan audit` untuk melihat rincian metrik per bab dan frasa klise yang terdeteksi.
+1. Jalankan `laporan audit` untuk melihat metrik pola tulisan per bab dan frasa berulang yang terdeteksi.
 2. Variasikan ritme kalimat: gabungkan kalimat pendek dan kalimat majemuk bertingkat secara alami.
 3. Hilangkan seluruh frasa pembuka klise; ganti dengan fakta empiris, data kuantitatif, atau observasi teknis langsung.
 

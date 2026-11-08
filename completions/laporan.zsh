@@ -11,7 +11,7 @@ _laporan() {
         'import:Konversi berkas eksternal ke Markdown'
         'preset:Kelola preset format kampus'
         'stats:Analisis statistik kata dan halaman'
-        'audit:Audit forensik stylometri dan anti-AI-slop'
+        'audit:Tinjau heuristik variasi dan pola tulisan'
         'citations:Kelola dan verifikasi keabsahan sitasi'
         'doctor:Audit integritas berkas dan dependensi'
         'bundle:Kemas berkas menjadi arsip zip rilis'

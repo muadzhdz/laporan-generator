@@ -36,7 +36,9 @@ Terima kasih telah tertarik untuk berkontribusi pada **Laporan Generator**! Proj
 ## Jenis Kontribusi yang Kami Terima
 
 ### 1. Preset Kampus / Institusi Baru
-Kami menyambut baik penambahan variasi preset format kampus resmi universitas/sekolah di Indonesia. Anda dapat menambahkan berkas preset baru di direktori `presets/<preset-id>.yml` (lihat spesifikasi di `docs/preset-schema.md`).
+Kami menyambut kontribusi preset format kampus dan jurnal. Cantumkan sumber pedoman, unit akademik yang dicakup, tahun terbit, dan tanggal verifikasi; jangan menyatakan preset resmi atau berlaku universal tanpa bukti. Tambahkan berkas ke `presets/<preset-id>.yml`, ikuti [spesifikasi preset](docs/preset-schema.md), dan lengkapi [register sumber dan cakupan](docs/preset-sources.md).
+
+Sebelum membuka pull request, jalankan pemeriksaan yang sesuai dengan platform Anda dan sertakan hasilnya. Ikuti [matriks verifikasi lintas platform](docs/testing-matrix.md); job CI macOS dan Windows wajib hijau sebelum perubahan dinyatakan siap.
 
 ### 2. Perbaikan Skrip & Automation
 Memperbaiki efisiensi `build.sh`, meningkatkan penanganan kesalahan, atau menambah pengujian baru pada `test.sh`.
@@ -61,7 +63,7 @@ make test
 - Pengujian kompilasi PDF dan ekstraksi teks (`pdftotext`)
 - Pengecekan kebersihan dari karakter ilegal (box-drawing)
 - Validasi skema preset kampus dan scanner PDF
-- Audit forensik stylometry AI (`scripts/audit-forensics.py`)
+- Audit heuristik pola tulisan (`scripts/audit-forensics.py`)
 - Verifikasi keaslian DOI sitasi (`scripts/verify-citations.py`)
 - Pengujian preset artikel jurnal UAJY & IEEE CSL
 - Validasi JSON Schema metadata, tab completions terminal, dan suite kompilasi contoh riil (`examples/build_examples.sh`)

@@ -6,10 +6,84 @@ on:
       - 'v*'
 
 jobs:
+  windows-validation:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install document dependencies
+        shell: pwsh
+        run: .\scripts\setup-deps.ps1 -Force
+      - name: Validate PowerShell, Python, and MCP
+        shell: pwsh
+        run: |
+          .\laporan.ps1 preset validate
+          if ($LASTEXITCODE -ne 0) { throw "Preset validation failed: $LASTEXITCODE" }
+          python scripts/test_scripts.py
+          if ($LASTEXITCODE -ne 0) { throw "Python tests failed: $LASTEXITCODE" }
+          node tests/test_mcp.js
+          if ($LASTEXITCODE -ne 0) { throw "MCP tests failed: $LASTEXITCODE" }
+      - name: Smoke-test native PDF and DOCX build
+        shell: pwsh
+        run: |
+          $project = Join-Path $env:TEMP ("laporan-release-" + [guid]::NewGuid())
+          node bin/laporan-generator.js init $project --preset standard
+          if ($LASTEXITCODE -ne 0) { throw "Initialization failed: $LASTEXITCODE" }
+          Push-Location $project
+          try {
+            .\laporan.ps1 build
+            if ($LASTEXITCODE -ne 0) { throw "Build failed: $LASTEXITCODE" }
+            if (-not (Test-Path Laporan.pdf) -or -not (Test-Path Laporan.docx)) { throw "Build outputs are missing" }
+          } finally {
+            Pop-Location
+            Remove-Item $project -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
+  macos-validation:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install document dependencies
+        run: brew install pandoc typst imagemagick poppler lua
+      - name: Run test suites
+        run: |
+          ./test.sh
+          python3 scripts/test_scripts.py
+          node tests/test_mcp.js
+          ./examples/build_examples.sh
+      - name: Build release documents
+        run: |
+          ./build.sh templates/default
+          ./build-docx.sh templates/default
+
+  nix-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: Run test suite in the flake environment
+        run: nix develop --command bash -lc './test.sh'
+
   release:
     runs-on: ubuntu-latest
+    needs: [windows-validation, macos-validation, nix-validation]
     permissions:
       contents: write
+      id-token: write
 
     steps:
       - name: Checkout Repository
@@ -37,16 +111,26 @@ jobs:
           cp templates/default/Laporan.docx .
 
       - name: Setup Node.js for npm
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      - name: Ensure npm supports trusted publishing
+        run: npm install --global npm@latest
+
+      - name: Verify release tag matches package version
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION=${GITHUB_REF_NAME#v}
+          if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match package.json ($PACKAGE_VERSION)" >&2
+            exit 1
+          fi
 
       - name: Publish to npm
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        if: ${{ env.NODE_AUTH_TOKEN != '' }}
 
       - name: Extract Release Notes from CHANGELOG
         id: changelog

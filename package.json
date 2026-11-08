@@ -1,6 +1,6 @@
 {
   "name": "laporan-generator",
-  "version": "3.1.0",
+  "version": "4.0.0",
   "description": "Universal Academic Report & Thesis Generator with Multi-Host AI Agent Skills & Native MCP Server",
   "main": "bin/laporan-generator.js",
   "bin": {

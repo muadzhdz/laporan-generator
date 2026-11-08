@@ -131,7 +131,7 @@ def analyze_text(text):
             "message": "Teks terlalu pendek untuk dianalisis forensik",
             "word_count": word_count,
             "sentence_count": sentence_count,
-            "ai_probability": 0,
+            "pattern_score": 0,
         }
     lengths = [cnt for _, cnt in valid_sentences]
     mean_len = sum(lengths) / sentence_count
@@ -165,12 +165,12 @@ def analyze_text(text):
         penalty += (em_dash_count - (word_count / 300)) * 5
     if (formulaic_count / sentence_count) > 0.25:
         penalty += ((formulaic_count / sentence_count) - 0.25) * 60
-    ai_prob = min(98, max(4, int(penalty)))
-    verdict = "HUMAN CADENCE" if ai_prob <= 15 else ("MODERATE SUSPICION" if ai_prob <= 40 else "AI SLOP DETECTED")
+    pattern_score = min(98, max(4, int(penalty)))
+    verdict = "FEW PATTERN FLAGS" if pattern_score <= 15 else ("SOME PATTERN FLAGS" if pattern_score <= 40 else "MANY PATTERN FLAGS")
     return {
         "status": "AUDITED",
         "verdict": verdict,
-        "ai_probability": ai_prob,
+        "pattern_score": pattern_score,
         "word_count": word_count,
         "sentence_count": sentence_count,
         "min_sentence_len": min(lengths),
@@ -197,12 +197,12 @@ def collect_files(target):
     return sorted(glob.glob(target))
 
 def main():
-    parser = argparse.ArgumentParser(description="Forensic Stylometry & Anti-AI-Slop Engine")
+    parser = argparse.ArgumentParser(description="Heuristic Writing Pattern Audit")
     parser.add_argument("target", nargs="?", default=None, help="File atau direktori Markdown yang akan diaudit")
     parser.add_argument("--dir", dest="dir_target", default=None, help="Direktori Markdown yang akan diaudit")
     parser.add_argument("--all", action="store_true", help="Audit seluruh berkas Markdown di dalam repositori")
     parser.add_argument("--json", action="store_true", help="Keluarkan hasil dalam format JSON terstruktur")
-    parser.add_argument("--strict", "--fail-on-ai", action="store_true", dest="strict", help="Gagal (exit code 1) jika probabilitas AI melebihi 15 persen")
+    parser.add_argument("--strict", "--fail-on-ai", action="store_true", dest="strict", help="Gagal jika skor pola tulisan heuristik melebihi 15; bukan estimasi penggunaan AI")
     args = parser.parse_args()
 
     target_path = args.target if args.target is not None else args.dir_target
@@ -242,7 +242,7 @@ def main():
     results = {}
     total_words = 0
     total_sentences = 0
-    max_prob = 0
+    max_pattern_score = 0
     failed_strict = False
 
     for path in files:
@@ -253,8 +253,8 @@ def main():
         if res.get("status") == "AUDITED":
             total_words += res["word_count"]
             total_sentences += res["sentence_count"]
-            max_prob = max(max_prob, res["ai_probability"])
-            if args.strict and res["ai_probability"] > 15:
+            max_pattern_score = max(max_pattern_score, res["pattern_score"])
+            if args.strict and res["pattern_score"] > 15:
                 failed_strict = True
 
     if args.json:
@@ -263,7 +263,8 @@ def main():
                 "total_files": len(files),
                 "total_words": total_words,
                 "total_sentences": total_sentences,
-                "max_ai_probability": max_prob,
+                "max_pattern_score": max_pattern_score,
+                "score_interpretation": "Heuristic writing-pattern score; not an estimate of authorship or AI use.",
                 "passed_strict": not failed_strict,
             },
             "files": results,
@@ -272,7 +273,7 @@ def main():
         sys.exit(1 if failed_strict else 0)
 
     print("=" * 70)
-    print("          LAPORAN GENERATOR - FORENSIC STYLOMETRY AUDIT")
+    print("          LAPORAN GENERATOR - WRITING PATTERN AUDIT")
     print("=" * 70)
     for path, res in results.items():
         rel = os.path.relpath(path)
@@ -280,19 +281,20 @@ def main():
             print(f"[-] {rel:32} | {res.get('message', 'SKIPPED')}")
             continue
         v = res["verdict"]
-        p = res["ai_probability"]
+        p = res["pattern_score"]
         cv = res["cv"]
         delta = res["mean_adj_delta"]
         mattr = res["mattr"]
         cl = res["cliches_count"]
-        print(f"[*] {rel:32} | {v:19} | AI_Prob={p:2}% | CV={cv:0.3f} | Delta={delta:0.2f} | MATTR={mattr:0.3f} | Cliches={cl}")
+        print(f"[*] {rel:32} | {v:19} | PatternScore={p:2}/98 | CV={cv:0.3f} | Delta={delta:0.2f} | MATTR={mattr:0.3f} | Cliches={cl}")
         if res["cliches_details"]:
             for item, cnt in res["cliches_details"]:
                 print(f"    ! Cliche found: '{item}' ({cnt}x)")
 
     print("-" * 70)
-    status_msg = "PASSED (HUMAN CADENCE)" if not failed_strict else "FAILED (AI SLOP DETECTED)"
-    print(f"Rangkuman: {len(files)} berkas | {total_words} kata | Max AI Prob: {max_prob}% | Status: {status_msg}")
+    status_msg = "PASSED (FEW PATTERN FLAGS)" if not failed_strict else "FAILED (PATTERN SCORE THRESHOLD EXCEEDED)"
+    print(f"Rangkuman: {len(files)} berkas | {total_words} kata | Max pattern score: {max_pattern_score}/98 | Status: {status_msg}")
+    print("Skor ini adalah heuristik pola tulisan, bukan probabilitas penggunaan AI atau bukti kepengarangan.")
     print("=" * 70)
     sys.exit(1 if failed_strict else 0)
 

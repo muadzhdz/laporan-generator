@@ -9,7 +9,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-USER_AGENT = "LaporanGenerator/3.1.0 (https://github.com/muadzhdz/laporan-generator; mailto:contact@muadz.dev)"
+USER_AGENT = "LaporanGenerator/4.0.0 (https://github.com/muadzhdz/laporan-generator; mailto:contact@muadz.dev)"
 
 def load_cache(cache_path):
     if os.path.isfile(cache_path):

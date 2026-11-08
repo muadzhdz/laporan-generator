@@ -244,7 +244,7 @@ if command -v unzip &>/dev/null; then
       else
         fail "title block bawaan pandoc masih muncul"
       fi
-      COVER_BR=$(echo "$DOCXML" | grep -oE 'w:val="CoverTitle".{0,500}' | grep -o '<w:br />' | wc -l)
+      COVER_BR=$(python3 -c 'import re,sys; match=re.search(r"w:val=\"CoverTitle\".{0,500}",sys.stdin.read()); print(match.group(0).count("<w:br />") if match else 0)' <<< "$DOCXML")
       if [ "$COVER_BR" -eq 1 ]; then
         pass "judul cover docx 2 baris"
       else
@@ -634,7 +634,7 @@ else
 fi
 echo ""
 
-echo "[T27] Forensic Stylometry Engine check (scripts/audit-forensics.py)"
+echo "[T27] Writing Pattern Audit check (scripts/audit-forensics.py)"
 if [ -x "scripts/audit-forensics.py" ]; then
   pass "scripts/audit-forensics.py dapat dieksekusi"
 else

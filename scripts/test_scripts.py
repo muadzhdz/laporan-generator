@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SCRIPTS_DIR)
@@ -16,6 +17,7 @@ scan_preset = __import__("scan-preset")
 validate_preset = __import__("validate-preset")
 docx_pagenum = __import__("docx-pagenum")
 finalize_docx = __import__("finalize-docx")
+report_doctor = __import__("report-doctor")
 
 
 class TestScanPreset(unittest.TestCase):
@@ -190,6 +192,12 @@ class TestReportStats(unittest.TestCase):
 
 
 class TestReportDoctor(unittest.TestCase):
+    def test_running_python_runtime_is_detected_without_python3_command(self):
+        with mock.patch.object(report_doctor.shutil, "which", return_value=None):
+            dependencies, _ = report_doctor.check_dependencies()
+        python_runtime = next(item for item in dependencies if item[1] == "Python 3 Runtime")
+        self.assertTrue(python_runtime[3])
+
     def test_json_doctor_execution(self):
         proj_root = get_project_root()
         cmd = [sys.executable, os.path.join(SCRIPTS_DIR, "report-doctor.py"), proj_root, "--json"]
@@ -298,11 +306,14 @@ class TestFrontMatterOptIn(unittest.TestCase):
             self.skipTest("Node.js runtime not found in PATH")
 
         with tempfile.TemporaryDirectory() as tmpdir:
+            init_module = json.dumps(os.path.join(ROOT_DIR, "lib", "init.js"))
+            temp_root = json.dumps(tmpdir)
             node_code = f"""
             const path = require('path');
-            const {{ initProject }} = require('{os.path.join(ROOT_DIR, "lib/init.js")}');
-            initProject({{ targetDir: '{tmpdir}/test_f', daftar_gambar: 'false', daftar_tabel: false, silent: true }});
-            initProject({{ targetDir: '{tmpdir}/test_t', daftar_gambar: 'true', daftar_tabel: true, silent: true }});
+            const {{ initProject }} = require({init_module});
+            const tempRoot = {temp_root};
+            initProject({{ targetDir: path.join(tempRoot, 'test_f'), daftar_gambar: 'false', daftar_tabel: false, silent: true }});
+            initProject({{ targetDir: path.join(tempRoot, 'test_t'), daftar_gambar: 'true', daftar_tabel: true, silent: true }});
             """
             proc = subprocess.run(["node", "-e", node_code], capture_output=True, text=True)
             self.assertEqual(proc.returncode, 0, f"Node initProject failed: {proc.stderr}")
@@ -329,7 +340,7 @@ class TestAuditForensics(unittest.TestCase):
         self.assertEqual(data["summary"]["total_files"], 5)
         self.assertIn("files", data)
 
-    def test_human_cadence_score(self):
+    def test_writing_pattern_score(self):
         sample_human = (
             "Penelitian ini dilakukan secara sistematis melalui pengujian lapangan bertahap. "
             "Hasil menunjukkan bahwa latensi menurun secara konsisten dari dua puluh milidetik menjadi lima milidetik. "
@@ -348,7 +359,9 @@ class TestAuditForensics(unittest.TestCase):
             self.assertEqual(proc.returncode, 0)
             data = json.loads(proc.stdout)
             file_res = data["files"][tmp_path]
-            self.assertIn(file_res["verdict"], ["HUMAN CADENCE", "MODERATE SUSPICION"])
+            self.assertIn(file_res["verdict"], ["FEW PATTERN FLAGS", "SOME PATTERN FLAGS"])
+            self.assertIn("pattern_score", file_res)
+            self.assertEqual(data["summary"]["score_interpretation"], "Heuristic writing-pattern score; not an estimate of authorship or AI use.")
         finally:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)

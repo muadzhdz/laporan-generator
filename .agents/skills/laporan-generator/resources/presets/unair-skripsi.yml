@@ -1,9 +1,9 @@
 # Preset: Universitas Airlangga (UNAIR)
 preset_id: "unair-skripsi"
 name: "Universitas Airlangga (UNAIR)"
-description: "Format Skripsi & Karya Ilmiah sesuai Pedoman Penulisan Universitas Airlangga (Margin 4-4-3-3)."
+description: "Preset awal untuk dokumen UNAIR; periksa pedoman fakultas/prodi yang berlaku."
 
-# 1. Geometri & Margin Halaman (Standar UNAIR: Atas 4cm, Kiri 4cm, Bawah 3cm, Kanan 3cm)
+# 1. Geometri & Margin Halaman pada konfigurasi preset ini
 margin_top: 4cm
 margin_bottom: 3cm
 margin_left: 4cm
